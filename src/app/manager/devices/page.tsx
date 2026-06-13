@@ -1,4 +1,0 @@
-'use client';
-import AppShell from '@/components/AppShell';
-import { useApi } from '@/components/ClientTools';
-export default function ManagerDevices(){ const {data}=useApi<any>('/api/manager/device-requests'); async function approve(id:string){ await fetch('/api/manager/approve-device',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({requestId:id})}); location.reload(); } return <AppShell area="manager"><h1>อนุมัติอุปกรณ์ใหม่</h1><div className="table-wrap"><table><thead><tr><th>รหัส</th><th>อุปกรณ์</th><th>เหตุผล</th><th>เวลา</th><th>ดำเนินการ</th></tr></thead><tbody>{(data?.requests||[]).map((r:any)=><tr key={r.id}><td>{r.employee_code}</td><td>{r.device_name||r.device_fingerprint}</td><td>{r.reason}</td><td>{r.requested_at}</td><td><button onClick={()=>approve(r.id)}>อนุมัติ</button></td></tr>)}</tbody></table></div></AppShell>}

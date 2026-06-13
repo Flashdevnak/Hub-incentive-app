@@ -16,9 +16,9 @@ const quickLinks = [
     desc: 'ตรวจและอนุมัติคำขอเปิดใช้งานครั้งแรกของพนักงาน'
   },
   {
-    href: '/manager/devices',
-    title: 'อนุมัติอุปกรณ์',
-    desc: 'ตรวจอุปกรณ์ใหม่ที่พนักงานใช้เข้าสู่ระบบ'
+    href: '/manager/pin-resets',
+    title: 'อนุมัติรีเซ็ต PIN',
+    desc: 'ตรวจคำขอลืม PIN และอนุมัติให้พนักงานตั้ง PIN ใหม่'
   },
   {
     href: '/admin/batches',
@@ -48,7 +48,7 @@ export default function Admin() {
 
   return (
     <AppShell area="admin">
-      <div className="page-head">
+      <div className="page-head page-head-clean">
         <div>
           <p className="eyebrow">Admin Dashboard</p>
           <h1>ภาพรวมระบบ</h1>
@@ -63,7 +63,7 @@ export default function Admin() {
       {loading && <div className="notice">กำลังโหลดข้อมูล...</div>}
       {error && <div className="notice danger">{error}</div>}
 
-      <div className="grid grid-3">
+      <div className="grid grid-3 admin-stats-grid">
         <Link className="card kpi-card" href="/admin/employees">
           <div className="label">พนักงานทั้งหมด</div>
           <div className="kpi">{s.employees || 0}</div>
@@ -118,11 +118,11 @@ export default function Admin() {
           </div>
           <div>
             <strong>hub_manager</strong>
-            <span>เห็นข้อมูลตาม HUB เช่น 26NAK_BHUB</span>
+            <span>เห็นข้อมูลตาม HUB เช่น TH27101500 หรือ 26NAK_BHUB</span>
           </div>
           <div>
             <strong>supervisor</strong>
-            <span>ใช้ดูแลทีม/กะ/กลุ่มงาน ตาม scope ที่ Admin กำหนด</span>
+            <span>แนะนำใช้ Scope Type = HUB ถ้าเป็น Hub Supervisor</span>
           </div>
           <div>
             <strong>staff</strong>

@@ -37,7 +37,6 @@ function cleanTitle(item: NotificationItem) {
   if (item.type === 'ACTIVATION_PENDING') return 'มีคำขอเปิดใช้งานใหม่';
   if (item.type === 'ACTIVATION_APPROVED') return 'คำขอเปิดใช้งานได้รับอนุมัติแล้ว';
   if (item.type === 'ACTIVATION_REJECTED') return 'คำขอเปิดใช้งานไม่ผ่านการอนุมัติ';
-  if (item.type === 'DEVICE_PENDING') return 'มีคำขออุปกรณ์ใหม่';
 
   return 'การแจ้งเตือน';
 }
@@ -55,10 +54,6 @@ function cleanMessage(item: NotificationItem) {
 
   if (item.type === 'ACTIVATION_REJECTED') {
     return 'คำขอของคุณไม่ผ่านการอนุมัติ กรุณาติดต่อหัวหน้าหรือ Admin';
-  }
-
-  if (item.type === 'DEVICE_PENDING') {
-    return 'มีคำขออนุมัติอุปกรณ์ใหม่ กรุณาตรวจสอบ';
   }
 
   return 'กรุณาตรวจสอบรายละเอียดการแจ้งเตือน';

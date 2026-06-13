@@ -160,7 +160,7 @@ export default function AccountPage() {
         <div>
           <p className="eyebrow">My Account</p>
           <h1>บัญชีของฉัน</h1>
-          <p className="muted">ตรวจสอบข้อมูลบัญชี เปลี่ยน PIN จัดการอุปกรณ์ และออกจากระบบ</p>
+          <p className="muted">ตรวจสอบข้อมูลบัญชี เปลี่ยน PIN และออกจากระบบ</p>
         </div>
 
         <button className="btn-danger account-logout-top" onClick={logout} disabled={loggingOut}>
@@ -252,21 +252,6 @@ export default function AccountPage() {
               {saving ? 'กำลังบันทึก...' : 'บันทึก PIN ใหม่'}
             </button>
           </form>
-        </section>
-
-        <section className="card account-device-card">
-          <div>
-            <span className="login-label">Device</span>
-            <h2>อุปกรณ์ที่ใช้งาน</h2>
-            <p className="muted">
-              หากเปลี่ยนมือถือ เปลี่ยนเครื่อง หรือระบบแจ้งว่าอุปกรณ์ยังไม่ได้รับอนุมัติ
-              ให้เข้าไปตรวจสอบสถานะอุปกรณ์ที่หน้านี้
-            </p>
-          </div>
-
-          <a className="btn btn-secondary" href="/devices">
-            จัดการอุปกรณ์
-          </a>
         </section>
 
         <section className="card account-danger-card">
