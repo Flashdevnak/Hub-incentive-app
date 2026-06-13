@@ -5,7 +5,9 @@ export type NotificationType =
   | 'ACTIVATION_PENDING'
   | 'ACTIVATION_APPROVED'
   | 'ACTIVATION_REJECTED'
-  | 'DEVICE_PENDING'
+  | 'PIN_RESET_PENDING'
+  | 'PIN_RESET_APPROVED'
+  | 'PIN_RESET_REJECTED'
   | 'SYSTEM';
 
 type CreateNotificationInput = {
@@ -18,6 +20,8 @@ type CreateNotificationInput = {
   sourceEmployeeCode?: string;
   metadata?: Record<string, any>;
 };
+
+const approvalRoles: Role[] = ['super_admin', 'admin', 'area_manager', 'hub_manager', 'supervisor'];
 
 export async function createNotification(input: CreateNotificationInput) {
   try {
@@ -32,7 +36,10 @@ export async function createNotification(input: CreateNotificationInput) {
       metadata: input.metadata || {},
       is_read: false,
       read_by_employee_codes: [],
-      created_at: ts()
+      hidden_by_employee_codes: [],
+      is_hidden: false,
+      created_at: ts(),
+      updated_at: ts()
     });
 
     return ref.id;
@@ -49,16 +56,13 @@ export async function notifyActivationPending(input: {
   requestId: string;
 }) {
   return createNotification({
-    recipientRoles: ['super_admin', 'admin', 'area_manager', 'hub_manager', 'supervisor'],
+    recipientRoles: approvalRoles,
     type: 'ACTIVATION_PENDING',
     title: 'มีคำขอเปิดใช้งานใหม่',
     message: `${input.employeeName || input.employeeCode} ส่งคำขอเปิดใช้งานครั้งแรก รอตรวจสอบ`,
     actionUrl: '/manager/approvals',
     sourceEmployeeCode: input.employeeCode,
-    metadata: {
-      request_id: input.requestId,
-      hub_name: input.hubName || ''
-    }
+    metadata: { request_id: input.requestId, hub_name: input.hubName || '' }
   });
 }
 
@@ -74,9 +78,7 @@ export async function notifyActivationApproved(input: {
     message: 'คำขอของคุณได้รับอนุมัติแล้ว กรุณาตั้ง PIN เพื่อเข้าใช้งานระบบ',
     actionUrl: '/set-pin',
     sourceEmployeeCode: input.employeeCode,
-    metadata: {
-      request_id: input.requestId || ''
-    }
+    metadata: { request_id: input.requestId || '' }
   });
 }
 
@@ -93,9 +95,56 @@ export async function notifyActivationRejected(input: {
     message: input.reason ? `เหตุผล: ${input.reason}` : 'คำขอเปิดใช้งานของคุณไม่ผ่าน กรุณาติดต่อหัวหน้าหรือ Admin',
     actionUrl: '/activate',
     sourceEmployeeCode: input.employeeCode,
-    metadata: {
-      request_id: input.requestId || '',
-      reason: input.reason || ''
-    }
+    metadata: { request_id: input.requestId || '', reason: input.reason || '' }
+  });
+}
+
+export async function notifyPinResetPending(input: {
+  employeeCode: string;
+  employeeName?: string;
+  requestId: string;
+  reason?: string;
+}) {
+  return createNotification({
+    recipientRoles: approvalRoles,
+    type: 'PIN_RESET_PENDING',
+    title: 'มีคำขอรีเซ็ต PIN ใหม่',
+    message: `${input.employeeName || input.employeeCode} ส่งคำขอรีเซ็ต PIN รอตรวจสอบ`,
+    actionUrl: '/manager/pin-resets',
+    sourceEmployeeCode: input.employeeCode,
+    metadata: { request_id: input.requestId, reason: input.reason || '' }
+  });
+}
+
+export async function notifyPinResetApproved(input: {
+  employeeCode: string;
+  employeeName?: string;
+  requestId?: string;
+}) {
+  return createNotification({
+    recipientEmployeeCode: input.employeeCode,
+    type: 'PIN_RESET_APPROVED',
+    title: 'คำขอรีเซ็ต PIN ได้รับอนุมัติแล้ว',
+    message: 'คำขอรีเซ็ต PIN ได้รับอนุมัติแล้ว กรุณาตั้ง PIN ใหม่',
+    actionUrl: '/set-pin',
+    sourceEmployeeCode: input.employeeCode,
+    metadata: { request_id: input.requestId || '' }
+  });
+}
+
+export async function notifyPinResetRejected(input: {
+  employeeCode: string;
+  employeeName?: string;
+  reason?: string;
+  requestId?: string;
+}) {
+  return createNotification({
+    recipientEmployeeCode: input.employeeCode,
+    type: 'PIN_RESET_REJECTED',
+    title: 'คำขอรีเซ็ต PIN ไม่ผ่านการอนุมัติ',
+    message: input.reason ? `เหตุผล: ${input.reason}` : 'คำขอรีเซ็ต PIN ของคุณไม่ผ่าน กรุณาติดต่อหัวหน้าหรือ Admin',
+    actionUrl: '/forgot-pin',
+    sourceEmployeeCode: input.employeeCode,
+    metadata: { request_id: input.requestId || '', reason: input.reason || '' }
   });
 }

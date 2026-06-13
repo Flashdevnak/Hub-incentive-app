@@ -3,21 +3,16 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getDeviceId, Message } from '@/components/ClientTools';
+import { Message } from '@/components/ClientTools';
 
 function landingPath(role?: string) {
   if (role === 'super_admin' || role === 'admin') return '/admin';
-
-  if (role === 'area_manager' || role === 'hub_manager' || role === 'supervisor') {
-    return '/manager';
-  }
-
+  if (role === 'area_manager' || role === 'hub_manager' || role === 'supervisor') return '/manager';
   return '/dashboard';
 }
 
 export default function LoginPage() {
   const router = useRouter();
-
   const [employeeCode, setCode] = useState('');
   const [pin, setPin] = useState('');
   const [msg, setMsg] = useState('');
@@ -26,7 +21,6 @@ export default function LoginPage() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-
     setMsg('');
     setDanger(false);
     setLoading(true);
@@ -35,12 +29,7 @@ export default function LoginPage() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          employeeCode,
-          pin,
-          deviceId: getDeviceId(),
-          deviceName: navigator.userAgent
-        })
+        body: JSON.stringify({ employeeCode, pin, deviceName: navigator.userAgent })
       });
 
       const json = await res.json();
@@ -64,13 +53,8 @@ export default function LoginPage() {
     <div className="auth auth-modern">
       <div className="login-hero">
         <div className="brand-monogram large">NAK</div>
-
         <h1>NAK Incentive</h1>
-
-        <p>
-          ระบบตรวจสอบ Incentive พนักงาน พร้อมการจัดการสิทธิ์ Admin / หัวหน้า / พนักงาน
-          และรองรับการใช้งานบนมือถือ
-        </p>
+        <p>ระบบตรวจสอบ Incentive พนักงาน พร้อมการจัดการสิทธิ์ Admin / หัวหน้า / พนักงาน</p>
       </div>
 
       <div className="card auth-card auth-card-modern">
@@ -85,44 +69,22 @@ export default function LoginPage() {
         <form className="form" onSubmit={submit}>
           <label>
             รหัสพนักงาน
-            <input
-              value={employeeCode}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="เช่น 6600123 หรือ ADMIN"
-              autoComplete="username"
-            />
+            <input value={employeeCode} onChange={(e) => setCode(e.target.value)} placeholder="เช่น 6600123 หรือ ADMIN" autoComplete="username" />
           </label>
 
           <label>
             PIN 6 หลัก
-            <input
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              placeholder="******"
-              type="password"
-              inputMode="numeric"
-              autoComplete="current-password"
-            />
+            <input value={pin} onChange={(e) => setPin(e.target.value)} placeholder="******" type="password" inputMode="numeric" autoComplete="current-password" />
           </label>
 
-          <button className="login-button" disabled={loading}>
-            {loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
-          </button>
+          <button className="login-button" disabled={loading}>{loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}</button>
         </form>
 
-        <div className="actions login-actions">
-          <Link className="btn btn-secondary" href="/activate">
-            ขอเปิดใช้งานครั้งแรก
-          </Link>
-
-          <Link className="btn btn-secondary" href="/set-pin">
-            ตั้ง PIN หลังอนุมัติ
-          </Link>
+        <div className="actions login-actions login-actions-3">
+          <Link className="btn btn-secondary" href="/activate">ขอเปิดใช้งานครั้งแรก</Link>
+          <Link className="btn btn-secondary" href="/forgot-pin">ลืม PIN</Link>
+          <Link className="btn btn-secondary" href="/set-pin">ตั้ง PIN หลังอนุมัติ</Link>
         </div>
-
-        <p className="small muted login-note">
-          ระบบจะพาไปหน้าใช้งานตามสิทธิ์อัตโนมัติหลังเข้าสู่ระบบสำเร็จ
-        </p>
       </div>
     </div>
   );
