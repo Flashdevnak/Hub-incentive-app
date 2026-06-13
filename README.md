@@ -1,4 +1,4 @@
-# NAK Incentive Web App - Vercel + Firebase
+# HUB Incentive Web App - Vercel + Firebase
 
 เว็บแอปภาษาไทยสำหรับตรวจสอบ Incentive พนักงาน พร้อมระบบ Admin/Manager/Staff, Excel Import, Mapping คอลัมน์, Firestore Database, Trusted Device และ Audit Log
 
