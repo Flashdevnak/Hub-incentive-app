@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import AppShell from '@/components/AppShell';
 import { Message, useApi } from '@/components/ClientTools';
+import { formatThaiDateTime } from '@/lib/date';
 
 type PinResetRequest = {
   id: string;
@@ -97,7 +98,7 @@ export default function PinResetRequests() {
                       <td>{r.employee_name || '-'}</td>
                       <td className="desktop-detail-cell">{r.reason || '-'}</td>
                       <td><span className="pill">{r.status || 'PENDING'}</span></td>
-                      <td>{r.requested_at || '-'}</td>
+                      <td>{formatThaiDateTime(r.requested_at)}</td>
                       <td>
                         <div className="desktop-table-actions">
                           <button className="small-button" disabled={busyId === r.id} onClick={() => act(r.id, true)}>อนุมัติ</button>
@@ -124,7 +125,7 @@ export default function PinResetRequests() {
                 </div>
                 <div className="mobile-info-grid data-grid">
                   <div><span>ชื่อ</span><strong>{r.employee_name || '-'}</strong></div>
-                  <div><span>วันที่ส่งคำขอ</span><strong>{r.requested_at || '-'}</strong></div>
+                  <div><span>วันที่ส่งคำขอ</span><strong>{formatThaiDateTime(r.requested_at)}</strong></div>
                 </div>
                 <div className="data-note"><span>เหตุผล</span><p>{r.reason || '-'}</p></div>
                 <div className="data-card-actions two">

@@ -21,6 +21,357 @@
   --blue: #1455d9;
 }
 
+/* FINAL PREMIUM POLISH OVERRIDE - KEEP LAST */
+
+body {
+  background:
+    radial-gradient(circle at 18% -10%, rgba(255, 176, 0, 0.12), transparent 28%),
+    linear-gradient(180deg, #f7f9fc 0%, #f3f6fb 100%) !important;
+}
+
+.notification-widget {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+.notification-trigger,
+.desktop-content-actions .notification-trigger,
+.mobile-topbar-actions .notification-trigger {
+  width: 46px !important;
+  height: 46px !important;
+  min-width: 46px !important;
+  min-height: 46px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  position: relative !important;
+  flex: 0 0 46px !important;
+}
+
+.notification-bell-svg,
+.notification-trigger svg {
+  width: 20px !important;
+  height: 20px !important;
+  display: block !important;
+  margin: 0 !important;
+  flex: 0 0 20px !important;
+}
+
+.notification-badge {
+  position: absolute !important;
+  top: 4px !important;
+  right: 4px !important;
+  transform: none !important;
+}
+
+.desktop-content-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+}
+
+.desktop-content-actions .role-badge,
+.desktop-account-btn {
+  height: 42px !important;
+  min-height: 42px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+}
+
+.card,
+.desktop-table-card,
+.notification-popover {
+  box-shadow: var(--premium-shadow-soft) !important;
+}
+
+.desktop-table-card {
+  border-radius: 24px !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+}
+
+.desktop-data-table th {
+  background: linear-gradient(180deg, #f9fafb, #f3f6fa) !important;
+  color: #4b5563 !important;
+}
+
+.desktop-data-table th,
+.desktop-data-table td {
+  padding: 15px 18px !important;
+  word-break: keep-all !important;
+  overflow-wrap: break-word !important;
+}
+
+@media (min-width: 1024px) {
+  .main,
+  .main-modern {
+    width: auto !important;
+    margin-left: 280px !important;
+    padding-left: clamp(28px, 3.2vw, 60px) !important;
+    padding-right: clamp(28px, 3.2vw, 60px) !important;
+  }
+
+  .content-shell,
+  .main > .content-shell,
+  .main-modern > .content-shell,
+  .desktop-content-topbar,
+  .main > .desktop-content-topbar,
+  .main-modern > .desktop-content-topbar {
+    width: min(100%, 1440px) !important;
+    max-width: 1440px !important;
+  }
+
+  .content-shell:has(.responsive-desktop-table),
+  .main > .content-shell:has(.responsive-desktop-table),
+  .main-modern > .content-shell:has(.responsive-desktop-table) {
+    width: min(100%, 1600px) !important;
+    max-width: 1600px !important;
+  }
+
+  .content-shell:has(.employee-form-card),
+  .main > .content-shell:has(.employee-form-card),
+  .main-modern > .content-shell:has(.employee-form-card) {
+    width: min(100%, 1500px) !important;
+    max-width: 1500px !important;
+  }
+
+  .notification-popover {
+    position: absolute !important;
+    top: calc(100% + 10px) !important;
+    right: 0 !important;
+    left: auto !important;
+    width: 360px !important;
+    max-width: min(360px, calc(100vw - 320px)) !important;
+    z-index: 300 !important;
+  }
+
+  .desktop-data-table {
+    width: 100% !important;
+    min-width: 1120px !important;
+  }
+
+  .employee-data-table {
+    min-width: 1260px !important;
+  }
+}
+
+@media (min-width: 1600px) {
+  .desktop-data-table {
+    min-width: 1280px !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .notification-trigger,
+  .mobile-topbar-actions .notification-trigger {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+    flex-basis: 42px !important;
+  }
+}
+
+/* FINAL PREMIUM POLISH: width, tables, notification centering */
+
+:root {
+  --premium-shadow: 0 18px 46px rgba(18, 31, 54, 0.08);
+  --premium-shadow-soft: 0 10px 28px rgba(18, 31, 54, 0.06);
+}
+
+body {
+  background:
+    radial-gradient(circle at 18% -10%, rgba(255, 176, 0, 0.12), transparent 28%),
+    linear-gradient(180deg, #f7f9fc 0%, #f3f6fb 100%);
+  text-rendering: geometricPrecision;
+}
+
+.card,
+.desktop-table-card,
+.notification-popover {
+  box-shadow: var(--premium-shadow-soft);
+}
+
+.page-head h1,
+.page-head-clean h1 {
+  letter-spacing: 0;
+}
+
+.notification-widget {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  margin: 0 !important;
+}
+
+.notification-trigger,
+.desktop-content-actions .notification-trigger,
+.mobile-topbar-actions .notification-trigger {
+  width: 46px !important;
+  height: 46px !important;
+  min-width: 46px !important;
+  min-height: 46px !important;
+  padding: 0 !important;
+  border-radius: 16px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  position: relative !important;
+  flex: 0 0 46px !important;
+}
+
+.notification-bell-svg,
+.notification-trigger svg {
+  width: 20px !important;
+  height: 20px !important;
+  display: block !important;
+  margin: 0 !important;
+  flex: 0 0 20px !important;
+}
+
+.notification-badge {
+  position: absolute !important;
+  top: 4px !important;
+  right: 4px !important;
+  transform: none !important;
+  pointer-events: none;
+}
+
+.desktop-content-actions {
+  align-items: center !important;
+}
+
+.desktop-content-actions .role-badge,
+.desktop-account-btn {
+  min-height: 42px !important;
+  height: 42px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+}
+
+.notification-popover {
+  border-radius: 22px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+}
+
+.desktop-data-table {
+  min-width: 1080px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.desktop-data-table th {
+  background: linear-gradient(180deg, #f9fafb, #f3f6fa) !important;
+  color: #4b5563 !important;
+  text-transform: none;
+}
+
+.desktop-data-table th,
+.desktop-data-table td {
+  padding: 15px 18px !important;
+}
+
+.desktop-data-table td {
+  font-weight: 650 !important;
+}
+
+.desktop-table-card {
+  border-radius: 24px !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+}
+
+.mobile-data-card,
+.data-card,
+.employee-card {
+  box-shadow: var(--premium-shadow-soft);
+}
+
+@media (min-width: 1024px) {
+  .main,
+  .main-modern {
+    width: auto !important;
+    margin-left: 280px !important;
+    padding-left: clamp(28px, 3.2vw, 60px) !important;
+    padding-right: clamp(28px, 3.2vw, 60px) !important;
+  }
+
+  .content-shell,
+  .main > .content-shell,
+  .main-modern > .content-shell,
+  .desktop-content-topbar,
+  .main > .desktop-content-topbar,
+  .main-modern > .desktop-content-topbar {
+    width: min(100%, 1440px) !important;
+    max-width: 1440px !important;
+  }
+
+  .content-shell:has(.responsive-desktop-table),
+  .main > .content-shell:has(.responsive-desktop-table),
+  .main-modern > .content-shell:has(.responsive-desktop-table) {
+    width: min(100%, 1600px) !important;
+    max-width: 1600px !important;
+  }
+
+  .content-shell:has(.employee-form-card),
+  .main > .content-shell:has(.employee-form-card),
+  .main-modern > .content-shell:has(.employee-form-card) {
+    width: min(100%, 1500px) !important;
+    max-width: 1500px !important;
+  }
+
+  .desktop-content-actions {
+    gap: 10px !important;
+  }
+
+  .notification-popover {
+    position: absolute !important;
+    top: calc(100% + 10px) !important;
+    right: 0 !important;
+    left: auto !important;
+    width: 360px !important;
+    max-width: min(360px, calc(100vw - 320px)) !important;
+    z-index: 300 !important;
+  }
+
+  .desktop-data-table {
+    width: 100%;
+    min-width: 1120px;
+  }
+
+  .employee-data-table {
+    min-width: 1260px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .desktop-data-table {
+    min-width: 1280px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .notification-trigger,
+  .mobile-topbar-actions .notification-trigger {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+    flex-basis: 42px !important;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -4075,5 +4426,163 @@ textarea {
   .notification-page-actions button {
     width: 100% !important;
     min-height: 44px;
+  }
+}
+
+/* FINAL PREMIUM POLISH OVERRIDE - KEEP LAST */
+
+body {
+  background:
+    radial-gradient(circle at 18% -10%, rgba(255, 176, 0, 0.12), transparent 28%),
+    linear-gradient(180deg, #f7f9fc 0%, #f3f6fb 100%) !important;
+}
+
+.notification-widget {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+.notification-trigger,
+.desktop-content-actions .notification-trigger,
+.mobile-topbar-actions .notification-trigger {
+  width: 46px !important;
+  height: 46px !important;
+  min-width: 46px !important;
+  min-height: 46px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  position: relative !important;
+  flex: 0 0 46px !important;
+}
+
+.notification-bell-svg,
+.notification-trigger svg {
+  width: 20px !important;
+  height: 20px !important;
+  display: block !important;
+  margin: 0 !important;
+  flex: 0 0 20px !important;
+}
+
+.notification-badge {
+  position: absolute !important;
+  top: 4px !important;
+  right: 4px !important;
+  transform: none !important;
+}
+
+.desktop-content-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+}
+
+.desktop-content-actions .role-badge,
+.desktop-account-btn {
+  height: 42px !important;
+  min-height: 42px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+}
+
+.card,
+.desktop-table-card,
+.notification-popover {
+  box-shadow: var(--premium-shadow-soft) !important;
+}
+
+.desktop-table-card {
+  border-radius: 24px !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+}
+
+.desktop-data-table th {
+  background: linear-gradient(180deg, #f9fafb, #f3f6fa) !important;
+  color: #4b5563 !important;
+}
+
+.desktop-data-table th,
+.desktop-data-table td {
+  padding: 15px 18px !important;
+  word-break: keep-all !important;
+  overflow-wrap: break-word !important;
+}
+
+@media (min-width: 1024px) {
+  .main,
+  .main-modern {
+    width: auto !important;
+    margin-left: 280px !important;
+    padding-left: clamp(28px, 3.2vw, 60px) !important;
+    padding-right: clamp(28px, 3.2vw, 60px) !important;
+  }
+
+  .content-shell,
+  .main > .content-shell,
+  .main-modern > .content-shell,
+  .desktop-content-topbar,
+  .main > .desktop-content-topbar,
+  .main-modern > .desktop-content-topbar {
+    width: min(100%, 1440px) !important;
+    max-width: 1440px !important;
+  }
+
+  .content-shell:has(.responsive-desktop-table),
+  .main > .content-shell:has(.responsive-desktop-table),
+  .main-modern > .content-shell:has(.responsive-desktop-table) {
+    width: min(100%, 1600px) !important;
+    max-width: 1600px !important;
+  }
+
+  .content-shell:has(.employee-form-card),
+  .main > .content-shell:has(.employee-form-card),
+  .main-modern > .content-shell:has(.employee-form-card) {
+    width: min(100%, 1500px) !important;
+    max-width: 1500px !important;
+  }
+
+  .notification-popover {
+    position: absolute !important;
+    top: calc(100% + 10px) !important;
+    right: 0 !important;
+    left: auto !important;
+    width: 360px !important;
+    max-width: min(360px, calc(100vw - 320px)) !important;
+    z-index: 300 !important;
+  }
+
+  .desktop-data-table {
+    width: 100% !important;
+    min-width: 1120px !important;
+  }
+
+  .employee-data-table {
+    min-width: 1260px !important;
+  }
+}
+
+@media (min-width: 1600px) {
+  .desktop-data-table {
+    min-width: 1280px !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .notification-trigger,
+  .mobile-topbar-actions .notification-trigger {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+    flex-basis: 42px !important;
   }
 }

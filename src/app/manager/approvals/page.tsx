@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import AppShell from '@/components/AppShell';
 import { Message, useApi } from '@/components/ClientTools';
+import { formatThaiDateTime } from '@/lib/date';
 
 type ActivationRequest = {
   id: string;
@@ -103,7 +104,7 @@ export default function Approvals() {
                       <td>{r.hub_name || '-'}</td>
                       <td>{r.start_date_input || '-'}</td>
                       <td><span className="pill">{r.status || 'PENDING'}</span></td>
-                      <td>{r.requested_at || '-'}</td>
+                      <td>{formatThaiDateTime(r.requested_at)}</td>
                       <td className="desktop-detail-cell">{r.device_info || '-'}</td>
                       <td>
                         <div className="desktop-table-actions">
@@ -134,7 +135,7 @@ export default function Approvals() {
                   <div><span>HUB</span><strong>{r.hub_name || '-'}</strong></div>
                   <div><span>วันเริ่มงาน</span><strong>{r.start_date_input || '-'}</strong></div>
                   <div><span>สถานะ</span><strong>{r.status || 'PENDING'}</strong></div>
-                  <div><span>วันที่ส่งคำขอ</span><strong>{r.requested_at || '-'}</strong></div>
+                  <div><span>วันที่ส่งคำขอ</span><strong>{formatThaiDateTime(r.requested_at)}</strong></div>
                 </div>
                 <div className="data-note"><span>อุปกรณ์ / Browser</span><p>{r.device_info || '-'}</p></div>
                 <div className="data-card-actions two">

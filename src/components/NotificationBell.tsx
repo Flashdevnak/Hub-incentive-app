@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { formatThaiDateTime } from '@/lib/date';
 
 type NotificationItem = {
   id: string;
@@ -12,19 +13,6 @@ type NotificationItem = {
   created_at?: string;
   is_read?: boolean;
 };
-
-function shortDate(value?: string) {
-  if (!value) return '';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
-
-  return date.toLocaleString('th-TH', {
-    day: '2-digit',
-    month: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-}
 
 function looksBrokenThai(value?: string) {
   if (!value) return false;
@@ -219,7 +207,7 @@ export default function NotificationBell({ compact = false }: { compact?: boolea
                 >
                   <span>{cleanTitle(item)}</span>
                   <p>{cleanMessage(item)}</p>
-                  <small>{shortDate(item.created_at)}</small>
+                  <small>{formatThaiDateTime(item.created_at)}</small>
                 </button>
               ))}
             </div>

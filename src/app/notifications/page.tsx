@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AppShell from '@/components/AppShell';
 import { Message, useApi } from '@/components/ClientTools';
+import { formatThaiDateTime } from '@/lib/date';
 
 type NotificationItem = {
   id: string;
@@ -14,21 +15,6 @@ type NotificationItem = {
   created_at?: string;
   is_read?: boolean;
 };
-
-function shortDate(value?: string) {
-  if (!value) return '-';
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-
-  return date.toLocaleString('th-TH', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-}
 
 function looksBrokenThai(value?: string) {
   if (!value) return false;
@@ -197,7 +183,7 @@ export default function NotificationsPage() {
               <p>{cleanMessage(item)}</p>
             </div>
 
-            <span>{shortDate(item.created_at)}</span>
+            <span>{formatThaiDateTime(item.created_at)}</span>
           </button>
         ))}
       </div>

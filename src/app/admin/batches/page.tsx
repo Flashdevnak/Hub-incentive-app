@@ -2,12 +2,10 @@
 
 import AppShell from '@/components/AppShell';
 import { useApi } from '@/components/ClientTools';
+import { formatThaiDateTime } from '@/lib/date';
 
 function fmt(value: any) {
-  if (!value) return '-';
-  if (typeof value === 'string') return value;
-  if (typeof value?.toDate === 'function') return value.toDate().toLocaleString('th-TH');
-  return String(value);
+  return formatThaiDateTime(value);
 }
 
 export default function Batches() {

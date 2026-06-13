@@ -56,9 +56,9 @@ export const defaultMappings: FieldMapping[] = [
 defaultMappings.push({
   excel_header: 'Shift',
   system_field: 'shift_code',
-  thai_label: 'กะ / Shift',
+  thai_label: 'กะ',
   data_type: 'text',
-  category: 'identity',
+  category: 'shift',
   is_visible_to_staff: true,
   display_order: 90
 });
@@ -76,7 +76,7 @@ export function autoMap(headers: string[], existing: FieldMapping[] = defaultMap
   return headers.map((h, idx) => {
     const found = existing.find(m => m.excel_header === h || m.system_field === h || m.thai_label === h) ||
       (shiftHeaderAliases.has(normalizeShiftHeader(h))
-        ? { excel_header: h, system_field: 'shift_code', thai_label: 'กะ / Shift', data_type: 'text', category: 'identity', is_visible_to_staff: true, display_order: 90 } as FieldMapping
+        ? { excel_header: h, system_field: 'shift_code', thai_label: 'กะ', data_type: 'text', category: 'shift', is_visible_to_staff: true, display_order: 90 } as FieldMapping
         : null);
     return found || { excel_header: h, system_field: `extra_${idx + 1}`, thai_label: h, data_type: 'text', category: 'extra', is_visible_to_staff: true, display_order: 1000 + idx } as FieldMapping;
   });
@@ -131,7 +131,7 @@ export function normalizeShift(rawValue: any) {
     if (timeRange) {
       shift_code = `${timeRange[1].replace('.', ':')}-${timeRange[2].replace('.', ':')}`;
       shift_name = shift_code;
-      shift_group = shift_code;
+      shift_group = groupFromShiftStart(shift_code);
     } else if (startOnly) {
       shift_code = startOnly[1].replace('.', ':');
       shift_name = raw;
@@ -152,6 +152,17 @@ export function normalizeShift(rawValue: any) {
     shift_start: range?.[1] || '',
     shift_end: range?.[2] || ''
   };
+}
+
+function groupFromShiftStart(shiftCode: string) {
+  const start = shiftCode.match(/^(\d{1,2}):(\d{2})/) || [];
+  const hour = Number(start[1]);
+
+  if (!Number.isFinite(hour)) return shiftCode;
+  if (hour >= 0 && hour < 6) return 'EARLY';
+  if (hour >= 6 && hour < 14) return 'DAY';
+  if (hour >= 14 && hour < 19) return 'EVENING';
+  return 'NIGHT';
 }
 
 export function toNumber(v: any) {

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import AppShell from '@/components/AppShell';
 import { Message, useApi } from '@/components/ClientTools';
+import { formatThaiDateTime } from '@/lib/date';
 
 type IssueItem = {
   id: string;
@@ -106,7 +107,7 @@ export default function ManagerIssues() {
                       <td>{i.topic || '-'}</td>
                       <td className="desktop-detail-cell">{i.detail || '-'}</td>
                       <td><span className="pill">{i.status || 'OPEN'}</span></td>
-                      <td>{i.created_at || '-'}</td>
+                      <td>{formatThaiDateTime(i.created_at)}</td>
                       <td className="desktop-detail-cell">{i.resolution_note || '-'}</td>
                       <td>
                         <div className="desktop-table-actions">
@@ -136,7 +137,7 @@ export default function ManagerIssues() {
 
                 <div className="mobile-info-grid data-grid">
                   <div><span>หัวข้อ</span><strong>{i.topic || '-'}</strong></div>
-                  <div><span>เวลา</span><strong>{i.created_at || '-'}</strong></div>
+                  <div><span>เวลา</span><strong>{formatThaiDateTime(i.created_at)}</strong></div>
                 </div>
 
                 <div className="data-note">

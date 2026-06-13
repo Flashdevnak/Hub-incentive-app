@@ -88,18 +88,18 @@ export async function POST(req: NextRequest) {
           continue;
         }
 
+        let employeeMaster = employeeShiftCache.get(employeeCode);
+
+        if (!employeeShiftCache.has(employeeCode)) {
+          const employeeSnap = await db().collection('employees').doc(employeeCode).get();
+          employeeMaster = employeeSnap.exists ? employeeSnap.data() || {} : {};
+          employeeShiftCache.set(employeeCode, employeeMaster);
+        }
+
         let shift = normalizeShift(standard.shift_code || standard.shift_name || standard.shift_group);
         let shiftSource: 'EXCEL' | 'EMPLOYEE_MASTER' | 'UNKNOWN' = shift.shift_code ? 'EXCEL' : 'UNKNOWN';
 
         if (!shift.shift_code) {
-          let employeeMaster = employeeShiftCache.get(employeeCode);
-
-          if (!employeeShiftCache.has(employeeCode)) {
-            const employeeSnap = await db().collection('employees').doc(employeeCode).get();
-            employeeMaster = employeeSnap.exists ? employeeSnap.data() || {} : {};
-            employeeShiftCache.set(employeeCode, employeeMaster);
-          }
-
           shift = normalizeShift(employeeMaster.shift_code || employeeMaster.shift_name || employeeMaster.shift_group);
 
           if (shift.shift_code) {
@@ -120,6 +120,12 @@ export async function POST(req: NextRequest) {
           created_at: ts()
         });
 
+        const canFillEmployeeShift = shiftDetection.detected && shift.shift_code && !(
+          employeeMaster.shift_code ||
+          employeeMaster.shift_name ||
+          employeeMaster.shift_group
+        );
+
         writer.set(db().collection('employees').doc(employeeCode), {
           employee_code: employeeCode,
           employee_name: standard.employee_name || '',
@@ -130,7 +136,7 @@ export async function POST(req: NextRequest) {
           position_category: standard.position_category || '',
           start_date: standard.start_date || '',
           employment_status: standard.employment_status || '',
-          ...(shiftDetection.detected && shift.shift_code ? {
+          ...(canFillEmployeeShift ? {
             shift_code: shift.shift_code,
             shift_name: shift.shift_name,
             shift_group: shift.shift_group,

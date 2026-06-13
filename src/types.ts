@@ -50,7 +50,7 @@ export interface FieldMapping {
   system_field: string;
   thai_label: string;
   data_type: 'text' | 'number' | 'date' | 'money';
-  category: 'identity' | 'income' | 'deduction' | 'summary' | 'attendance' | 'extra' | 'note';
+  category: 'identity' | 'shift' | 'income' | 'deduction' | 'summary' | 'attendance' | 'extra' | 'note';
   is_required?: boolean;
   is_visible_to_staff?: boolean;
   is_visible_to_manager?: boolean;
