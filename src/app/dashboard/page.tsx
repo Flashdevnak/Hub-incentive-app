@@ -2,14 +2,17 @@
 
 import AppShell from '@/components/AppShell';
 import { useApi } from '@/components/ClientTools';
-import { money } from '@/lib/uiData';
-import { formatShiftGroup, formatShiftSource } from '@/lib/shiftDisplay';
+import { money, monthName } from '@/lib/uiData';
+import { formatShiftGroup } from '@/lib/shiftDisplay';
 
 export default function Dashboard() {
   const { data, error } = useApi<any>('/api/me/dashboard');
   const emp = data?.employee || {};
   const latest = data?.latest || {};
   const shift = data?.shiftInfo || {};
+  const latestPeriod = latest.period_month
+    ? `${monthName(latest.period_month)} ${latest.period_year || ''}`.trim()
+    : 'ยังไม่มีข้อมูล';
 
   return (
     <AppShell>
@@ -47,9 +50,8 @@ export default function Dashboard() {
         <p><b>ตำแหน่ง:</b> {emp.position || '-'}</p>
         <p><b>กะ:</b> {shift.shift_name || shift.shift_code || emp.shift_name || emp.shift_code || '-'}</p>
         <p><b>กลุ่มกะ:</b> {formatShiftGroup(shift.shift_group || emp.shift_group)}</p>
-        <p><b>ที่มาข้อมูลกะ:</b> {formatShiftSource(shift.shift_source)}</p>
         <p><b>วันเริ่มงาน:</b> {emp.start_date || '-'}</p>
-        <p><b>รอบข้อมูล:</b> {latest.period_month ? `${latest.period_month}/${latest.period_year}` : 'ยังไม่มีข้อมูล'}</p>
+        <p><b>รอบข้อมูลล่าสุด:</b> {latestPeriod}</p>
       </div>
     </AppShell>
   );

@@ -2,30 +2,10 @@ import { NextRequest } from 'next/server';
 import { db } from '@/lib/firebaseAdmin';
 import { ok, requireAuth, handleError } from '@/lib/http';
 import { managerRoles } from '@/lib/rbac';
+import { isActiveEmployeeRecord, isExplicitInactiveEmployeeRecord } from '@/lib/employeeStatus';
 
 function shiftKey(data: any) {
   return String(data.shift_code || data.shift_name || data.shift_group || '').trim();
-}
-
-function isCurrentActiveEmployee(data: any) {
-  const employmentStatus = String(data.employment_status || 'ACTIVE').trim().toUpperCase();
-  return (
-    employmentStatus === 'ACTIVE' &&
-    data.is_active !== false &&
-    data.is_deleted !== true &&
-    data.hidden_from_current_count !== true
-  );
-}
-
-function isInactiveEmployee(data: any) {
-  const employmentStatus = String(data.employment_status || 'ACTIVE').trim().toUpperCase();
-  return (
-    data.is_deleted !== true &&
-    (employmentStatus === 'RESIGNED' ||
-      employmentStatus === 'INACTIVE' ||
-      employmentStatus === 'SUSPENDED' ||
-      (employmentStatus === 'ACTIVE' && (data.is_active === false || data.hidden_from_current_count === true)))
-  );
 }
 
 export async function GET(req: NextRequest) {
@@ -42,13 +22,28 @@ export async function GET(req: NextRequest) {
     ]);
 
     const shiftMap = new Map<string, any>();
+    const accountMap = new Map<string, any>();
 
-    const employeeDocs = emp.docs.filter((doc) => doc.data().is_deleted !== true);
-    const activeEmployees = employeeDocs.filter((doc) => isCurrentActiveEmployee(doc.data()));
-    const inactiveEmployees = employeeDocs.filter((doc) => isInactiveEmployee(doc.data()));
+    acc.docs.forEach((doc) => accountMap.set(doc.id, doc.data()));
 
-    for (const doc of activeEmployees) {
-      const data = doc.data();
+    const employeeDocs = emp.docs
+      .map((doc) => {
+        const employee = { id: doc.id, ...doc.data() } as any;
+        const code = String(employee.employee_code || doc.id).toUpperCase();
+        const account = accountMap.get(code);
+
+        return {
+          ...employee,
+          employee_code: code,
+          account_status: account?.status || employee.account_status || employee.status,
+          accountStatus: account?.status || employee.accountStatus
+        };
+      })
+      .filter((employee) => employee.is_deleted !== true);
+    const activeEmployees = employeeDocs.filter(isActiveEmployeeRecord);
+    const inactiveEmployees = employeeDocs.filter(isExplicitInactiveEmployeeRecord);
+
+    for (const data of activeEmployees) {
       const key = shiftKey(data);
       if (!key) continue;
 

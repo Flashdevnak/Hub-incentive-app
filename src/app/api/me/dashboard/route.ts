@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
         shift_group: shift?.shift_group || '',
         shift_source: shift?.shift_source || (employee?.shift_code ? 'EMPLOYEE_MASTER' : 'UNKNOWN')
       },
-      notice: 'ยอดที่แสดงเป็นข้อมูลจากระบบ HCM เท่านั้น ยังไม่รวมรายได้อื่น เช่น เบี้ยขยันหรือรายการนอกระบบ'
+      notice: 'ยอดที่แสดงเป็นข้อมูลจากไฟล์นำเข้าล่าสุด ยังไม่รวมรายได้อื่น เช่น เบี้ยขยันหรือรายการนอกระบบ'
     });
   } catch (e) {
     return handleError(e);

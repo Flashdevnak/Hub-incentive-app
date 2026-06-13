@@ -3,6 +3,11 @@ import { db, ts } from '@/lib/firebaseAdmin';
 import { fail, ok, requireAuth, handleError } from '@/lib/http';
 import { hashPin, normalizeCode } from '@/lib/crypto';
 import { audit } from '@/lib/audit';
+import {
+  isActiveEmployeeRecord,
+  isExplicitInactiveEmployeeRecord,
+  normalizedEmploymentStatus
+} from '@/lib/employeeStatus';
 import type { Role, SessionUser, AccountStatus, EmploymentStatus } from '@/types';
 
 const roles: Role[] = [
@@ -39,15 +44,6 @@ function deriveScopeType(role: Role): SessionUser['scopeType'] {
 function normalizeEmploymentStatus(status?: string): EmploymentStatus {
   const normalized = String(status || 'ACTIVE').trim().toUpperCase() as EmploymentStatus;
   return employmentStatuses.includes(normalized) ? normalized : 'ACTIVE';
-}
-
-function isCurrentActive(employee: any) {
-  return (
-    normalizeEmploymentStatus(employee.employment_status) === 'ACTIVE' &&
-    employee.is_active !== false &&
-    employee.is_deleted !== true &&
-    employee.hidden_from_current_count !== true
-  );
 }
 
 function canSeeEmployee(session: SessionUser, employee: any) {
@@ -125,7 +121,8 @@ export async function GET(req: NextRequest) {
         const employee = { id: doc.id, ...doc.data() } as any;
         const code = String(employee.employee_code || doc.id).toUpperCase();
         const account = accountMap.get(code);
-        const employmentStatus = normalizeEmploymentStatus(employee.employment_status);
+        const employmentStatus = normalizedEmploymentStatus(employee) as EmploymentStatus;
+        const accountStatus = account?.status || employee.account_status || employee.status;
 
         return {
           ...employee,
@@ -133,7 +130,8 @@ export async function GET(req: NextRequest) {
           employment_status: employmentStatus,
           is_active: employee.is_active ?? employmentStatus === 'ACTIVE',
           account_role: account?.role,
-          account_status: account?.status,
+          account_status: accountStatus,
+          accountStatus,
           scope_type: account?.scope_type,
           scope_value: account?.scope_value,
           permission_preset: account?.permission_preset || employee.permission_preset,
@@ -147,8 +145,8 @@ export async function GET(req: NextRequest) {
 
     const visibleEmployees = employees.filter((employee) => employee.is_deleted !== true);
     const counts = {
-      active: visibleEmployees.filter(isCurrentActive).length,
-      inactive: visibleEmployees.filter((employee) => !isCurrentActive(employee)).length,
+      active: visibleEmployees.filter(isActiveEmployeeRecord).length,
+      inactive: visibleEmployees.filter(isExplicitInactiveEmployeeRecord).length,
       total: visibleEmployees.length,
       pending: visibleEmployees.filter((employee) => employee.account_status === 'PIN_REQUIRED').length
     };

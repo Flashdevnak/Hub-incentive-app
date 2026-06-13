@@ -179,6 +179,149 @@ body {
   }
 }
 
+/* FINAL CLEAN DEVICE POLISH - KEEP LAST */
+
+body {
+  background: #f6f8fb !important;
+}
+
+.content-shell {
+  gap: clamp(18px, 2.2vw, 28px) !important;
+}
+
+.page-head-clean,
+.incentive-head,
+.section-title-row {
+  margin: 0 0 clamp(18px, 2vw, 26px) !important;
+  padding: clamp(18px, 2.4vw, 30px) 0 clamp(8px, 1vw, 14px) !important;
+  gap: 14px !important;
+  align-items: flex-end !important;
+}
+
+.page-head-clean h1,
+.incentive-head h1 {
+  margin: 0 !important;
+  color: #111827 !important;
+  line-height: 1.12 !important;
+  letter-spacing: 0 !important;
+}
+
+.page-head-clean .muted,
+.incentive-head .muted,
+.section-title-row .muted {
+  max-width: 760px !important;
+  color: #64748b !important;
+}
+
+.card,
+.desktop-table-card,
+.mobile-data-card,
+.data-card,
+.employee-card,
+.section-card,
+.empty-state-card,
+.notification-page-card {
+  border-radius: 8px !important;
+  border-color: #e5e7eb !important;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06) !important;
+}
+
+.amount-card,
+.incentive-kpi-card,
+.kpi-card,
+.stat-card {
+  min-height: 132px !important;
+  padding: clamp(18px, 2vw, 24px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+
+.amount-card .label,
+.incentive-kpi-card .label,
+.kpi-card p,
+.stat-card span {
+  color: #64748b !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+}
+
+.amount-card .kpi,
+.incentive-kpi-card .kpi,
+.kpi-card strong,
+.stat-card strong {
+  color: #0f172a !important;
+  font-size: clamp(1.6rem, 2vw, 2.25rem) !important;
+  line-height: 1.08 !important;
+  letter-spacing: 0 !important;
+}
+
+.amount-gross,
+.incentive-kpi-card.tone-gross {
+  background: #ffffff !important;
+  border-left: 4px solid #2563eb !important;
+}
+
+.amount-deduction,
+.incentive-kpi-card.tone-deduction {
+  background: #ffffff !important;
+  border-left: 4px solid #dc2626 !important;
+}
+
+.amount-net,
+.incentive-kpi-card.tone-net {
+  background: #ffffff !important;
+  border-left: 4px solid #059669 !important;
+}
+
+.desktop-table-card {
+  overflow: auto !important;
+}
+
+.desktop-data-table th {
+  background: #f8fafc !important;
+  color: #475569 !important;
+  font-size: 0.78rem !important;
+  letter-spacing: 0 !important;
+}
+
+.desktop-data-table td {
+  color: #1f2937 !important;
+  vertical-align: middle !important;
+}
+
+.mobile-card-list,
+.data-card-list,
+.employee-card-list,
+.responsive-mobile-cards {
+  gap: 14px !important;
+}
+
+.mobile-data-card h3,
+.data-card h3,
+.employee-card h3,
+.notification-page-card strong {
+  letter-spacing: 0 !important;
+  overflow-wrap: anywhere !important;
+}
+
+@media (max-width: 768px) {
+  .page-head-clean,
+  .incentive-head,
+  .section-title-row {
+    padding-top: 14px !important;
+    align-items: stretch !important;
+  }
+
+  .amount-card,
+  .incentive-kpi-card,
+  .kpi-card,
+  .stat-card {
+    min-height: 112px !important;
+  }
+}
+
 /* Employee lifecycle and permission preset polish */
 .employee-count-grid {
   display: grid;

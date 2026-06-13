@@ -174,6 +174,7 @@ export async function POST(req: NextRequest) {
             ? existingEmploymentStatus
             : importedEmploymentStatus || existingEmploymentStatus || 'ACTIVE',
           is_active: employeeIsInactiveInMaster ? false : employeeMaster.is_active ?? true,
+          is_deleted: employeeMaster.is_deleted === true,
           hidden_from_current_count: employeeIsInactiveInMaster ? true : employeeMaster.hidden_from_current_count ?? false,
           inactive_reason: employeeMaster.inactive_reason || '',
           ...(canFillEmployeeShift ? {

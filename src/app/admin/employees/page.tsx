@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import AppShell from '@/components/AppShell';
 import { Message } from '@/components/ClientTools';
+import { isActiveEmployeeRecord, isExplicitInactiveEmployeeRecord } from '@/lib/employeeStatus';
 import type { Role, SessionUser, AccountStatus, EmploymentStatus } from '@/types';
 
 type ScopeType = SessionUser['scopeType'];
@@ -225,12 +226,7 @@ function normalizeEmploymentStatus(status?: string): EmploymentStatus {
 }
 
 function isCurrentActive(employee: EmployeeRow) {
-  return (
-    normalizeEmploymentStatus(employee.employment_status) === 'ACTIVE' &&
-    employee.is_active !== false &&
-    employee.is_deleted !== true &&
-    employee.hidden_from_current_count !== true
-  );
+  return isActiveEmployeeRecord(employee);
 }
 
 function statusClass(status?: string) {
@@ -394,7 +390,7 @@ export default function Employees() {
   const counts = useMemo(() => {
     const visibleEmployees = employees.filter((e) => e.is_deleted !== true);
     const active = visibleEmployees.filter(isCurrentActive).length;
-    const inactive = visibleEmployees.filter((e) => !isCurrentActive(e)).length;
+    const inactive = visibleEmployees.filter(isExplicitInactiveEmployeeRecord).length;
     const pending = visibleEmployees.filter((e) => e.account_status === 'PIN_REQUIRED').length;
 
     return {
@@ -595,7 +591,7 @@ export default function Employees() {
     .filter((e) => e.is_deleted !== true)
     .filter((e) => {
       if (statusFilter === 'ACTIVE') return isCurrentActive(e);
-      if (statusFilter === 'INACTIVE') return !isCurrentActive(e);
+      if (statusFilter === 'INACTIVE') return isExplicitInactiveEmployeeRecord(e);
       return true;
     })
     .filter((e) => {
