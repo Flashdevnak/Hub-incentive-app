@@ -1297,3 +1297,19 @@ th {
     word-break: break-word;
   }
 }
+
+/* Fix role badge contrast inside sidebar */
+
+.user-panel .role-badge {
+  background: linear-gradient(135deg, #ffffff, #fff3e8);
+  color: #7c2d12 !important;
+  border: 1px solid #fed7aa;
+  font-weight: 900;
+  box-shadow: 0 8px 18px rgba(237, 91, 47, 0.18);
+}
+
+.mobile-topbar .role-badge {
+  background: #fff3e8;
+  color: #9a3412 !important;
+  border: 1px solid #fed7aa;
+}
