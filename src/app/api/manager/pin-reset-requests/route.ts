@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { db } from '@/lib/firebaseAdmin';
 import { ok, requireAuth, handleError } from '@/lib/http';
 import { managerRoles } from '@/lib/rbac';
+import { filterRequestsByScope } from '@/lib/approvalScope';
 
 function toMs(value: any) {
   if (!value) return 0;
@@ -13,7 +14,7 @@ function toMs(value: any) {
 
 export async function GET(req: NextRequest) {
   try {
-    requireAuth(req, [...managerRoles]);
+    const user = requireAuth(req, [...managerRoles]);
 
     const snap = await db()
       .collection('pin_reset_requests')
@@ -25,7 +26,7 @@ export async function GET(req: NextRequest) {
       .map((d) => ({ id: d.id, ...d.data() }))
       .sort((a: any, b: any) => toMs(b.requested_at) - toMs(a.requested_at));
 
-    return ok({ requests });
+    return ok({ requests: await filterRequestsByScope(user, requests as any[], 'pin') });
   } catch (e) {
     return handleError(e);
   }

@@ -4,6 +4,7 @@ import { ok, requireAuth, handleError, fail } from '@/lib/http';
 import { audit } from '@/lib/audit';
 import { managerRoles } from '@/lib/rbac';
 import { notifyActivationApproved } from '@/lib/notifications';
+import { assertCanApprove } from '@/lib/approvalScope';
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,6 +17,9 @@ export async function POST(req: NextRequest) {
 
     const data = snap.data()!;
     if (data.status && data.status !== 'PENDING') return fail('คำขอนี้ไม่ได้อยู่ในสถานะรออนุมัติ');
+
+    const denied = await assertCanApprove(user, data.employee_code, 'activation');
+    if (denied) return denied;
 
     await ref.set(
       {

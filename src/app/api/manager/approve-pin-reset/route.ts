@@ -4,6 +4,7 @@ import { ok, requireAuth, handleError, fail } from '@/lib/http';
 import { managerRoles } from '@/lib/rbac';
 import { audit } from '@/lib/audit';
 import { notifyPinResetApproved } from '@/lib/notifications';
+import { assertCanApprove } from '@/lib/approvalScope';
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,6 +22,10 @@ export async function POST(req: NextRequest) {
     const employeeCode = data.employee_code || '';
 
     if (!employeeCode) return fail('คำขอไม่มีรหัสพนักงาน');
+
+    if (data.status && data.status !== 'PENDING') return fail('คำขอนี้ไม่ได้อยู่ในสถานะรออนุมัติ');
+    const denied = await assertCanApprove(user, employeeCode, 'pin');
+    if (denied) return denied;
 
     const accountRef = db().collection('user_accounts').doc(employeeCode);
     const accountSnap = await accountRef.get();

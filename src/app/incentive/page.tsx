@@ -3,6 +3,7 @@
 import AppShell from '@/components/AppShell';
 import { useApi } from '@/components/ClientTools';
 import { money } from '@/lib/uiData';
+import { formatShiftGroup, formatShiftSource } from '@/lib/shiftDisplay';
 
 type DetailItem = {
   thai_label?: string;
@@ -126,7 +127,7 @@ export default function Incentive() {
         </div>
 
         <div className="notice incentive-note">
-          ยอดที่แสดงเป็นข้อมูลจากไฟล์ Incentive เท่านั้น ยังไม่รวมรายได้จากเบี้ยขยัน
+          ยอดที่แสดงเป็นข้อมูลจากระบบ HCM เท่านั้น ยังไม่รวมรายได้อื่น เช่น เบี้ยขยันหรือรายการนอกระบบ
         </div>
 
         {loading && <div className="notice">กำลังโหลดข้อมูล Incentive...</div>}
@@ -151,11 +152,11 @@ export default function Incentive() {
 
             <div className="card shift-summary-card">
               <div>
-                <span className="login-label">Shift</span>
+                <span className="login-label">กะ</span>
                 <h2>{record.shift_name || record.shift_code || 'ยังไม่มีข้อมูลกะ'}</h2>
-                <p className="muted">แหล่งข้อมูล: {record.shift_source || 'UNKNOWN'}</p>
+                <p className="muted">ที่มาข้อมูลกะ: {formatShiftSource(record.shift_source || 'UNKNOWN')}</p>
               </div>
-              {record.shift_group && <span className="pill">{record.shift_group}</span>}
+              {record.shift_group && <span className="pill">{formatShiftGroup(record.shift_group)}</span>}
             </div>
 
             <CompactSection

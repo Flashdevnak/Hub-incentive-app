@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { db } from '@/lib/firebaseAdmin';
 import { ok, requireAuth, handleError } from '@/lib/http';
 import { managerRoles } from '@/lib/rbac';
+import { filterRequestsByScope } from '@/lib/approvalScope';
 
 function toMs(value: any) {
   if (!value) return 0;
@@ -13,7 +14,7 @@ function toMs(value: any) {
 
 export async function GET(req: NextRequest) {
   try {
-    requireAuth(req, [...managerRoles]);
+    const user = requireAuth(req, [...managerRoles]);
 
     // ไม่ใช้ orderBy ตรงนี้ เพื่อไม่ให้เอกสารเก่าที่ไม่มี requested_at หายจากรายการ
     const snap = await db()
@@ -39,7 +40,7 @@ export async function GET(req: NextRequest) {
       })
       .sort((a, b) => toMs(b.requested_at) - toMs(a.requested_at));
 
-    return ok({ requests });
+    return ok({ requests: await filterRequestsByScope(user, requests, 'activation') });
   } catch (e) {
     return handleError(e);
   }

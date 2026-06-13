@@ -3,6 +3,7 @@
 import AppShell from '@/components/AppShell';
 import { useApi } from '@/components/ClientTools';
 import { money, monthName } from '@/lib/uiData';
+import { formatShiftGroup } from '@/lib/shiftDisplay';
 
 export default function History() {
   const { data, error } = useApi<any>('/api/me/history');
@@ -36,10 +37,10 @@ export default function History() {
               {rows.map((r: any) => (
                 <tr key={r.id}>
                   <td>{monthName(r.period_month)} {r.period_year}</td>
-                  <td>{r.shift_name || r.shift_code || '-'}</td>
-                  <td>{money(r.gross_amount)}</td>
-                  <td>{money(r.deduction_amount)}</td>
-                  <td><b>{money(r.net_amount)}</b></td>
+                  <td>{r.shift_name || r.shift_code || formatShiftGroup(r.shift_group)}</td>
+                  <td className="amount-text-gross">{money(r.gross_amount)}</td>
+                  <td className="amount-text-deduction">{money(r.deduction_amount)}</td>
+                  <td className="amount-text-net"><b>{money(r.net_amount)}</b></td>
                 </tr>
               ))}
             </tbody>
@@ -55,12 +56,12 @@ export default function History() {
                 <span className="data-kicker">รอบเดือน</span>
                 <h3>{monthName(r.period_month)} {r.period_year}</h3>
               </div>
-              <span className="pill">{r.shift_name || r.shift_code || '-'}</span>
+              <span className="pill">{r.shift_name || r.shift_code || formatShiftGroup(r.shift_group)}</span>
             </div>
             <div className="mobile-info-grid data-grid">
-              <div><span>ยอด Incentive</span><strong>{money(r.gross_amount)}</strong></div>
-              <div><span>ยอดหัก</span><strong>{money(r.deduction_amount)}</strong></div>
-              <div><span>ยอดสุทธิ</span><strong>{money(r.net_amount)}</strong></div>
+              <div className="history-amount-gross"><span>ยอด Incentive</span><strong>{money(r.gross_amount)}</strong></div>
+              <div className="history-amount-deduction"><span>ยอดหัก</span><strong>{money(r.deduction_amount)}</strong></div>
+              <div className="history-amount-net"><span>ยอดสุทธิ</span><strong>{money(r.net_amount)}</strong></div>
             </div>
           </div>
         ))}

@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { db } from '@/lib/firebaseAdmin';
 import { ok, requireAuth, handleError } from '@/lib/http';
+import { dedupeIncentiveRecordsByMonth, pickLatestIncentiveRecord } from '@/lib/incentiveRecords';
 
 export async function GET(req: NextRequest) {
   try {
@@ -18,7 +19,7 @@ export async function GET(req: NextRequest) {
     if (month && year) {
       q = q.where('period_month', '==', month).where('period_year', '==', year);
     } else {
-      q = q.orderBy('period_key', 'desc').limit(5);
+      q = q.orderBy('period_key', 'desc').limit(20);
     }
 
     const snap = await q.get();
@@ -30,7 +31,11 @@ export async function GET(req: NextRequest) {
       .filter((record) => !shiftName || String(record.shift_name || '').trim() === shiftName)
       .filter((record) => !shiftGroup || String(record.shift_group || '').trim() === shiftGroup);
 
-    return ok({ record: records[0] || null });
+    const record = month && year
+      ? pickLatestIncentiveRecord(records)
+      : dedupeIncentiveRecordsByMonth(records)[0] || null;
+
+    return ok({ record });
   } catch (e) {
     return handleError(e);
   }

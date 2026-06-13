@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { db } from '@/lib/firebaseAdmin';
 import { ok, requireAuth, handleError } from '@/lib/http';
+import { dedupeIncentiveRecordsByMonth } from '@/lib/incentiveRecords';
 
 export async function GET(req: NextRequest) {
   try {
@@ -10,11 +11,12 @@ export async function GET(req: NextRequest) {
       .collection('incentive_records')
       .where('employee_code', '==', user.employeeCode)
       .orderBy('period_key', 'desc')
-      .limit(1)
+      .limit(20)
       .get();
 
     const employee = (empSnap.data() || {}) as any;
-    const latest = latestSnap.empty ? null : ({ id: latestSnap.docs[0].id, ...latestSnap.docs[0].data() } as any);
+    const latestRecords = latestSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as any));
+    const latest = dedupeIncentiveRecordsByMonth(latestRecords)[0] || null;
     const shift = (latest || employee) as any;
 
     return ok({
@@ -26,7 +28,7 @@ export async function GET(req: NextRequest) {
         shift_group: shift?.shift_group || '',
         shift_source: shift?.shift_source || (employee?.shift_code ? 'EMPLOYEE_MASTER' : 'UNKNOWN')
       },
-      notice: 'หมายเหตุ: ยอดที่แสดงเป็นข้อมูลจากไฟล์ Incentive เท่านั้น ยังไม่รวมรายได้จากเบี้ยขยัน และอาจยังไม่ใช่ยอดรายได้สุทธิทั้งหมดของพนักงาน'
+      notice: 'ยอดที่แสดงเป็นข้อมูลจากระบบ HCM เท่านั้น ยังไม่รวมรายได้อื่น เช่น เบี้ยขยันหรือรายการนอกระบบ'
     });
   } catch (e) {
     return handleError(e);

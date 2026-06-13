@@ -189,11 +189,19 @@ export async function POST(req: NextRequest) {
         if (fileType === 'incentive') {
           writer.set(db().collection('incentive_records').doc(`${periodYear}_${String(periodMonth).padStart(2, '0')}_${employeeCode}_${batchRef.id}`), {
             import_batch_id: batchRef.id,
+            import_version: versionNo,
+            imported_at: importTimestamp,
+            confirmed_at: importTimestamp,
+            source_file_name: file.name,
+            import_status: failed ? 'IMPORTED_WITH_ERRORS' : 'IMPORTED',
             period_month: periodMonth,
             period_year: periodYear,
+            month: periodMonth,
+            year: periodYear,
             period_key: periodKey,
             employee_code: employeeCode,
             employee_name: standard.employee_name || '',
+            hub_id: standard.hub_id || '',
             hub_name: standard.hub_name || hub,
             gross_amount:
               Number(standard.base_incentive || 0) +

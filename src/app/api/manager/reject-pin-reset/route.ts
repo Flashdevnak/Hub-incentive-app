@@ -4,6 +4,7 @@ import { ok, requireAuth, handleError, fail } from '@/lib/http';
 import { managerRoles } from '@/lib/rbac';
 import { audit } from '@/lib/audit';
 import { notifyPinResetRejected } from '@/lib/notifications';
+import { assertCanApprove } from '@/lib/approvalScope';
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,6 +20,11 @@ export async function POST(req: NextRequest) {
 
     const data = snap.data() || {};
     const employeeCode = data.employee_code || '';
+    if (data.status && data.status !== 'PENDING') return fail('คำขอนี้ไม่ได้อยู่ในสถานะรออนุมัติ');
+    if (employeeCode) {
+      const denied = await assertCanApprove(user, employeeCode, 'pin');
+      if (denied) return denied;
+    }
 
     await ref.set(
       {
