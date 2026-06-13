@@ -69,7 +69,7 @@ export default function Admin() {
         <Link className="card kpi-card" href="/admin/employees">
           <div className="label">พนักงานใช้งานอยู่</div>
           <div className="kpi">{s.active_employee_count ?? s.employees ?? 0}</div>
-          <p className="muted small">Headcount ปัจจุบันจาก employee master</p>
+          <p className="muted small">นับจากข้อมูลพนักงานที่ยังทำงานอยู่ ไม่ผูกกับสถานะบัญชี</p>
         </Link>
 
         <Link className="card kpi-card" href="/admin/employees">
@@ -81,13 +81,19 @@ export default function Admin() {
         <Link className="card kpi-card" href="/admin/employees">
           <div className="label">ลาออก/ไม่ใช้งาน</div>
           <div className="kpi">{s.inactive_employee_count ?? 0}</div>
-          <p className="muted small">ไม่รวมใน Headcount ปัจจุบัน แต่ยังเก็บประวัติ</p>
+          <p className="muted small">พนักงานที่ไม่อยู่ในสถานะทำงานแล้ว แต่ยังเก็บประวัติไว้</p>
         </Link>
 
         <Link className="card kpi-card" href="/admin/employees">
-          <div className="label">บัญชีทั้งหมด</div>
-          <div className="kpi">{s.account_count ?? s.accounts ?? 0}</div>
-          <p className="muted small">นับจาก user_accounts ไม่ใช่จำนวนพนักงาน</p>
+          <div className="label">บัญชีใช้งานได้</div>
+          <div className="kpi">{s.active_account_count ?? 0}</div>
+          <p className="muted small">บัญชีที่เข้าใช้งานระบบได้จริงใน user_accounts</p>
+        </Link>
+
+        <Link className="card kpi-card" href="/admin/employees">
+          <div className="label">ยังไม่มีบัญชี</div>
+          <div className="kpi">{s.missing_account_count ?? 0}</div>
+          <p className="muted small">พนักงานที่ยังทำงานอยู่แต่ยังไม่เคยสร้างบัญชี</p>
         </Link>
 
         <Link className="card kpi-card approval-kpi-card" href="/manager/approvals">
@@ -103,9 +109,9 @@ export default function Admin() {
         </Link>
       </div>
 
-      {Number(s.pendingActivation || 0) > 0 && (
+      {Number(s.pending_activation_count ?? s.pendingActivation ?? 0) > 0 && (
         <div className="notice approval-notice">
-          มีคำขอเปิดใช้งานรออนุมัติ {s.pendingActivation} รายการ
+          มีคำขอเปิดใช้งานรออนุมัติ {s.pending_activation_count ?? s.pendingActivation} รายการ
           <Link className="btn btn-secondary" href="/manager/approvals">
             ไปหน้าอนุมัติ
           </Link>

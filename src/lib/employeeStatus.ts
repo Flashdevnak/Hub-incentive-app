@@ -4,7 +4,10 @@ const activeLikeStatuses = new Set([
   'APPROVED',
   'IMPORTED_ACTIVE',
   'ใช้งานอยู่',
-  'ใช้งานได้'
+  'ใช้งานได้',
+  'ทำงานอยู่',
+  '在職',
+  '在职'
 ]);
 
 const inactiveLikeStatuses = new Set([
@@ -15,7 +18,9 @@ const inactiveLikeStatuses = new Set([
   'DELETED',
   'ลาออก',
   'ไม่ใช้งาน',
-  'ระงับใช้งาน'
+  'ระงับใช้งาน',
+  '离職',
+  '离职'
 ]);
 
 export function normalizeStatusValue(value: any) {
@@ -44,7 +49,6 @@ export function isActiveEmployeeRecord(employee: any) {
   if (
     !employee ||
     employee.is_deleted === true ||
-    employee.hidden_from_current_count === true ||
     employee.is_active === false
   ) {
     return false;
@@ -52,16 +56,6 @@ export function isActiveEmployeeRecord(employee: any) {
 
   const employmentStatus = employee.employment_status;
   if (isInactiveLikeStatus(employmentStatus)) return false;
-
-  const statusFields = [
-    employee.account_status,
-    employee.accountStatus,
-    employee.status,
-    employee.approval_status,
-    employee.activation_status
-  ];
-
-  if (statusFields.some(isInactiveLikeStatus)) return false;
 
   if (!String(employmentStatus || '').trim()) return true;
   return isActiveLikeStatus(employmentStatus);
@@ -71,11 +65,10 @@ export function isExplicitInactiveEmployeeRecord(employee: any) {
   if (!employee || employee.is_deleted === true) return false;
 
   return [
-    employee.employment_status,
-    employee.status,
-    employee.account_status,
-    employee.accountStatus,
-    employee.approval_status,
-    employee.activation_status
+    employee.employment_status
   ].some(isInactiveLikeStatus);
+}
+
+export function isUsableAccountRecord(account: any) {
+  return String(account?.status || '').trim().toUpperCase() === 'ACTIVE';
 }

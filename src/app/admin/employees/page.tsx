@@ -231,7 +231,9 @@ function isCurrentActive(employee: EmployeeRow) {
 
 function statusClass(status?: string) {
   if (status === 'ACTIVE') return 'pill pill-ok';
+  if (status === 'PIN_REQUIRED') return 'pill pill-warn';
   if (status === 'LOCKED' || status === 'DISABLED') return 'pill pill-danger';
+  if (!status) return 'pill pill-muted';
   return 'pill';
 }
 
@@ -265,6 +267,10 @@ function presetValue(form: FormState, valueFrom: PermissionPreset['valueFrom']) 
 }
 
 function presetForValues(role?: Role, scopeType?: ScopeType) {
+  if (role === 'supervisor' && scopeType === 'HUB') {
+    return permissionPresets.find((preset) => preset.id === 'supervisor_hub');
+  }
+
   return permissionPresets.find((preset) => preset.role === role && preset.scopeType === scopeType);
 }
 
@@ -391,12 +397,16 @@ export default function Employees() {
     const visibleEmployees = employees.filter((e) => e.is_deleted !== true);
     const active = visibleEmployees.filter(isCurrentActive).length;
     const inactive = visibleEmployees.filter(isExplicitInactiveEmployeeRecord).length;
+    const activeAccounts = visibleEmployees.filter((e) => e.account_status === 'ACTIVE').length;
+    const missingAccounts = visibleEmployees.filter((e) => isCurrentActive(e) && !e.account_status).length;
     const pending = visibleEmployees.filter((e) => e.account_status === 'PIN_REQUIRED').length;
 
     return {
       active,
       inactive,
       total: visibleEmployees.length,
+      activeAccounts,
+      missingAccounts,
       pending
     };
   }, [employees]);
@@ -656,6 +666,14 @@ export default function Employees() {
           <span>ทั้งหมด</span>
           <strong>{counts.total}</strong>
         </button>
+        <div className="employee-count-card">
+          <span>บัญชีใช้งานได้</span>
+          <strong>{counts.activeAccounts}</strong>
+        </div>
+        <div className="employee-count-card">
+          <span>ยังไม่มีบัญชี</span>
+          <strong>{counts.missingAccounts}</strong>
+        </div>
         <div className="employee-count-card">
           <span>รอตั้ง PIN</span>
           <strong>{counts.pending}</strong>

@@ -20,11 +20,11 @@ export async function POST(req: NextRequest) {
 
     const data = snap.data() || {};
     const employeeCode = data.employee_code || '';
+    if (!employeeCode) return fail('คำขอไม่มีรหัสพนักงาน');
+
     if (data.status && data.status !== 'PENDING') return fail('คำขอนี้ไม่ได้อยู่ในสถานะรออนุมัติ');
-    if (employeeCode) {
-      const denied = await assertCanApprove(user, employeeCode, 'pin');
-      if (denied) return denied;
-    }
+    const denied = await assertCanApprove(user, employeeCode, 'pin');
+    if (denied) return denied;
 
     await ref.set(
       {
@@ -37,14 +37,12 @@ export async function POST(req: NextRequest) {
       { merge: true }
     );
 
-    if (employeeCode) {
-      await notifyPinResetRejected({
-        employeeCode,
-        employeeName: data.employee_name || '',
-        reason: reason || '',
-        requestId: String(requestId)
-      });
-    }
+    await notifyPinResetRejected({
+      employeeCode,
+      employeeName: data.employee_name || '',
+      reason: reason || '',
+      requestId: String(requestId)
+    });
 
     await audit(user.employeeCode, user.role, 'REJECT_PIN_RESET', 'pin_reset_request', String(requestId), { employeeCode, reason }, req);
 

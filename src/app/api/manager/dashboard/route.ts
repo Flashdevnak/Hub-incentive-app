@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { db } from '@/lib/firebaseAdmin';
 import { ok, requireAuth, handleError } from '@/lib/http';
 import { managerRoles } from '@/lib/rbac';
-import { isActiveEmployeeRecord, isExplicitInactiveEmployeeRecord } from '@/lib/employeeStatus';
+import { isActiveEmployeeRecord, isExplicitInactiveEmployeeRecord, isUsableAccountRecord } from '@/lib/employeeStatus';
 
 function shiftKey(data: any) {
   return String(data.shift_code || data.shift_name || data.shift_group || '').trim();
@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
     const accountMap = new Map<string, any>();
 
     acc.docs.forEach((doc) => accountMap.set(doc.id, doc.data()));
+    const activeAccountCount = acc.docs.filter((doc) => isUsableAccountRecord(doc.data())).length;
 
     const employeeDocs = emp.docs
       .map((doc) => {
@@ -35,6 +36,7 @@ export async function GET(req: NextRequest) {
         return {
           ...employee,
           employee_code: code,
+          account_exists: !!account,
           account_status: account?.status || employee.account_status || employee.status,
           accountStatus: account?.status || employee.accountStatus
         };
@@ -42,6 +44,7 @@ export async function GET(req: NextRequest) {
       .filter((employee) => employee.is_deleted !== true);
     const activeEmployees = employeeDocs.filter(isActiveEmployeeRecord);
     const inactiveEmployees = employeeDocs.filter(isExplicitInactiveEmployeeRecord);
+    const missingAccountCount = activeEmployees.filter((employee) => !employee.account_exists).length;
 
     for (const data of activeEmployees) {
       const key = shiftKey(data);
@@ -88,6 +91,8 @@ export async function GET(req: NextRequest) {
         total_employee_count: employeeDocs.length,
         inactive_employee_count: inactiveEmployees.length,
         account_count: acc.size,
+        active_account_count: activeAccountCount,
+        missing_account_count: missingAccountCount,
         pending_activation_count: act.size,
         pending_pin_reset_count: pinReset.size || 0,
         employees: activeEmployees.length,

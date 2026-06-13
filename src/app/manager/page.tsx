@@ -20,29 +20,45 @@ export default function Manager() {
       </div>
 
       <div className="grid grid-3 dashboard-count-grid">
-        <div className="card">
+        <div className="card kpi-card">
           <div className="label">พนักงานใช้งานอยู่</div>
           <div className="kpi">{s.active_employee_count ?? s.employees ?? 0}</div>
+          <p className="muted small">นับจาก employee master ที่ยังทำงานอยู่</p>
         </div>
-        <div className="card">
+        <div className="card kpi-card">
           <div className="label">พนักงานทั้งหมดในระบบ</div>
           <div className="kpi">{s.total_employee_count ?? 0}</div>
+          <p className="muted small">รวมข้อมูลพนักงานทั้งหมดที่ยังเก็บไว้</p>
         </div>
-        <div className="card">
+        <div className="card kpi-card">
           <div className="label">ลาออก/ไม่ใช้งาน</div>
           <div className="kpi">{s.inactive_employee_count ?? 0}</div>
+          <p className="muted small">ไม่อยู่ในสถานะทำงานแล้ว</p>
         </div>
-        <div className="card">
+        <div className="card kpi-card">
+          <div className="label">บัญชีใช้งานได้</div>
+          <div className="kpi">{s.active_account_count ?? 0}</div>
+          <p className="muted small">บัญชี ACTIVE ที่เข้าใช้ระบบได้</p>
+        </div>
+        <div className="card kpi-card">
+          <div className="label">ยังไม่มีบัญชี</div>
+          <div className="kpi">{s.missing_account_count ?? 0}</div>
+          <p className="muted small">พนักงานที่ยังทำงานอยู่แต่ไม่มีบัญชี</p>
+        </div>
+        <div className="card kpi-card">
           <div className="label">รออนุมัติเปิดใช้งาน</div>
           <div className="kpi">{s.pending_activation_count ?? s.pendingActivation ?? 0}</div>
+          <p className="muted small">คำขอเปิดใช้งานที่รอตรวจสอบ</p>
         </div>
-        <div className="card">
+        <div className="card kpi-card">
           <div className="label">รอรีเซ็ต PIN</div>
           <div className="kpi">{s.pending_pin_reset_count ?? s.pendingPinReset ?? 0}</div>
+          <p className="muted small">คำขอรีเซ็ต PIN ที่รอตรวจสอบ</p>
         </div>
-        <div className="card">
+        <div className="card kpi-card">
           <div className="label">คำร้องรอตรวจสอบ</div>
           <div className="kpi">{s.pendingIssues || 0}</div>
+          <p className="muted small">รายการแจ้งปัญหาที่ยังเปิดอยู่</p>
         </div>
       </div>
 
