@@ -2275,3 +2275,120 @@ th {
     right: 10px !important;
   }
 }
+
+/* Notification read / clear actions */
+
+.notification-popover-actions {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #f1f3f7;
+  background: #ffffff;
+}
+
+.notification-popover-actions button {
+  flex: 1;
+  min-height: 36px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: #eef2f7;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.notification-popover-actions button:last-child {
+  background: #fff1f0;
+  color: #9d1f16;
+}
+
+.notification-popover-actions button:disabled {
+  opacity: 0.55;
+}
+
+.notification-page-head {
+  align-items: flex-start;
+}
+
+.notification-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.notification-page-list {
+  display: grid;
+  gap: 12px;
+}
+
+.notification-page-card {
+  width: 100%;
+  min-height: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  text-align: left;
+  border-radius: 20px;
+  background: #ffffff;
+  color: var(--text);
+}
+
+.notification-page-card.unread {
+  border-color: #fed7aa;
+  background: linear-gradient(180deg, #ffffff, #fff8f1);
+}
+
+.notification-page-card strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #172033;
+  font-size: 16px;
+  font-weight: 950;
+  line-height: 1.35;
+}
+
+.notification-page-card p {
+  margin: 0;
+  color: #596579;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.notification-page-card > span {
+  flex: 0 0 auto;
+  color: #8a95a8;
+  font-size: 12px;
+  font-weight: 850;
+  text-align: right;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .notification-page-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .notification-page-actions button {
+    width: 100%;
+  }
+
+  .notification-page-card {
+    display: grid;
+    gap: 10px;
+  }
+
+  .notification-page-card > span {
+    text-align: left;
+    white-space: normal;
+  }
+
+  .notification-popover-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
