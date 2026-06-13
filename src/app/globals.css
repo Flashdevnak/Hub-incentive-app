@@ -1472,3 +1472,19 @@ th {
     font-size: 28px;
   }
 }
+
+.empty-state-card {
+  max-width: 760px;
+  padding: 24px;
+}
+
+.empty-state-card h2 {
+  margin-bottom: 6px;
+}
+
+.device-cell {
+  max-width: 360px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
