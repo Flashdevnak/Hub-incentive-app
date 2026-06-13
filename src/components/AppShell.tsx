@@ -191,6 +191,27 @@ function AppIcon({ name }: { name: IconName }) {
   }
 }
 
+function useIsMobileViewport() {
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    function sync() {
+      setIsMobile(window.innerWidth <= 860);
+    }
+
+    sync();
+    window.addEventListener('resize', sync);
+    window.addEventListener('orientationchange', sync);
+
+    return () => {
+      window.removeEventListener('resize', sync);
+      window.removeEventListener('orientationchange', sync);
+    };
+  }, []);
+
+  return isMobile;
+}
+
 export default function AppShell({
   children,
   area = 'staff'
@@ -203,6 +224,7 @@ export default function AppShell({
 
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
+  const isMobile = useIsMobileViewport();
 
   useEffect(() => {
     let alive = true;
@@ -249,51 +271,53 @@ export default function AppShell({
 
   return (
     <div className="layout app-layout">
-      <aside className="side side-modern">
-        <div className="brand-block">
-          <div className="brand-monogram">NAK</div>
+      {isMobile !== true && (
+        <aside className="side side-modern">
+          <div className="brand-block">
+            <div className="brand-monogram">NAK</div>
 
-          <div>
-            <h2>NAK Incentive</h2>
-            <p>Employee Incentive System</p>
-          </div>
-        </div>
-
-        <div className="user-panel">
-          <span className="user-kicker">เข้าสู่ระบบโดย</span>
-          <strong>{displayName}</strong>
-          <span>รหัส: {displayCode}</span>
-          <span className="role-badge">{displayRole}</span>
-        </div>
-
-        <nav className="nav nav-modern">
-          {sections.map((section) => (
-            <div className="nav-section" key={section.title}>
-              <div className="nav-title">{section.title}</div>
-
-              {section.items.map((item) => (
-                <Link
-                  href={item.href}
-                  key={item.href}
-                  className={isActive(pathname, item.href) ? 'active' : ''}
-                >
-                  <span className="nav-symbol">
-                    <AppIcon name={item.icon} />
-                  </span>
-                  <span>{item.label}</span>
-                </Link>
-              ))}
+            <div>
+              <h2>NAK Incentive</h2>
+              <p>Employee Incentive System</p>
             </div>
-          ))}
+          </div>
 
-          <button className="logout-btn" onClick={logout}>
-            <span className="nav-symbol">
-              <AppIcon name="logout" />
-            </span>
-            <span>ออกจากระบบ</span>
-          </button>
-        </nav>
-      </aside>
+          <div className="user-panel">
+            <span className="user-kicker">เข้าสู่ระบบโดย</span>
+            <strong>{displayName}</strong>
+            <span>รหัส: {displayCode}</span>
+            <span className="role-badge">{displayRole}</span>
+          </div>
+
+          <nav className="nav nav-modern">
+            {sections.map((section) => (
+              <div className="nav-section" key={section.title}>
+                <div className="nav-title">{section.title}</div>
+
+                {section.items.map((item) => (
+                  <Link
+                    href={item.href}
+                    key={item.href}
+                    className={isActive(pathname, item.href) ? 'active' : ''}
+                  >
+                    <span className="nav-symbol">
+                      <AppIcon name={item.icon} />
+                    </span>
+                    <span>{item.label}</span>
+                  </Link>
+                ))}
+              </div>
+            ))}
+
+            <button className="logout-btn" onClick={logout}>
+              <span className="nav-symbol">
+                <AppIcon name="logout" />
+              </span>
+              <span>ออกจากระบบ</span>
+            </button>
+          </nav>
+        </aside>
+      )}
 
       <header className="mobile-topbar">
         <Link href={homeHrefForMode(mode)} className="mobile-brand mobile-brand-link">
@@ -312,20 +336,17 @@ export default function AppShell({
       </header>
 
       <main className="main main-modern">
-        <div className="desktop-content-topbar">
-          <div className="desktop-content-title">
-            <span>NAK Incentive</span>
-            <strong>{displayName}</strong>
+        {isMobile === false && (
+          <div className="desktop-content-topbar">
+            <div className="desktop-content-actions">
+              {user && <NotificationBell />}
+              <span className="role-badge">{displayRole}</span>
+              <Link href="/account" className="desktop-account-btn">
+                บัญชี
+              </Link>
+            </div>
           </div>
-
-          <div className="desktop-content-actions">
-            {user && <NotificationBell />}
-            <span className="role-badge">{displayRole}</span>
-            <Link href="/account" className="desktop-account-btn">
-              บัญชี
-            </Link>
-          </div>
-        </div>
+        )}
 
         <div className="content-shell">{children}</div>
       </main>

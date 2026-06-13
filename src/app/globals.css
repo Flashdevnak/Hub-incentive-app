@@ -3268,3 +3268,161 @@ body {
     text-align: center;
   }
 }
+
+/* APP SHELL HARD FIX
+   วางท้าย src/app/globals.css
+   ใช้คู่กับ AppShell.tsx ชุด hardfix
+*/
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+@media (max-width: 860px) {
+  .side,
+  .side-modern,
+  .desktop-content-topbar,
+  .desktop-content-title,
+  .desktop-content-actions {
+    display: none !important;
+  }
+
+  .mobile-topbar {
+    display: flex !important;
+    width: 100%;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .main,
+  .main-modern {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    padding: 22px 10px 104px !important;
+    overflow-x: hidden !important;
+  }
+
+  .content-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .page-head,
+  .page-head-clean {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+    width: 100%;
+    margin: 0 0 18px !important;
+  }
+
+  .page-head h1,
+  .page-head-clean h1 {
+    font-size: 30px !important;
+    line-height: 1.12 !important;
+  }
+
+  .notice {
+    width: 100% !important;
+    white-space: normal !important;
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+  }
+
+  .stats-grid,
+  .admin-stats-grid,
+  .summary-grid,
+  .metric-grid,
+  .menu-grid,
+  .admin-menu-grid,
+  .mobile-card-list,
+  .data-card-list,
+  .employee-card-list {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    width: 100% !important;
+  }
+
+  .card,
+  .stat-card,
+  .menu-card,
+  .data-card,
+  .mobile-data-card,
+  .employee-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    border-radius: 22px !important;
+  }
+
+  .mobile-info-grid,
+  .data-grid,
+  .employee-info-grid,
+  .data-card-actions,
+  .data-card-actions.two,
+  .data-card-actions.three,
+  .employee-card-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+}
+
+@media (min-width: 861px) {
+  .mobile-topbar,
+  .mobile-tabs,
+  .mobile-tabs-modern {
+    display: none !important;
+  }
+
+  .side,
+  .side-modern {
+    position: fixed !important;
+    left: 0;
+    top: 0;
+    width: 280px !important;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .main,
+  .main-modern {
+    margin-left: 280px !important;
+    padding: 24px 42px 70px !important;
+    overflow-x: hidden !important;
+  }
+
+  .content-shell,
+  .desktop-content-topbar {
+    width: min(1180px, 100%);
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  .desktop-content-topbar {
+    display: flex !important;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 18px !important;
+  }
+
+  .desktop-content-actions {
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+}
+
