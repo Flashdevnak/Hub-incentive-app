@@ -1,4 +1,4 @@
-'use client';
+use client';
 
 import type { FormEvent } from 'react';
 import { useMemo, useState } from 'react';
@@ -7,8 +7,22 @@ import { getDeviceId, Message } from '@/components/ClientTools';
 
 type MessageType = 'ok' | 'danger' | 'notice';
 
+type ActivationStatus = {
+  status: 'NONE' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'ACTIVE';
+  title: string;
+  message: string;
+  actionUrl?: string;
+};
+
 function cleanEmployeeCode(value: string) {
   return value.trim().toUpperCase();
+}
+
+function statusClass(status?: string) {
+  if (status === 'APPROVED' || status === 'ACTIVE') return 'activation-status-card approved';
+  if (status === 'REJECTED') return 'activation-status-card rejected';
+  if (status === 'PENDING') return 'activation-status-card pending';
+  return 'activation-status-card';
 }
 
 export default function ActivatePage() {
@@ -17,11 +31,61 @@ export default function ActivatePage() {
   const [msg, setMsg] = useState('');
   const [type, setType] = useState<MessageType>('notice');
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [status, setStatus] = useState<ActivationStatus | null>(null);
 
   const canSubmit = useMemo(() => {
     return cleanEmployeeCode(employeeCode).length > 0 && startDate.length > 0 && !loading;
   }, [employeeCode, startDate, loading]);
+
+  async function checkStatus() {
+    const code = cleanEmployeeCode(employeeCode);
+
+    if (!code) {
+      setType('danger');
+      setMsg('กรุณากรอกรหัสพนักงานก่อนตรวจสถานะ');
+      return;
+    }
+
+    if (!startDate) {
+      setType('danger');
+      setMsg('กรุณาเลือกวันเริ่มงานก่อนตรวจสถานะ');
+      return;
+    }
+
+    setChecking(true);
+    setMsg('');
+
+    try {
+      const res = await fetch('/api/auth/activation-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ employeeCode: code, startDate })
+      });
+
+      const json = await res.json().catch(() => null);
+
+      if (!res.ok || !json?.ok) {
+        setStatus(null);
+        setType('danger');
+        setMsg(json?.message || 'ตรวจสถานะไม่สำเร็จ');
+        return;
+      }
+
+      setStatus({
+        status: json.status,
+        title: json.title,
+        message: json.message,
+        actionUrl: json.actionUrl
+      });
+    } catch {
+      setType('danger');
+      setMsg('เชื่อมต่อระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+    } finally {
+      setChecking(false);
+    }
+  }
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -42,6 +106,7 @@ export default function ActivatePage() {
 
     setLoading(true);
     setSubmitted(false);
+    setStatus(null);
     setType('notice');
     setMsg('กำลังส่งคำขอเปิดใช้งาน...');
 
@@ -63,6 +128,7 @@ export default function ActivatePage() {
         setType('ok');
         setMsg(json.message || 'ส่งคำขอเปิดใช้งานสำเร็จ กรุณารอหัวหน้าหรือ Admin อนุมัติ');
         setSubmitted(true);
+        await checkStatus();
         return;
       }
 
@@ -134,6 +200,18 @@ export default function ActivatePage() {
 
         <Message text={msg} type={type} />
 
+        {status && (
+          <div className={statusClass(status.status)}>
+            <strong>{status.title}</strong>
+            <p>{status.message}</p>
+            {status.actionUrl && (
+              <Link href={status.actionUrl} className="btn btn-secondary">
+                {status.status === 'APPROVED' ? 'ไปตั้ง PIN' : status.status === 'ACTIVE' ? 'ไปหน้า Login' : 'ดำเนินการต่อ'}
+              </Link>
+            )}
+          </div>
+        )}
+
         <form className="form activate-form" onSubmit={submit}>
           <label>
             รหัสพนักงาน
@@ -158,9 +236,13 @@ export default function ActivatePage() {
           <button className="activate-submit" disabled={!canSubmit}>
             {loading ? 'กำลังส่งคำขอ...' : 'ส่งคำขอเปิดใช้งาน'}
           </button>
+
+          <button type="button" className="btn-secondary" onClick={checkStatus} disabled={checking}>
+            {checking ? 'กำลังตรวจสถานะ...' : 'ตรวจสถานะคำขอ'}
+          </button>
         </form>
 
-        {submitted && (
+        {submitted && !status && (
           <div className="activate-success-box">
             <strong>ส่งคำขอแล้ว</strong>
             <p>

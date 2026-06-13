@@ -1721,3 +1721,250 @@ th {
     max-width: 42vw;
   }
 }
+
+/* Notification System UI - paste at the end of src/app/globals.css */
+
+.notification-widget {
+  position: relative;
+  margin-top: 10px;
+}
+
+.notification-widget.compact {
+  margin-top: 0;
+}
+
+.notification-trigger {
+  width: 100%;
+  min-height: 40px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 11px;
+  font-weight: 900;
+}
+
+.notification-widget.compact .notification-trigger {
+  width: 42px;
+  min-height: 42px;
+  padding: 0;
+  justify-content: center;
+  background: #fff3e8;
+  color: #9a3412;
+  border: 1px solid #fed7aa;
+}
+
+.notification-widget.compact .notification-bell-icon {
+  font-size: 0;
+}
+
+.notification-widget.compact .notification-bell-icon::after {
+  content: "!";
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.notification-badge {
+  min-width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  display: inline-grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 0 6px;
+}
+
+.notification-widget.compact .notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+}
+
+.notification-popover {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 8px);
+  width: 330px;
+  max-width: calc(100vw - 24px);
+  background: #fff;
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 22px 60px rgba(18, 31, 54, 0.2);
+  z-index: 80;
+  overflow: hidden;
+}
+
+.notification-widget.compact .notification-popover {
+  left: auto;
+  right: 0;
+}
+
+.notification-popover-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.notification-popover-head button,
+.notification-view-all {
+  background: #edf1f7;
+  color: #172033;
+  min-height: 34px;
+  padding: 7px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.notification-list {
+  display: grid;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  width: 100%;
+  text-align: left;
+  background: #fff;
+  color: var(--text);
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  padding: 12px 14px;
+  display: grid;
+  gap: 4px;
+}
+
+.notification-item.unread {
+  background: #fff8f1;
+}
+
+.notification-item span {
+  font-weight: 900;
+}
+
+.notification-item p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.notification-item small {
+  color: #98a2b3;
+  font-size: 12px;
+}
+
+.notification-empty {
+  padding: 18px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.notification-view-all {
+  width: calc(100% - 20px);
+  margin: 10px;
+}
+
+.mobile-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notification-page-list {
+  display: grid;
+  gap: 12px;
+  max-width: 920px;
+}
+
+.notification-page-card {
+  width: 100%;
+  text-align: left;
+  color: var(--text);
+  background: #fff;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: start;
+  border-color: var(--line);
+}
+
+.notification-page-card.unread {
+  border-color: #fed7aa;
+  background: linear-gradient(180deg, #fff, #fff8f1);
+}
+
+.notification-page-card strong {
+  font-size: 17px;
+}
+
+.notification-page-card p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.notification-page-card span {
+  color: #98a2b3;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.activation-status-card {
+  margin: 12px 0;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: #f8fafc;
+  display: grid;
+  gap: 8px;
+}
+
+.activation-status-card strong {
+  font-size: 17px;
+}
+
+.activation-status-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.activation-status-card.approved {
+  background: #effaf4;
+  border-color: #bee8cf;
+}
+
+.activation-status-card.pending {
+  background: #fff7e6;
+  border-color: #ffd899;
+}
+
+.activation-status-card.rejected {
+  background: #fff1f0;
+  border-color: #ffc7c3;
+}
+
+@media (max-width: 860px) {
+  .notification-popover {
+    width: 310px;
+  }
+
+  .notification-page-card {
+    grid-template-columns: 1fr;
+  }
+
+  .notification-page-card span {
+    white-space: normal;
+  }
+}
