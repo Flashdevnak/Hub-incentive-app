@@ -7,6 +7,16 @@ function shiftKey(data: any) {
   return String(data.shift_code || data.shift_name || data.shift_group || '').trim();
 }
 
+function isCurrentActiveEmployee(data: any) {
+  const employmentStatus = String(data.employment_status || 'ACTIVE').trim().toUpperCase();
+  return (
+    employmentStatus === 'ACTIVE' &&
+    data.is_active !== false &&
+    data.is_deleted !== true &&
+    data.hidden_from_current_count !== true
+  );
+}
+
 export async function GET(req: NextRequest) {
   try {
     requireAuth(req, [...managerRoles]);
@@ -21,7 +31,9 @@ export async function GET(req: NextRequest) {
 
     const shiftMap = new Map<string, any>();
 
-    for (const doc of emp.docs) {
+    const activeEmployees = emp.docs.filter((doc) => isCurrentActiveEmployee(doc.data()));
+
+    for (const doc of activeEmployees) {
       const data = doc.data();
       const key = shiftKey(data);
       if (!key) continue;
@@ -63,7 +75,7 @@ export async function GET(req: NextRequest) {
 
     return ok({
       summary: {
-        employees: emp.size,
+        employees: activeEmployees.length,
         accounts: acc.size,
         pendingActivation: act.size,
         pendingIssues: issues.size || 0

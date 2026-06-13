@@ -1,5 +1,6 @@
 export type Role = 'super_admin' | 'admin' | 'area_manager' | 'hub_manager' | 'supervisor' | 'staff' | 'viewer';
 export type AccountStatus = 'PIN_REQUIRED' | 'ACTIVE' | 'LOCKED' | 'DISABLED';
+export type EmploymentStatus = 'ACTIVE' | 'INACTIVE' | 'RESIGNED' | 'SUSPENDED';
 export type RequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 export type FileType = 'incentive' | 'diligence' | 'ot' | 'attendance' | 'bonus' | 'fine' | 'other';
 
@@ -22,13 +23,19 @@ export interface Employee {
   team?: string;
   team_name?: string;
   start_date?: string;
-  employment_status?: string;
+  employment_status?: EmploymentStatus | string;
+  is_active?: boolean;
+  is_deleted?: boolean;
+  resigned_at?: string;
+  inactive_reason?: string;
+  hidden_from_current_count?: boolean;
   shift_code?: string;
   shift_name?: string;
   shift_group?: string;
   shift_start?: string;
   shift_end?: string;
   updated_at?: string;
+  updated_by?: string;
 }
 
 export interface UserAccount {

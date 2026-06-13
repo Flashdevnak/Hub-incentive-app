@@ -7,6 +7,14 @@ import type { FieldMapping } from '@/types';
 
 export const runtime = 'nodejs';
 
+const inactiveStatuses = new Set(['RESIGNED', 'INACTIVE', 'SUSPENDED']);
+
+function normalizeEmploymentStatus(status?: string) {
+  const normalized = String(status || '').trim().toUpperCase();
+  if (normalized === 'ACTIVE' || normalized === 'RESIGNED' || normalized === 'INACTIVE' || normalized === 'SUSPENDED') return normalized;
+  return '';
+}
+
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req, ['super_admin', 'admin']);
@@ -62,7 +70,8 @@ export async function POST(req: NextRequest) {
       status: 'PROCESSING',
       shift_column_detected: shiftDetection.detected,
       shift_column_name: shiftDetection.columnName || '',
-      shift_records_count: 0
+      shift_records_count: 0,
+      inactive_employee_rows_count: 0
     });
 
     for (const doc of existing.docs) {
@@ -74,6 +83,7 @@ export async function POST(req: NextRequest) {
     let shiftRecordsCount = 0;
     let employeeMasterShiftCount = 0;
     let unknownShiftCount = 0;
+    let inactiveEmployeeRowsCount = 0;
 
     const writer = db().bulkWriter();
     const employeeShiftCache = new Map<string, any>();
@@ -111,6 +121,11 @@ export async function POST(req: NextRequest) {
         }
 
         if (shift.shift_code) shiftRecordsCount++;
+        const existingEmploymentStatus = normalizeEmploymentStatus(employeeMaster.employment_status);
+        const importedEmploymentStatus = normalizeEmploymentStatus(standard.employment_status);
+        const employeeIsInactiveInMaster = inactiveStatuses.has(existingEmploymentStatus);
+
+        if (employeeIsInactiveInMaster) inactiveEmployeeRowsCount++;
 
         writer.set(db().collection('raw_import_rows').doc(`${batchRef.id}_${i + 1}`), {
           import_batch_id: batchRef.id,
@@ -135,7 +150,12 @@ export async function POST(req: NextRequest) {
           position: standard.position || '',
           position_category: standard.position_category || '',
           start_date: standard.start_date || '',
-          employment_status: standard.employment_status || '',
+          employment_status: employeeIsInactiveInMaster
+            ? existingEmploymentStatus
+            : importedEmploymentStatus || existingEmploymentStatus || 'ACTIVE',
+          is_active: employeeIsInactiveInMaster ? false : employeeMaster.is_active ?? true,
+          hidden_from_current_count: employeeIsInactiveInMaster ? true : employeeMaster.hidden_from_current_count ?? false,
+          inactive_reason: employeeMaster.inactive_reason || '',
           ...(canFillEmployeeShift ? {
             shift_code: shift.shift_code,
             shift_name: shift.shift_name,
@@ -205,6 +225,7 @@ export async function POST(req: NextRequest) {
       shift_records_count: shiftRecordsCount,
       shift_fallback_employee_count: employeeMasterShiftCount,
       shift_unknown_count: unknownShiftCount,
+      inactive_employee_rows_count: inactiveEmployeeRowsCount,
       updated_at: ts()
     }, { merge: true });
 
@@ -219,7 +240,8 @@ export async function POST(req: NextRequest) {
       shiftColumnName: shiftDetection.columnName || '',
       shiftRecordsCount,
       employeeMasterShiftCount,
-      unknownShiftCount
+      unknownShiftCount,
+      inactiveEmployeeRowsCount
     }, req);
 
     return ok({
@@ -230,7 +252,12 @@ export async function POST(req: NextRequest) {
       versionNo,
       shiftColumnDetected: shiftDetection.detected,
       shiftColumnName: shiftDetection.columnName || '',
-      shiftRecordsCount
+      shiftRecordsCount,
+      inactiveEmployeeRowsCount,
+      inactiveEmployeeWarning:
+        inactiveEmployeeRowsCount > 0
+          ? 'พบพนักงานที่เคยถูกตั้งเป็นลาออก/ไม่ใช้งาน แต่มีในไฟล์ใหม่ กรุณาตรวจสอบก่อนเปิดใช้งานอีกครั้ง'
+          : ''
     });
   } catch (e) {
     return handleError(e);

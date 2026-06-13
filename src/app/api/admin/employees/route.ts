@@ -3,7 +3,7 @@ import { db, ts } from '@/lib/firebaseAdmin';
 import { fail, ok, requireAuth, handleError } from '@/lib/http';
 import { hashPin, normalizeCode } from '@/lib/crypto';
 import { audit } from '@/lib/audit';
-import type { Role, SessionUser, AccountStatus } from '@/types';
+import type { Role, SessionUser, AccountStatus, EmploymentStatus } from '@/types';
 
 const roles: Role[] = [
   'super_admin',
@@ -16,6 +16,7 @@ const roles: Role[] = [
 ];
 
 const accountStatuses: AccountStatus[] = ['PIN_REQUIRED', 'ACTIVE', 'LOCKED', 'DISABLED'];
+const employmentStatuses: EmploymentStatus[] = ['ACTIVE', 'INACTIVE', 'RESIGNED', 'SUSPENDED'];
 
 function clean<T extends Record<string, any>>(obj: T): T {
   const out: Record<string, any> = {};
@@ -33,6 +34,20 @@ function deriveScopeType(role: Role): SessionUser['scopeType'] {
   if (role === 'hub_manager') return 'HUB';
   if (role === 'supervisor') return 'HUB';
   return 'SELF';
+}
+
+function normalizeEmploymentStatus(status?: string): EmploymentStatus {
+  const normalized = String(status || 'ACTIVE').trim().toUpperCase() as EmploymentStatus;
+  return employmentStatuses.includes(normalized) ? normalized : 'ACTIVE';
+}
+
+function isCurrentActive(employee: any) {
+  return (
+    normalizeEmploymentStatus(employee.employment_status) === 'ACTIVE' &&
+    employee.is_active !== false &&
+    employee.is_deleted !== true &&
+    employee.hidden_from_current_count !== true
+  );
 }
 
 function canSeeEmployee(session: SessionUser, employee: any) {
@@ -110,10 +125,13 @@ export async function GET(req: NextRequest) {
         const employee = { id: doc.id, ...doc.data() } as any;
         const code = String(employee.employee_code || doc.id).toUpperCase();
         const account = accountMap.get(code);
+        const employmentStatus = normalizeEmploymentStatus(employee.employment_status);
 
         return {
           ...employee,
           employee_code: code,
+          employment_status: employmentStatus,
+          is_active: employee.is_active ?? employmentStatus === 'ACTIVE',
           account_role: account?.role,
           account_status: account?.status,
           scope_type: account?.scope_type,
@@ -126,7 +144,15 @@ export async function GET(req: NextRequest) {
       .filter((employee) => !shiftName || String(employee.shift_name || '').trim() === shiftName)
       .filter((employee) => !shiftGroup || String(employee.shift_group || '').trim() === shiftGroup);
 
-    return ok({ employees });
+    const visibleEmployees = employees.filter((employee) => employee.is_deleted !== true);
+    const counts = {
+      active: visibleEmployees.filter(isCurrentActive).length,
+      inactive: visibleEmployees.filter((employee) => !isCurrentActive(employee)).length,
+      total: visibleEmployees.length,
+      pending: visibleEmployees.filter((employee) => employee.account_status === 'PIN_REQUIRED').length
+    };
+
+    return ok({ employees, counts });
   } catch (e) {
     return handleError(e);
   }
@@ -150,8 +176,22 @@ export async function POST(req: NextRequest) {
     const scopeType = (body.scope_type || deriveScopeType(role)) as SessionUser['scopeType'];
     const scopeValue = String(body.scope_value || '').trim();
 
+    if ((scopeType === 'HUB' || scopeType === 'AREA' || scopeType === 'SHIFT') && !scopeValue) {
+      return fail(`Scope Type = ${scopeType} ต้องมี Scope Value`);
+    }
+
     const status = String(body.status || 'PIN_REQUIRED') as AccountStatus;
     if (!accountStatuses.includes(status)) return fail('สถานะบัญชีไม่ถูกต้อง');
+    const employmentStatus = normalizeEmploymentStatus(body.employment_status);
+    const requestedIsActive = typeof body.is_active === 'boolean' ? body.is_active : employmentStatus === 'ACTIVE';
+    const hiddenFromCurrentCount =
+      typeof body.hidden_from_current_count === 'boolean'
+        ? body.hidden_from_current_count
+        : employmentStatus !== 'ACTIVE';
+
+    if (employmentStatus !== 'ACTIVE' && status === 'ACTIVE' && !body.allow_login_when_inactive) {
+      return fail('พนักงานที่ลาออก/ไม่ใช้งานต้องปิดบัญชีหรือยืนยัน allow_login_when_inactive ก่อน');
+    }
 
     const employeeRef = db().collection('employees').doc(employeeCode);
     const accountRef = db().collection('user_accounts').doc(employeeCode);
@@ -160,6 +200,8 @@ export async function POST(req: NextRequest) {
     const currentEmployee = employeeSnap.exists ? employeeSnap.data() || {} : {};
     const accountSnap = await accountRef.get();
     const currentAccount = accountSnap.exists ? accountSnap.data() || {} : {};
+    const previousEmploymentStatus = normalizeEmploymentStatus(currentEmployee.employment_status);
+    const now = ts();
 
     const employeeData = clean({
       employee_code: employeeCode,
@@ -174,8 +216,19 @@ export async function POST(req: NextRequest) {
       shift_start: String(body.shift_start || '').trim(),
       shift_end: String(body.shift_end || '').trim(),
       start_date: String(body.start_date || '').trim(),
-      employment_status: String(body.employment_status || 'ACTIVE').trim(),
-      updated_at: ts()
+      employment_status: employmentStatus,
+      is_active: requestedIsActive && employmentStatus === 'ACTIVE',
+      is_deleted: body.is_deleted === true ? true : currentEmployee.is_deleted === true ? true : false,
+      resigned_at:
+        employmentStatus === 'RESIGNED'
+          ? String(body.resigned_at || currentEmployee.resigned_at || now).trim()
+          : body.resigned_at === ''
+            ? ''
+            : currentEmployee.resigned_at || undefined,
+      inactive_reason: String(body.inactive_reason || '').trim(),
+      hidden_from_current_count: hiddenFromCurrentCount || employmentStatus !== 'ACTIVE',
+      updated_at: now,
+      updated_by: session.employeeCode
     });
 
     const accountData: Record<string, any> = clean({
@@ -183,7 +236,7 @@ export async function POST(req: NextRequest) {
       role,
       scope_type: scopeType,
       scope_value: scopeValue,
-      status,
+      status: employmentStatus === 'ACTIVE' ? status : status === 'ACTIVE' ? 'DISABLED' : status,
       is_locked:
         status === 'LOCKED'
           ? true
@@ -192,8 +245,9 @@ export async function POST(req: NextRequest) {
             : currentAccount.is_locked || false,
       failed_login_count:
         status === 'ACTIVE' || status === 'PIN_REQUIRED' ? 0 : Number(currentAccount.failed_login_count || 0),
-      updated_at: ts(),
-      created_at: currentAccount.created_at || ts()
+      updated_at: now,
+      updated_by: session.employeeCode,
+      created_at: currentAccount.created_at || now
     });
 
     const pin = String(body.pin || '').trim();
@@ -205,7 +259,7 @@ export async function POST(req: NextRequest) {
 
       accountData.pin_hash = hashPin(pin);
 
-      if (status === 'PIN_REQUIRED') {
+      if (status === 'PIN_REQUIRED' && employmentStatus === 'ACTIVE') {
         accountData.status = 'ACTIVE';
       }
     }
@@ -231,13 +285,23 @@ export async function POST(req: NextRequest) {
       }, req);
     }
 
+    if (previousEmploymentStatus !== employmentStatus) {
+      await audit(session.employeeCode, session.role, 'UPDATE_EMPLOYEE_STATUS', 'employee', employeeCode, {
+        from: previousEmploymentStatus,
+        to: employmentStatus,
+        accountStatus: accountData.status,
+        hiddenFromCurrentCount: employeeData.hidden_from_current_count
+      }, req);
+    }
+
     return ok({
       message: 'บันทึกข้อมูลพนักงานและบัญชีสำเร็จ',
       employeeCode,
       role: accountData.role,
       scopeType: accountData.scope_type,
       scopeValue: accountData.scope_value,
-      status: accountData.status
+      status: accountData.status,
+      employmentStatus: employeeData.employment_status
     });
   } catch (e) {
     return handleError(e);
