@@ -55,6 +55,8 @@ const staffNav: NavItem[] = [
 const adminNav: NavItem[] = [
   { href: '/admin', label: 'ภาพรวมระบบ', icon: 'home' },
   { href: '/admin/import', label: 'อัปโหลด Excel', icon: 'upload' },
+  { href: '/manager/approvals', label: 'อนุมัติเปิดใช้งาน', icon: 'check' },
+  { href: '/manager/devices', label: 'อนุมัติอุปกรณ์', icon: 'device' },
   { href: '/admin/batches', label: 'ประวัตินำเข้า', icon: 'archive' },
   { href: '/admin/employees', label: 'ข้อมูลพนักงาน', icon: 'users' },
   { href: '/admin/issues', label: 'คำร้องตรวจสอบ', icon: 'inbox' },
@@ -109,7 +111,7 @@ function mobileNavForMode(mode: 'staff' | 'admin' | 'manager'): NavItem[] {
     return [
       { href: '/admin', label: 'หน้าแรก', icon: 'home' },
       { href: '/admin/import', label: 'อัปโหลด', icon: 'upload' },
-      { href: '/admin/employees', label: 'พนักงาน', icon: 'users' },
+      { href: '/manager/approvals', label: 'อนุมัติ', icon: 'check' },
       { href: '/account', label: 'บัญชี', icon: 'user' }
     ];
   }

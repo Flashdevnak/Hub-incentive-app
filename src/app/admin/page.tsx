@@ -11,6 +11,16 @@ const quickLinks = [
     desc: 'นำเข้าไฟล์ Incentive และตรวจ Mapping ก่อนยืนยันข้อมูล'
   },
   {
+    href: '/manager/approvals',
+    title: 'อนุมัติเปิดใช้งาน',
+    desc: 'ตรวจและอนุมัติคำขอเปิดใช้งานครั้งแรกของพนักงาน'
+  },
+  {
+    href: '/manager/devices',
+    title: 'อนุมัติอุปกรณ์',
+    desc: 'ตรวจอุปกรณ์ใหม่ที่พนักงานใช้เข้าสู่ระบบ'
+  },
+  {
     href: '/admin/batches',
     title: 'ประวัตินำเข้า',
     desc: 'ตรวจรอบข้อมูลย้อนหลัง ดูไฟล์ที่เคยนำเข้า และสถานะการ Import'
@@ -54,24 +64,33 @@ export default function Admin() {
       {error && <div className="notice danger">{error}</div>}
 
       <div className="grid grid-3">
-        <div className="card kpi-card">
+        <Link className="card kpi-card" href="/admin/employees">
           <div className="label">พนักงานทั้งหมด</div>
           <div className="kpi">{s.employees || 0}</div>
           <p className="muted small">จำนวนพนักงานในระบบ</p>
-        </div>
+        </Link>
 
-        <div className="card kpi-card">
+        <Link className="card kpi-card" href="/admin/employees">
           <div className="label">บัญชีทั้งหมด</div>
           <div className="kpi">{s.accounts || 0}</div>
           <p className="muted small">บัญชีที่เปิดใช้งานหรือรอจัดการ</p>
-        </div>
+        </Link>
 
-        <div className="card kpi-card">
+        <Link className="card kpi-card approval-kpi-card" href="/manager/approvals">
           <div className="label">รออนุมัติ</div>
           <div className="kpi">{s.pendingActivation || 0}</div>
           <p className="muted small">คำขอเปิดใช้งานที่รอตรวจสอบ</p>
-        </div>
+        </Link>
       </div>
+
+      {Number(s.pendingActivation || 0) > 0 && (
+        <div className="notice approval-notice">
+          มีคำขอเปิดใช้งานรออนุมัติ {s.pendingActivation} รายการ
+          <Link className="btn btn-secondary" href="/manager/approvals">
+            ไปหน้าอนุมัติ
+          </Link>
+        </div>
+      )}
 
       <h2 className="section-title">เมนูจัดการระบบ</h2>
 
