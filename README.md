@@ -28,7 +28,7 @@ npm run dev
 
 ```env
 DEFAULT_ADMIN_CODE=ADMIN
-DEFAULT_ADMIN_PIN=xxxxxx
+DEFAULT_ADMIN_PIN=123456
 SETUP_SECRET=your-secret
 ```
 
