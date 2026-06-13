@@ -1,0 +1,9 @@
+{
+  "name": "NAK Incentive",
+  "short_name": "Incentive",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#ed5b2f",
+  "icons": []
+}

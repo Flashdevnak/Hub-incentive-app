@@ -1,0 +1,5 @@
+'use client';
+import AppShell from '@/components/AppShell';
+import { useState } from 'react';
+import { Message } from '@/components/ClientTools';
+export default function Account(){ const [oldPin,setOld]=useState(''); const [newPin,setNew]=useState(''); const [msg,setMsg]=useState(''); async function submit(e:any){e.preventDefault(); const j=await (await fetch('/api/auth/change-pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({oldPin,newPin})})).json(); setMsg(j.message)} return <AppShell><h1>บัญชีของฉัน</h1><div className="split"><form className="card form" onSubmit={submit}><h2>เปลี่ยน PIN</h2><Message text={msg}/><label>PIN เดิม<input type="password" inputMode="numeric" value={oldPin} onChange={e=>setOld(e.target.value)}/></label><label>PIN ใหม่<input type="password" inputMode="numeric" value={newPin} onChange={e=>setNew(e.target.value)}/></label><button>บันทึก PIN ใหม่</button></form><div className="card"><h2>คำแนะนำ</h2><p>ห้ามบอก PIN กับผู้อื่น และหากเปลี่ยนมือถือให้กดขออนุมัติอุปกรณ์ใหม่</p><a className="btn btn-secondary" href="/devices">จัดการอุปกรณ์</a></div></div></AppShell>}

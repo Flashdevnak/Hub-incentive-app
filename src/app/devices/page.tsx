@@ -1,0 +1,5 @@
+'use client';
+import AppShell from '@/components/AppShell';
+import { getDeviceId, Message, useApi } from '@/components/ClientTools';
+import { useState } from 'react';
+export default function Devices(){ const {data}=useApi<any>('/api/me/devices'); const [msg,setMsg]=useState(''); async function request(){ const j=await (await fetch('/api/me/devices',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({deviceId:getDeviceId(),deviceName:navigator.userAgent,reason:'ขอใช้อุปกรณ์นี้'})})).json(); setMsg(j.message) } return <AppShell><h1>อุปกรณ์ของฉัน</h1><Message text={msg}/><button onClick={request}>ขออนุมัติอุปกรณ์นี้</button><h2 className="section-title">อุปกรณ์ที่ใช้งานอยู่</h2><div className="table-wrap"><table><thead><tr><th>อุปกรณ์</th><th>สถานะ</th><th>อนุมัติเมื่อ</th><th>ใช้งานครั้งล่าสุด</th></tr></thead><tbody>{(data?.devices||[]).map((d:any)=><tr key={d.id}><td>{d.device_name||d.device_fingerprint}</td><td>{d.status}</td><td>{d.approved_at}</td><td>{d.last_used_at}</td></tr>)}</tbody></table></div></AppShell>}

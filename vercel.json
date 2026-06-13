@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "src/app/api/admin/import/**/*.ts": {
+      "maxDuration": 60
+    }
+  }
+}

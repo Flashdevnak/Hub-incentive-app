@@ -1,0 +1,8 @@
+{
+  "indexes": [
+    {"collectionGroup":"incentive_records","queryScope":"COLLECTION","fields":[{"fieldPath":"employee_code","order":"ASCENDING"},{"fieldPath":"period_key","order":"DESCENDING"}]},
+    {"collectionGroup":"activation_requests","queryScope":"COLLECTION","fields":[{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"requested_at","order":"DESCENDING"}]},
+    {"collectionGroup":"import_batches","queryScope":"COLLECTION","fields":[{"fieldPath":"uploaded_at","order":"DESCENDING"}]}
+  ],
+  "fieldOverrides": []
+}
