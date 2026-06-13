@@ -23,15 +23,13 @@ type IconName =
   | 'history'
   | 'message'
   | 'user'
-  | 'shield'
   | 'upload'
   | 'archive'
   | 'users'
   | 'inbox'
   | 'audit'
-  | 'chart'
   | 'check'
-  | 'device'
+  | 'key'
   | 'logout';
 
 type NavItem = {
@@ -58,7 +56,7 @@ const adminNav: NavItem[] = [
   { href: '/admin', label: 'ภาพรวมระบบ', icon: 'home' },
   { href: '/admin/import', label: 'อัปโหลด Excel', icon: 'upload' },
   { href: '/manager/approvals', label: 'อนุมัติเปิดใช้งาน', icon: 'check' },
-  { href: '/manager/devices', label: 'อนุมัติอุปกรณ์', icon: 'device' },
+  { href: '/manager/pin-resets', label: 'อนุมัติรีเซ็ต PIN', icon: 'key' },
   { href: '/notifications', label: 'แจ้งเตือน', icon: 'inbox' },
   { href: '/admin/batches', label: 'ประวัตินำเข้า', icon: 'archive' },
   { href: '/admin/employees', label: 'ข้อมูลพนักงาน', icon: 'users' },
@@ -69,7 +67,7 @@ const adminNav: NavItem[] = [
 const managerNav: NavItem[] = [
   { href: '/manager', label: 'ภาพรวมหัวหน้า', icon: 'home' },
   { href: '/manager/approvals', label: 'อนุมัติเปิดใช้งาน', icon: 'check' },
-  { href: '/manager/devices', label: 'อนุมัติอุปกรณ์', icon: 'device' },
+  { href: '/manager/pin-resets', label: 'อนุมัติรีเซ็ต PIN', icon: 'key' },
   { href: '/notifications', label: 'แจ้งเตือน', icon: 'inbox' },
   { href: '/manager/employees', label: 'รายชื่อพนักงาน', icon: 'users' },
   { href: '/manager/issues', label: 'คำร้องตรวจสอบ', icon: 'inbox' }
@@ -124,7 +122,7 @@ function mobileNavForMode(mode: 'staff' | 'admin' | 'manager'): NavItem[] {
     return [
       { href: '/manager', label: 'หน้าแรก', icon: 'home' },
       { href: '/manager/approvals', label: 'อนุมัติ', icon: 'check' },
-      { href: '/manager/devices', label: 'อุปกรณ์', icon: 'device' },
+      { href: '/manager/pin-resets', label: 'PIN', icon: 'key' },
       { href: '/account', label: 'บัญชี', icon: 'user' }
     ];
   }
@@ -174,8 +172,6 @@ function AppIcon({ name }: { name: IconName }) {
       return <svg {...common}><path d="M4 5h16v11H8l-4 4z" /><path d="M8 9h8" /><path d="M8 13h5" /></svg>;
     case 'user':
       return <svg {...common}><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" /><path d="M4.5 21a7.5 7.5 0 0 1 15 0" /></svg>;
-    case 'shield':
-      return <svg {...common}><path d="M12 3 19 6v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" /><path d="M9 12l2 2 4-5" /></svg>;
     case 'upload':
       return <svg {...common}><path d="M12 16V4" /><path d="M7 9l5-5 5 5" /><path d="M5 20h14" /></svg>;
     case 'archive':
@@ -186,12 +182,10 @@ function AppIcon({ name }: { name: IconName }) {
       return <svg {...common}><path d="M4 5h16v14H4z" /><path d="M4 14h4l2 3h4l2-3h4" /></svg>;
     case 'audit':
       return <svg {...common}><path d="M5 4h10l4 4v12H5z" /><path d="M15 4v5h5" /><path d="M9 13h6" /><path d="M9 17h4" /></svg>;
-    case 'chart':
-      return <svg {...common}><path d="M4 19h16" /><path d="M7 16V9" /><path d="M12 16V5" /><path d="M17 16v-4" /></svg>;
     case 'check':
       return <svg {...common}><path d="M4 12.5 9 17l11-11" /></svg>;
-    case 'device':
-      return <svg {...common}><path d="M8 3h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" /><path d="M10 18h4" /></svg>;
+    case 'key':
+      return <svg {...common}><path d="M14.5 9.5a4 4 0 1 0-2.8 3.82L14 15.6V18h2.4l1.4 1.4H20v-2.2l-5.5-5.5" /><path d="M7.5 9.5h.01" /></svg>;
     case 'logout':
       return <svg {...common}><path d="M10 6H6v12h4" /><path d="M14 8l4 4-4 4" /><path d="M8 12h10" /></svg>;
   }
@@ -301,20 +295,6 @@ export default function AppShell({
         </nav>
       </aside>
 
-      <header className="desktop-topbar">
-        <div className="desktop-topbar-inner">
-          <div className="desktop-topbar-spacer" />
-
-          <div className="desktop-topbar-actions">
-            {user && <NotificationBell />}
-            <span className="role-badge">{displayRole}</span>
-            <Link href="/account" className="desktop-account-btn">
-              บัญชี
-            </Link>
-          </div>
-        </div>
-      </header>
-
       <header className="mobile-topbar">
         <Link href={homeHrefForMode(mode)} className="mobile-brand mobile-brand-link">
           <div className="brand-monogram small">NAK</div>
@@ -331,7 +311,24 @@ export default function AppShell({
         </div>
       </header>
 
-      <main className="main main-modern">{children}</main>
+      <main className="main main-modern">
+        <div className="desktop-content-topbar">
+          <div className="desktop-content-title">
+            <span>NAK Incentive</span>
+            <strong>{displayName}</strong>
+          </div>
+
+          <div className="desktop-content-actions">
+            {user && <NotificationBell />}
+            <span className="role-badge">{displayRole}</span>
+            <Link href="/account" className="desktop-account-btn">
+              บัญชี
+            </Link>
+          </div>
+        </div>
+
+        <div className="content-shell">{children}</div>
+      </main>
 
       <nav className="mobile-tabs mobile-tabs-modern">
         {mobileNav.map((item) => (

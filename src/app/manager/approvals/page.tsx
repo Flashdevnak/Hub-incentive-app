@@ -12,6 +12,7 @@ type ActivationRequest = {
   start_date_input?: string;
   device_info?: string;
   status?: string;
+  requested_at?: string;
 };
 
 export default function Approvals() {
@@ -28,7 +29,6 @@ export default function Approvals() {
   async function act(id: string, approve: boolean) {
     const okText = approve ? 'อนุมัติคำขอนี้ใช่ไหม?' : 'ปฏิเสธคำขอนี้ใช่ไหม?';
     const confirmed = window.confirm(okText);
-
     if (!confirmed) return;
 
     setBusyId(id);
@@ -58,10 +58,7 @@ export default function Approvals() {
 
       setActionType('ok');
       setActionMsg(approve ? 'อนุมัติสำเร็จ' : 'ปฏิเสธคำขอสำเร็จ');
-
-      setTimeout(() => {
-        location.reload();
-      }, 600);
+      setTimeout(() => location.reload(), 600);
     } catch {
       setActionType('danger');
       setActionMsg('เชื่อมต่อระบบไม่สำเร็จ กรุณาลองใหม่');
@@ -72,7 +69,7 @@ export default function Approvals() {
 
   return (
     <AppShell area="manager">
-      <div className="page-head">
+      <div className="page-head page-head-clean">
         <div>
           <p className="eyebrow">Activation Approval</p>
           <h1>อนุมัติเปิดใช้งาน</h1>
@@ -85,7 +82,6 @@ export default function Approvals() {
       <Message text={actionMsg} type={actionType} />
 
       {loading && <div className="notice">กำลังโหลดคำขอเปิดใช้งาน...</div>}
-
       {error && <div className="notice danger">{error}</div>}
 
       {!loading && !error && requests.length === 0 && (
@@ -97,49 +93,47 @@ export default function Approvals() {
         </div>
       )}
 
-      {requests.length > 0 && (
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>รหัส</th>
-                <th>ชื่อ</th>
-                <th>HUB</th>
-                <th>วันเริ่มงาน</th>
-                <th>อุปกรณ์</th>
-                <th>ดำเนินการ</th>
-              </tr>
-            </thead>
+      <div className="mobile-card-list data-card-list">
+        {requests.map((r) => (
+          <div className="card mobile-data-card data-card" key={r.id}>
+            <div className="mobile-data-card-head">
+              <div>
+                <span className="data-kicker">รหัสพนักงาน</span>
+                <h3>{r.employee_code || '-'}</h3>
+                {r.employee_name && <p className="data-subtitle">{r.employee_name}</p>}
+              </div>
+              <span className="pill">รอตรวจสอบ</span>
+            </div>
 
-            <tbody>
-              {requests.map((r) => (
-                <tr key={r.id}>
-                  <td>{r.employee_code || '-'}</td>
-                  <td>{r.employee_name || '-'}</td>
-                  <td>{r.hub_name || '-'}</td>
-                  <td>{r.start_date_input || '-'}</td>
-                  <td className="device-cell">{r.device_info || '-'}</td>
-                  <td>
-                    <div className="actions">
-                      <button onClick={() => act(r.id, true)} disabled={busyId === r.id}>
-                        {busyId === r.id ? 'กำลังทำรายการ...' : 'อนุมัติ'}
-                      </button>
+            <div className="mobile-info-grid data-grid">
+              <div><span>ชื่อ</span><strong>{r.employee_name || '-'}</strong></div>
+              <div><span>HUB</span><strong>{r.hub_name || '-'}</strong></div>
+              <div><span>วันเริ่มงาน</span><strong>{r.start_date_input || '-'}</strong></div>
+              <div><span>สถานะ</span><strong>{r.status || 'PENDING'}</strong></div>
+              <div><span>วันที่ส่งคำขอ</span><strong>{r.requested_at || '-'}</strong></div>
+            </div>
 
-                      <button
-                        className="btn-danger"
-                        onClick={() => act(r.id, false)}
-                        disabled={busyId === r.id}
-                      >
-                        ปฏิเสธ
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+            <div className="data-note">
+              <span>อุปกรณ์ / Browser</span>
+              <p>{r.device_info || '-'}</p>
+            </div>
+
+            <div className="data-card-actions two">
+              <button onClick={() => act(r.id, true)} disabled={busyId === r.id}>
+                {busyId === r.id ? 'กำลังทำรายการ...' : 'อนุมัติ'}
+              </button>
+
+              <button
+                className="btn-danger"
+                onClick={() => act(r.id, false)}
+                disabled={busyId === r.id}
+              >
+                ปฏิเสธ
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </AppShell>
   );
 }

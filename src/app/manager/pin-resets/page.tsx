@@ -8,42 +8,55 @@ type PinResetRequest = {
   id: string;
   employee_code?: string;
   employee_name?: string;
-  start_date_input?: string;
   reason?: string;
   status?: string;
+  requested_at?: string;
 };
 
-export default function PinResetRequestsPage() {
-  const { data, loading, error } = useApi<{ requests: PinResetRequest[] }>('/api/manager/pin-reset-requests');
-  const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState<'notice' | 'ok' | 'danger'>('notice');
+export default function PinResetRequests() {
+  const { data, loading, error } = useApi<{ requests: PinResetRequest[] }>(
+    '/api/manager/pin-reset-requests'
+  );
+
+  const [msg, setMsg] = useState('');
+  const [msgType, setMsgType] = useState<'notice' | 'ok' | 'danger'>('notice');
   const [busyId, setBusyId] = useState('');
+
   const requests = data?.requests || [];
 
   async function act(id: string, approve: boolean) {
-    const reason = approve ? 'อนุมัติรีเซ็ต PIN' : window.prompt('เหตุผลที่ปฏิเสธ', 'ข้อมูลยืนยันตัวตนไม่ตรง') || '';
     const confirmed = window.confirm(approve ? 'อนุมัติให้รีเซ็ต PIN ใช่ไหม?' : 'ปฏิเสธคำขอนี้ใช่ไหม?');
     if (!confirmed) return;
+
+    const reason = approve ? 'อนุมัติรีเซ็ต PIN' : window.prompt('ระบุเหตุผลที่ปฏิเสธ', 'ข้อมูลไม่ตรง') || 'ข้อมูลไม่ตรง';
+
     setBusyId(id);
-    setMessage('');
+    setMsg('');
+
     try {
-      const res = await fetch(approve ? '/api/manager/approve-pin-reset' : '/api/manager/reject-pin-reset', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requestId: id, reason })
-      });
+      const res = await fetch(
+        approve ? '/api/manager/approve-pin-reset' : '/api/manager/reject-pin-reset',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ requestId: id, reason })
+        }
+      );
+
       const json = await res.json().catch(() => null);
+
       if (!res.ok || !json?.ok) {
-        setMessageType('danger');
-        setMessage(json?.message || 'ดำเนินการไม่สำเร็จ');
+        setMsgType('danger');
+        setMsg(json?.message || 'ดำเนินการไม่สำเร็จ');
         return;
       }
-      setMessageType('ok');
-      setMessage(json.message || 'ดำเนินการสำเร็จ');
+
+      setMsgType('ok');
+      setMsg(approve ? 'อนุมัติรีเซ็ต PIN แล้ว' : 'ปฏิเสธคำขอแล้ว');
       setTimeout(() => location.reload(), 600);
     } catch {
-      setMessageType('danger');
-      setMessage('เชื่อมต่อระบบไม่สำเร็จ');
+      setMsgType('danger');
+      setMsg('เชื่อมต่อระบบไม่สำเร็จ');
     } finally {
       setBusyId('');
     }
@@ -51,26 +64,57 @@ export default function PinResetRequestsPage() {
 
   return (
     <AppShell area="manager">
-      <div className="page-head">
+      <div className="page-head page-head-clean">
         <div>
-          <p className="eyebrow">PIN Reset Approval</p>
+          <p className="eyebrow">PIN Reset</p>
           <h1>อนุมัติรีเซ็ต PIN</h1>
-          <p className="muted">ตรวจสอบคำขอลืม PIN ก่อนให้พนักงานตั้ง PIN ใหม่</p>
+          <p className="muted">ตรวจคำขอลืม PIN ก่อนให้พนักงานตั้ง PIN ใหม่เอง</p>
         </div>
       </div>
-      <Message text={message} type={messageType} />
+
+      <Message text={msg} type={msgType} />
+
       {loading && <div className="notice">กำลังโหลดคำขอรีเซ็ต PIN...</div>}
       {error && <div className="notice danger">{error}</div>}
+
       {!loading && !error && requests.length === 0 && (
-        <div className="card empty-state-card"><h2>ไม่มีคำขอรออนุมัติ</h2><p className="muted">ตอนนี้ยังไม่มีคำขอรีเซ็ต PIN</p></div>
+        <div className="card empty-state-card">
+          <h2>ไม่มีคำขอรีเซ็ต PIN</h2>
+          <p className="muted">เมื่อพนักงานยื่นคำขอลืม PIN รายการจะแสดงที่นี่</p>
+        </div>
       )}
-      <div className="data-card-list">
+
+      <div className="mobile-card-list data-card-list">
         {requests.map((r) => (
-          <div className="card data-card" key={r.id}>
-            <div className="data-card-top"><div><span className="data-kicker">รหัสพนักงาน</span><h3>{r.employee_code || '-'}</h3></div><span className="pill">รอตรวจสอบ</span></div>
-            <div className="data-grid"><div><span>ชื่อ</span><strong>{r.employee_name || '-'}</strong></div><div><span>วันเริ่มงาน</span><strong>{r.start_date_input || '-'}</strong></div></div>
-            <div className="data-note"><span>เหตุผล</span><p>{r.reason || '-'}</p></div>
-            <div className="data-card-actions two"><button onClick={() => act(r.id, true)} disabled={busyId === r.id}>{busyId === r.id ? 'กำลังทำรายการ...' : 'อนุมัติ'}</button><button className="btn-danger" onClick={() => act(r.id, false)} disabled={busyId === r.id}>ปฏิเสธ</button></div>
+          <div className="card mobile-data-card data-card" key={r.id}>
+            <div className="mobile-data-card-head">
+              <div>
+                <span className="data-kicker">รหัสพนักงาน</span>
+                <h3>{r.employee_code || '-'}</h3>
+                {r.employee_name && <p className="data-subtitle">{r.employee_name}</p>}
+              </div>
+              <span className="pill">{r.status || 'PENDING'}</span>
+            </div>
+
+            <div className="mobile-info-grid data-grid">
+              <div><span>ชื่อ</span><strong>{r.employee_name || '-'}</strong></div>
+              <div><span>วันที่ส่งคำขอ</span><strong>{r.requested_at || '-'}</strong></div>
+            </div>
+
+            <div className="data-note">
+              <span>เหตุผล</span>
+              <p>{r.reason || '-'}</p>
+            </div>
+
+            <div className="data-card-actions two">
+              <button disabled={busyId === r.id} onClick={() => act(r.id, true)}>
+                {busyId === r.id ? 'กำลังทำรายการ...' : 'อนุมัติ'}
+              </button>
+
+              <button className="btn-danger" disabled={busyId === r.id} onClick={() => act(r.id, false)}>
+                ปฏิเสธ
+              </button>
+            </div>
           </div>
         ))}
       </div>

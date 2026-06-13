@@ -85,7 +85,7 @@ function deriveScopeByRole(role: Role): ScopeType {
   if (role === 'admin' || role === 'super_admin') return 'ALL';
   if (role === 'area_manager') return 'AREA';
   if (role === 'hub_manager') return 'HUB';
-  if (role === 'supervisor') return 'TEAM';
+  if (role === 'supervisor') return 'HUB';
   return 'SELF';
 }
 
@@ -99,11 +99,9 @@ export default function Employees() {
   const [employees, setEmployees] = useState<EmployeeRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
   const [search, setSearch] = useState('');
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'notice' | 'ok' | 'danger'>('notice');
-
   const [form, setForm] = useState<FormState>(emptyForm);
 
   async function loadEmployees() {
@@ -210,7 +208,6 @@ export default function Employees() {
 
   const filtered = employees.filter((e) => {
     const q = search.trim().toLowerCase();
-
     if (!q) return true;
 
     return [
@@ -230,7 +227,7 @@ export default function Employees() {
 
   return (
     <AppShell area="admin">
-      <div className="page-head">
+      <div className="page-head page-head-clean">
         <div>
           <p className="eyebrow">Employees & Roles</p>
           <h1>ข้อมูลพนักงาน / สิทธิ์</h1>
@@ -246,7 +243,7 @@ export default function Employees() {
 
       <Message text={message} type={messageType} />
 
-      <div className="card section-card">
+      <div className="card section-card employee-form-card">
         <h2>สร้าง / แก้ไขบัญชี</h2>
         <p className="muted small">
           ถ้าต้องการสร้าง Manager หรือ Supervisor ให้กรอกรหัสพนักงาน, เลือกสิทธิ์, กำหนด Scope และตั้ง PIN เริ่มต้น
@@ -256,69 +253,41 @@ export default function Employees() {
           <div className="split">
             <label>
               รหัสพนักงาน
-              <input
-                value={form.employee_code}
-                onChange={(e) => updateForm('employee_code', e.target.value)}
-                placeholder="เช่น 6600123"
-              />
+              <input value={form.employee_code} onChange={(e) => updateForm('employee_code', e.target.value)} placeholder="เช่น 6600123" />
             </label>
 
             <label>
               ชื่อพนักงาน
-              <input
-                value={form.employee_name}
-                onChange={(e) => updateForm('employee_name', e.target.value)}
-                placeholder="ชื่อ-นามสกุล"
-              />
+              <input value={form.employee_name} onChange={(e) => updateForm('employee_name', e.target.value)} placeholder="ชื่อ-นามสกุล" />
             </label>
           </div>
 
           <div className="split">
             <label>
               Area
-              <input
-                value={form.area}
-                onChange={(e) => updateForm('area', e.target.value)}
-                placeholder="เช่น NE1"
-              />
+              <input value={form.area} onChange={(e) => updateForm('area', e.target.value)} placeholder="เช่น NE1" />
             </label>
 
             <label>
               HUB ID
-              <input
-                value={form.hub_id}
-                onChange={(e) => updateForm('hub_id', e.target.value)}
-                placeholder="เช่น 26NAK_BHUB"
-              />
+              <input value={form.hub_id} onChange={(e) => updateForm('hub_id', e.target.value)} placeholder="เช่น TH27101500" />
             </label>
           </div>
 
           <label>
             HUB Name
-            <input
-              value={form.hub_name}
-              onChange={(e) => updateForm('hub_name', e.target.value)}
-              placeholder="เช่น 26 NAK_BHUB-นครราชสีมา"
-            />
+            <input value={form.hub_name} onChange={(e) => updateForm('hub_name', e.target.value)} placeholder="เช่น 26 NAK_BHUB-นครราชสีมา" />
           </label>
 
           <div className="split">
             <label>
               ตำแหน่ง
-              <input
-                value={form.position}
-                onChange={(e) => updateForm('position', e.target.value)}
-                placeholder="ตำแหน่งงาน"
-              />
+              <input value={form.position} onChange={(e) => updateForm('position', e.target.value)} placeholder="ตำแหน่งงาน" />
             </label>
 
             <label>
               วันเริ่มงาน
-              <input
-                value={form.start_date}
-                onChange={(e) => updateForm('start_date', e.target.value)}
-                placeholder="YYYY-MM-DD"
-              />
+              <input value={form.start_date} onChange={(e) => updateForm('start_date', e.target.value)} placeholder="YYYY-MM-DD" />
             </label>
           </div>
 
@@ -327,23 +296,16 @@ export default function Employees() {
               สิทธิ์ใช้งาน
               <select value={form.role} onChange={(e) => updateForm('role', e.target.value as Role)}>
                 {roleOptions.map((r) => (
-                  <option value={r.value} key={r.value}>
-                    {r.label} - {r.desc}
-                  </option>
+                  <option value={r.value} key={r.value}>{r.label} - {r.desc}</option>
                 ))}
               </select>
             </label>
 
             <label>
               สถานะบัญชี
-              <select
-                value={form.status}
-                onChange={(e) => updateForm('status', e.target.value as AccountStatus)}
-              >
+              <select value={form.status} onChange={(e) => updateForm('status', e.target.value as AccountStatus)}>
                 {statusOptions.map((s) => (
-                  <option value={s.value} key={s.value}>
-                    {s.label}
-                  </option>
+                  <option value={s.value} key={s.value}>{s.label}</option>
                 ))}
               </select>
             </label>
@@ -352,44 +314,30 @@ export default function Employees() {
           <div className="split">
             <label>
               Scope Type
-              <select
-                value={form.scope_type}
-                onChange={(e) => updateForm('scope_type', e.target.value as ScopeType)}
-              >
+              <select value={form.scope_type} onChange={(e) => updateForm('scope_type', e.target.value as ScopeType)}>
                 {scopeOptions.map((s) => (
-                  <option value={s.value} key={s.value}>
-                    {s.label}
-                  </option>
+                  <option value={s.value} key={s.value}>{s.label}</option>
                 ))}
               </select>
             </label>
 
             <label>
               Scope Value
-              <input
-                value={form.scope_value}
-                onChange={(e) => updateForm('scope_value', e.target.value)}
-                placeholder="เช่น NE1 หรือ 26NAK_BHUB"
-              />
+              <input value={form.scope_value} onChange={(e) => updateForm('scope_value', e.target.value)} placeholder="เช่น NE1 หรือ TH27101500" />
             </label>
           </div>
 
           <label>
             PIN เริ่มต้น / เปลี่ยน PIN
-            <input
-              value={form.pin}
-              onChange={(e) => updateForm('pin', e.target.value)}
-              type="password"
-              inputMode="numeric"
-              placeholder="เว้นว่างไว้ ถ้าไม่เปลี่ยน PIN"
-            />
+            <input value={form.pin} onChange={(e) => updateForm('pin', e.target.value)} type="password" inputMode="numeric" placeholder="เว้นว่างไว้ ถ้าไม่เปลี่ยน PIN" />
           </label>
 
           <div className="notice employee-scope-note">
-            <strong>ตัวอย่างการใช้งาน</strong>
+            <strong>ตัวอย่างการตั้งค่า</strong>
+            <span><b>Hub Supervisor</b> แนะนำ Role = supervisor, Scope Type = HUB, Scope Value = รหัส HUB</span>
             <span><b>hub_manager</b> ให้ Scope Type = HUB และ Scope Value = รหัส HUB</span>
             <span><b>area_manager</b> ให้ Scope Type = AREA และ Scope Value = Area เช่น NE1</span>
-            <span><b>supervisor</b> ให้ Scope Type = TEAM หรือ HUB ตามที่ต้องการให้ดูแล</span>
+            <span><b>staff</b> ให้ Scope Type = SELF เพื่อดูเฉพาะข้อมูลตัวเอง</span>
           </div>
 
           <button disabled={saving}>{saving ? 'กำลังบันทึก...' : 'บันทึกบัญชี / สิทธิ์'}</button>
@@ -399,9 +347,7 @@ export default function Employees() {
       <div className="section-title-row employee-list-head">
         <div>
           <h2 className="section-title">รายการพนักงาน</h2>
-          <p className="muted small">
-            แสดงแบบการ์ดเพื่อให้อ่านง่าย ไม่ต้องเลื่อนตารางไปทางขวา
-          </p>
+          <p className="muted small">แสดงแบบการ์ดเพื่อให้อ่านง่ายบนมือถือ ไม่ต้องเลื่อนตาราง</p>
         </div>
 
         <input
@@ -415,13 +361,11 @@ export default function Employees() {
       {loading ? (
         <div className="notice">กำลังโหลดข้อมูล...</div>
       ) : (
-        <div className="employee-card-list">
+        <div className="mobile-card-list employee-card-list">
           {filtered.map((e) => (
             <div className="card employee-card" key={e.employee_code}>
               <div className="employee-card-top">
-                <div className="employee-avatar">
-                  {(e.employee_name || e.employee_code || '?').slice(0, 1)}
-                </div>
+                <div className="employee-avatar">{(e.employee_name || e.employee_code || '?').slice(0, 1)}</div>
 
                 <div className="employee-main-info">
                   <div className="employee-code">{e.employee_code}</div>
@@ -429,40 +373,18 @@ export default function Employees() {
                   <p>{e.position || 'ไม่ระบุตำแหน่ง'}</p>
                 </div>
 
-                <span className={statusClass(e.account_status)}>
-                  {e.account_status || 'NO_ACCOUNT'}
-                </span>
+                <span className={statusClass(e.account_status)}>{e.account_status || 'NO_ACCOUNT'}</span>
               </div>
 
               <div className="employee-info-grid">
-                <div>
-                  <span>Area</span>
-                  <strong>{e.area || '-'}</strong>
-                </div>
-
-                <div>
-                  <span>HUB</span>
-                  <strong>{e.hub_name || e.hub_id || '-'}</strong>
-                </div>
-
-                <div>
-                  <span>Role</span>
-                  <strong>{e.account_role || '-'}</strong>
-                </div>
-
-                <div>
-                  <span>Scope</span>
-                  <strong>
-                    {e.scope_type || '-'}
-                    {e.scope_value ? ` / ${e.scope_value}` : ''}
-                  </strong>
-                </div>
+                <div><span>Area</span><strong>{e.area || '-'}</strong></div>
+                <div><span>HUB</span><strong>{e.hub_name || e.hub_id || '-'}</strong></div>
+                <div><span>Role</span><strong>{e.account_role || '-'}</strong></div>
+                <div><span>Scope</span><strong>{e.scope_type || '-'}{e.scope_value ? ` / ${e.scope_value}` : ''}</strong></div>
               </div>
 
               <div className="employee-card-actions">
-                <button className="btn-secondary" onClick={() => edit(e)}>
-                  แก้ไขข้อมูล / สิทธิ์
-                </button>
+                <button className="btn-secondary" onClick={() => edit(e)}>แก้ไขข้อมูล / สิทธิ์</button>
               </div>
             </div>
           ))}
@@ -470,9 +392,7 @@ export default function Employees() {
           {filtered.length === 0 && (
             <div className="card empty-state-card">
               <h2>ไม่พบข้อมูล</h2>
-              <p className="muted">
-                ไม่พบพนักงานตามคำค้นหา กรุณาลองค้นหาด้วยรหัส ชื่อ HUB หรือ Role อื่น
-              </p>
+              <p className="muted">ไม่พบพนักงานตามคำค้นหา กรุณาลองค้นหาด้วยรหัส ชื่อ HUB หรือ Role อื่น</p>
             </div>
           )}
         </div>
