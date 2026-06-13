@@ -81,62 +81,86 @@ export default function ManagerIssues() {
         </div>
       )}
 
-      <div className="mobile-card-list data-card-list">
-        {issues.map((i) => (
-          <div className="card mobile-data-card data-card" key={i.id}>
-            <div className="mobile-data-card-head">
-              <div>
-                <span className="data-kicker">รหัสพนักงาน</span>
-                <h3>{i.employee_code || '-'}</h3>
-                {i.employee_name && <p className="data-subtitle">{i.employee_name}</p>}
-              </div>
-              <span className="pill">{i.status || 'OPEN'}</span>
-            </div>
-
-            <div className="mobile-info-grid data-grid">
-              <div><span>หัวข้อ</span><strong>{i.topic || '-'}</strong></div>
-              <div><span>เวลา</span><strong>{i.created_at || '-'}</strong></div>
-            </div>
-
-            <div className="data-note">
-              <span>รายละเอียด</span>
-              <p>{i.detail || '-'}</p>
-            </div>
-
-            {i.resolution_note && (
-              <div className="data-note resolved-note">
-                <span>คำตอบ / ผลการแก้ไข</span>
-                <p>{i.resolution_note}</p>
-              </div>
-            )}
-
-            <div className="data-card-actions three">
-              <button
-                className="btn-secondary"
-                disabled={busyId === i.id}
-                onClick={() => updateIssue(i.id, 'IN_PROGRESS')}
-              >
-                รับเรื่อง
-              </button>
-
-              <button
-                disabled={busyId === i.id}
-                onClick={() => updateIssue(i.id, 'RESOLVED')}
-              >
-                ตอบกลับ / ปิดงาน
-              </button>
-
-              <button
-                className="btn-danger"
-                disabled={busyId === i.id}
-                onClick={() => updateIssue(i.id, 'REJECTED')}
-              >
-                ปฏิเสธ
-              </button>
+      {!loading && !error && issues.length > 0 && (
+        <>
+          <div className="responsive-desktop-table">
+            <div className="table-wrap desktop-table-card">
+              <table className="desktop-data-table">
+                <thead>
+                  <tr>
+                    <th>รหัส</th>
+                    <th>ชื่อ</th>
+                    <th>หัวข้อ</th>
+                    <th>รายละเอียด</th>
+                    <th>สถานะ</th>
+                    <th>วันที่ส่ง</th>
+                    <th>คำตอบ</th>
+                    <th>จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {issues.map((i) => (
+                    <tr key={i.id}>
+                      <td><strong>{i.employee_code || '-'}</strong></td>
+                      <td>{i.employee_name || '-'}</td>
+                      <td>{i.topic || '-'}</td>
+                      <td className="desktop-detail-cell">{i.detail || '-'}</td>
+                      <td><span className="pill">{i.status || 'OPEN'}</span></td>
+                      <td>{i.created_at || '-'}</td>
+                      <td className="desktop-detail-cell">{i.resolution_note || '-'}</td>
+                      <td>
+                        <div className="desktop-table-actions">
+                          <button className="btn-secondary small-button" disabled={busyId === i.id} onClick={() => updateIssue(i.id, 'IN_PROGRESS')}>รับเรื่อง</button>
+                          <button className="small-button" disabled={busyId === i.id} onClick={() => updateIssue(i.id, 'RESOLVED')}>ปิดงาน</button>
+                          <button className="btn-danger small-button" disabled={busyId === i.id} onClick={() => updateIssue(i.id, 'REJECTED')}>ปฏิเสธ</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-        ))}
-      </div>
+
+          <div className="responsive-mobile-cards mobile-card-list data-card-list">
+            {issues.map((i) => (
+              <div className="card mobile-data-card data-card" key={i.id}>
+                <div className="mobile-data-card-head">
+                  <div>
+                    <span className="data-kicker">รหัสพนักงาน</span>
+                    <h3>{i.employee_code || '-'}</h3>
+                    {i.employee_name && <p className="data-subtitle">{i.employee_name}</p>}
+                  </div>
+                  <span className="pill">{i.status || 'OPEN'}</span>
+                </div>
+
+                <div className="mobile-info-grid data-grid">
+                  <div><span>หัวข้อ</span><strong>{i.topic || '-'}</strong></div>
+                  <div><span>เวลา</span><strong>{i.created_at || '-'}</strong></div>
+                </div>
+
+                <div className="data-note">
+                  <span>รายละเอียด</span>
+                  <p>{i.detail || '-'}</p>
+                </div>
+
+                {i.resolution_note && (
+                  <div className="data-note resolved-note">
+                    <span>คำตอบ / ผลการแก้ไข</span>
+                    <p>{i.resolution_note}</p>
+                  </div>
+                )}
+
+                <div className="data-card-actions three">
+                  <button className="btn-secondary" disabled={busyId === i.id} onClick={() => updateIssue(i.id, 'IN_PROGRESS')}>รับเรื่อง</button>
+                  <button disabled={busyId === i.id} onClick={() => updateIssue(i.id, 'RESOLVED')}>ตอบกลับ / ปิดงาน</button>
+                  <button className="btn-danger" disabled={busyId === i.id} onClick={() => updateIssue(i.id, 'REJECTED')}>ปฏิเสธ</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </AppShell>
   );
 }

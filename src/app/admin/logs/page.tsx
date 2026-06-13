@@ -44,31 +44,66 @@ export default function Logs() {
         </div>
       )}
 
-      <div className="mobile-card-list data-card-list">
-        {logs.map((l: any) => (
-          <div className="card mobile-data-card data-card audit-card" key={l.id}>
-            <div className="mobile-data-card-head">
-              <div>
-                <span className="data-kicker">Action</span>
-                <h3>{l.action || '-'}</h3>
-              </div>
-              <span className="pill">{l.actor_code || l.actor || '-'}</span>
-            </div>
-
-            <div className="mobile-info-grid data-grid">
-              <div><span>เวลา</span><strong>{fmt(l.created_at)}</strong></div>
-              <div><span>Target</span><strong>{l.target_type || '-'}{l.target_id ? `: ${l.target_id}` : ''}</strong></div>
-              <div><span>Role</span><strong>{l.actor_role || '-'}</strong></div>
-              <div><span>IP</span><strong>{l.ip || '-'}</strong></div>
-            </div>
-
-            <div className="audit-detail">
-              <span>รายละเอียด</span>
-              <code>{shortDetail(l.detail_json || l.detail || l.metadata)}</code>
+      {!loading && !error && logs.length > 0 && (
+        <>
+          <div className="responsive-desktop-table">
+            <div className="table-wrap desktop-table-card">
+              <table className="desktop-data-table">
+                <thead>
+                  <tr>
+                    <th>เวลา</th>
+                    <th>ผู้ทำรายการ</th>
+                    <th>Role</th>
+                    <th>Action</th>
+                    <th>Target</th>
+                    <th>รายละเอียด</th>
+                    <th>IP</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {logs.map((l: any) => (
+                    <tr key={l.id}>
+                      <td>{fmt(l.created_at)}</td>
+                      <td><strong>{l.actor_code || l.actor || '-'}</strong></td>
+                      <td>{l.actor_role || '-'}</td>
+                      <td><span className="pill">{l.action || '-'}</span></td>
+                      <td>{l.target_type || '-'}{l.target_id ? `: ${l.target_id}` : ''}</td>
+                      <td className="desktop-detail-cell">{shortDetail(l.detail_json || l.detail || l.metadata)}</td>
+                      <td>{l.ip || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-        ))}
-      </div>
+
+          <div className="responsive-mobile-cards mobile-card-list data-card-list">
+            {logs.map((l: any) => (
+              <div className="card mobile-data-card data-card audit-card" key={l.id}>
+                <div className="mobile-data-card-head">
+                  <div>
+                    <span className="data-kicker">Action</span>
+                    <h3>{l.action || '-'}</h3>
+                  </div>
+                  <span className="pill">{l.actor_code || l.actor || '-'}</span>
+                </div>
+
+                <div className="mobile-info-grid data-grid">
+                  <div><span>เวลา</span><strong>{fmt(l.created_at)}</strong></div>
+                  <div><span>Target</span><strong>{l.target_type || '-'}{l.target_id ? `: ${l.target_id}` : ''}</strong></div>
+                  <div><span>Role</span><strong>{l.actor_role || '-'}</strong></div>
+                  <div><span>IP</span><strong>{l.ip || '-'}</strong></div>
+                </div>
+
+                <div className="audit-detail">
+                  <span>รายละเอียด</span>
+                  <code>{shortDetail(l.detail_json || l.detail || l.metadata)}</code>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </AppShell>
   );
 }

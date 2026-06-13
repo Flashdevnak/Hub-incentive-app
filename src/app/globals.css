@@ -3611,3 +3611,127 @@ body {
     max-width: 100% !important;
   }
 }
+/* RESPONSIVE TABLE/CARD FINAL
+   Desktop/Laptop >= 1024px = Table
+   Tablet/iPad/Mobile <= 1023px = Card
+   วางท้าย src/app/globals.css
+*/
+
+@media (min-width: 1024px) {
+  .responsive-mobile-cards {
+    display: none !important;
+  }
+
+  .responsive-desktop-table {
+    display: block !important;
+    width: 100%;
+  }
+
+  .desktop-table-card {
+    width: 100%;
+    overflow-x: auto !important;
+    border-radius: 22px;
+    background: #ffffff;
+    border: 1px solid var(--line);
+    box-shadow: 0 14px 36px rgba(18, 31, 54, 0.06);
+  }
+
+  .desktop-data-table {
+    width: 100%;
+    min-width: 980px;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: auto;
+  }
+
+  .desktop-data-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #f8fafc;
+    color: #475467;
+    font-size: 12px;
+    font-weight: 950;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .desktop-data-table td {
+    background: #ffffff;
+    color: #172033;
+    font-size: 14px;
+    font-weight: 750;
+    line-height: 1.45;
+    padding: 14px 16px;
+    border-bottom: 1px solid #eef2f7;
+    vertical-align: top;
+    white-space: normal;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  .desktop-data-table tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .desktop-data-table tr:hover td {
+    background: #fffaf4;
+  }
+
+  .desktop-detail-cell {
+    max-width: 360px;
+  }
+
+  .desktop-table-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  .desktop-table-actions .small-button {
+    white-space: nowrap;
+  }
+
+  .desktop-content-actions .notification-widget {
+    margin-top: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .desktop-content-actions .notification-trigger {
+    width: 46px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    border-radius: 16px !important;
+  }
+
+  .desktop-content-actions .role-badge,
+  .desktop-account-btn {
+    height: 42px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+
+  .desktop-content-topbar {
+    min-height: 52px !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .responsive-desktop-table {
+    display: none !important;
+  }
+
+  .responsive-mobile-cards {
+    display: grid !important;
+  }
+
+  .mobile-card-list,
+  .data-card-list,
+  .employee-card-list {
+    grid-template-columns: 1fr !important;
+  }
+}
