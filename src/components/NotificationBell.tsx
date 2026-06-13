@@ -1,4 +1,4 @@
-use client';
+﻿'use client';
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -86,27 +86,27 @@ export default function NotificationBell({ compact = false }: { compact?: boolea
         type="button"
         className="notification-trigger"
         onClick={() => setOpen((v) => !v)}
-        aria-label="แจ้งเตือน"
+        aria-label="à¹à¸ˆà¹‰à¸‡à¹€à¸•à¸·à¸­à¸™"
       >
-        <span className="notification-bell-icon">แจ้งเตือน</span>
+        <span className="notification-bell-icon">à¹à¸ˆà¹‰à¸‡à¹€à¸•à¸·à¸­à¸™</span>
         {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
       </button>
 
       {open && (
         <div className="notification-popover">
           <div className="notification-popover-head">
-            <strong>แจ้งเตือน</strong>
+            <strong>à¹à¸ˆà¹‰à¸‡à¹€à¸•à¸·à¸­à¸™</strong>
             {unreadCount > 0 && (
               <button type="button" onClick={markAllRead}>
-                อ่านทั้งหมด
+                à¸­à¹ˆà¸²à¸™à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”
               </button>
             )}
           </div>
 
-          {loading && <div className="notification-empty">กำลังโหลด...</div>}
+          {loading && <div className="notification-empty">à¸à¸³à¸¥à¸±à¸‡à¹‚à¸«à¸¥à¸”...</div>}
 
           {!loading && topItems.length === 0 && (
-            <div className="notification-empty">ยังไม่มีแจ้งเตือน</div>
+            <div className="notification-empty">à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µà¹à¸ˆà¹‰à¸‡à¹€à¸•à¸·à¸­à¸™</div>
           )}
 
           {!loading && topItems.length > 0 && (
@@ -134,10 +134,11 @@ export default function NotificationBell({ compact = false }: { compact?: boolea
               router.push('/notifications');
             }}
           >
-            ดูแจ้งเตือนทั้งหมด
+            à¸”à¸¹à¹à¸ˆà¹‰à¸‡à¹€à¸•à¸·à¸­à¸™à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”
           </button>
         </div>
       )}
     </div>
   );
 }
+
