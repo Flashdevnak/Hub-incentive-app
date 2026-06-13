@@ -3426,3 +3426,188 @@ body {
   }
 }
 
+/* =========================================================
+   FINAL DESKTOP WIDTH FORCE FIX - MUST BE LAST IN FILE
+   แก้ desktop content ถูกบีบแคบจนข้อความแตกแนวตั้ง
+   ========================================================= */
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important;
+}
+
+@media (min-width: 861px) {
+  .layout,
+  .layout.app-layout {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 100vh !important;
+    background: #f5f7fb !important;
+  }
+
+  .side,
+  .side-modern {
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 280px !important;
+    min-width: 280px !important;
+    max-width: 280px !important;
+    height: 100vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    z-index: 50 !important;
+  }
+
+  .main,
+  .main-modern {
+    display: block !important;
+    position: relative !important;
+    margin-left: 280px !important;
+    width: calc(100vw - 280px) !important;
+    min-width: calc(100vw - 280px) !important;
+    max-width: calc(100vw - 280px) !important;
+    min-height: 100vh !important;
+    padding: 26px 42px 72px !important;
+    overflow-x: hidden !important;
+  }
+
+  .main > *,
+  .main-modern > * {
+    max-width: none !important;
+  }
+
+  .content-shell,
+  .main > .content-shell,
+  .main-modern > .content-shell {
+    display: block !important;
+    width: min(1180px, 100%) !important;
+    min-width: 0 !important;
+    max-width: 1180px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding: 0 !important;
+  }
+
+  .desktop-content-topbar,
+  .main > .desktop-content-topbar,
+  .main-modern > .desktop-content-topbar {
+    display: flex !important;
+    width: min(1180px, 100%) !important;
+    min-width: 0 !important;
+    max-width: 1180px !important;
+    margin: 0 auto 18px !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+  }
+
+  .desktop-content-title {
+    display: none !important;
+  }
+
+  .desktop-content-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .desktop-account-btn {
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 42px !important;
+    white-space: nowrap !important;
+  }
+
+  .mobile-topbar,
+  .mobile-tabs,
+  .mobile-tabs-modern {
+    display: none !important;
+  }
+
+  .page-head,
+  .page-head-clean {
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: space-between !important;
+    gap: 18px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 0 22px !important;
+  }
+
+  .page-head > div,
+  .page-head-clean > div {
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: 760px !important;
+  }
+
+  .page-head h1,
+  .page-head-clean h1 {
+    width: auto !important;
+    max-width: 100% !important;
+    font-size: clamp(30px, 2.3vw, 42px) !important;
+    line-height: 1.12 !important;
+    white-space: normal !important;
+    word-break: keep-all !important;
+    overflow-wrap: normal !important;
+  }
+
+  .page-head p,
+  .page-head-clean p,
+  .muted {
+    white-space: normal !important;
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+  }
+
+  .notice,
+  .notice.ok,
+  .notice.danger {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    white-space: normal !important;
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+    line-height: 1.6 !important;
+  }
+
+  .stats-grid,
+  .admin-stats-grid,
+  .summary-grid,
+  .metric-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  .menu-grid,
+  .admin-menu-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+    width: 100% !important;
+  }
+
+  .card,
+  .stat-card,
+  .menu-card,
+  .summary-card,
+  .metric-card,
+  .section-card {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+}
