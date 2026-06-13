@@ -103,6 +103,7 @@ export default function NotificationBell({ compact = false }: { compact?: boolea
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [busy, setBusy] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -128,21 +129,29 @@ export default function NotificationBell({ compact = false }: { compact?: boolea
   }, []);
 
   const topItems = useMemo(() => items.slice(0, 6), [items]);
+  const readItems = useMemo(() => items.filter((x) => x.is_read), [items]);
+  const unreadItems = useMemo(() => items.filter((x) => !x.is_read), [items]);
 
-  async function markRead(ids: string[]) {
+  async function updateNotifications(ids: string[], action: 'mark_read' | 'clear_read') {
     if (!ids.length) return;
 
-    await fetch('/api/me/notifications/read', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ notificationIds: ids })
-    });
+    setBusy(true);
 
-    await load();
+    try {
+      await fetch('/api/me/notifications/read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notificationIds: ids, action })
+      });
+
+      await load();
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function openItem(item: NotificationItem) {
-    await markRead([item.id]);
+    await updateNotifications([item.id], 'mark_read');
     setOpen(false);
 
     if (item.action_url) {
@@ -151,7 +160,11 @@ export default function NotificationBell({ compact = false }: { compact?: boolea
   }
 
   async function markAllRead() {
-    await markRead(items.filter((x) => !x.is_read).map((x) => x.id));
+    await updateNotifications(unreadItems.map((x) => x.id), 'mark_read');
+  }
+
+  async function clearRead() {
+    await updateNotifications(readItems.map((x) => x.id), 'clear_read');
   }
 
   return (
@@ -178,10 +191,18 @@ export default function NotificationBell({ compact = false }: { compact?: boolea
               <strong>การแจ้งเตือน</strong>
               <p>อัปเดตคำขอและสถานะอนุมัติ</p>
             </div>
+          </div>
 
-            {unreadCount > 0 && (
-              <button type="button" onClick={markAllRead}>
+          <div className="notification-popover-actions">
+            {unreadItems.length > 0 && (
+              <button type="button" onClick={markAllRead} disabled={busy}>
                 อ่านทั้งหมด
+              </button>
+            )}
+
+            {readItems.length > 0 && (
+              <button type="button" onClick={clearRead} disabled={busy}>
+                ล้างที่อ่านแล้ว
               </button>
             )}
           </div>
