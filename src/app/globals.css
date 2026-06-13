@@ -2541,3 +2541,260 @@ th {
     font-size: 11px;
   }
 }
+
+/* Desktop shell fix + employee card list */
+
+.desktop-topbar {
+  display: none;
+}
+
+@media (min-width: 861px) {
+  .desktop-topbar {
+    width: calc(100vw - 280px);
+    margin-left: 280px;
+    padding: 18px 42px 0;
+    display: block;
+    position: relative;
+    z-index: 15;
+  }
+
+  .desktop-topbar-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .desktop-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+
+  .desktop-account-btn {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid var(--line);
+    color: #344054;
+    font-size: 14px;
+    font-weight: 900;
+    box-shadow: 0 8px 20px rgba(18, 31, 54, 0.045);
+  }
+
+  .desktop-topbar .notification-popover {
+    right: 0;
+  }
+
+  .side .notification-widget {
+    display: none !important;
+  }
+
+  .main,
+  .main-modern {
+    padding-top: 18px !important;
+  }
+
+  .mobile-topbar,
+  .mobile-tabs,
+  .mobile-tabs-modern {
+    display: none !important;
+  }
+}
+
+.employee-scope-note {
+  display: grid;
+  gap: 5px;
+}
+
+.employee-scope-note strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.employee-scope-note span {
+  display: block;
+  line-height: 1.5;
+}
+
+.employee-list-head {
+  align-items: flex-end;
+}
+
+.employee-list-head .section-title {
+  margin-bottom: 4px;
+}
+
+.employee-search-input {
+  min-width: min(360px, 100%);
+}
+
+.employee-card-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.employee-card {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 24px;
+}
+
+.employee-card-top {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.employee-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--brand), var(--brand2));
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 950;
+  box-shadow: 0 12px 26px rgba(237, 91, 47, 0.18);
+}
+
+.employee-main-info {
+  min-width: 0;
+}
+
+.employee-code {
+  width: max-content;
+  max-width: 100%;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  color: #475467;
+  font-size: 12px;
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.employee-main-info h3 {
+  margin: 0 0 4px;
+  color: #172033;
+  font-size: 19px;
+  font-weight: 950;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  word-break: break-word;
+}
+
+.employee-main-info p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.employee-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.employee-info-grid div {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  padding: 11px 12px;
+  border-radius: 16px;
+  background: #f8fafc;
+  border: 1px solid var(--line);
+}
+
+.employee-info-grid span {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.employee-info-grid strong {
+  color: #172033;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.employee-card-actions {
+  display: grid;
+}
+
+.employee-card-actions button {
+  width: 100%;
+}
+
+@media (max-width: 980px) {
+  .employee-card-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 860px) {
+  .employee-list-head {
+    display: grid;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .employee-search-input {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .employee-card-list {
+    gap: 12px;
+  }
+
+  .employee-card {
+    padding: 15px;
+    border-radius: 22px;
+  }
+
+  .employee-card-top {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .employee-card-top .pill {
+    grid-column: 1 / -1;
+    width: max-content;
+  }
+
+  .employee-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 15px;
+    font-size: 18px;
+  }
+
+  .employee-main-info h3 {
+    font-size: 18px;
+  }
+
+  .employee-info-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .employee-info-grid div {
+    padding: 10px 11px;
+  }
+}
