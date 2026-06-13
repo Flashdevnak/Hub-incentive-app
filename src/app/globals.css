@@ -1488,3 +1488,236 @@ th {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Compact Incentive Detail Page */
+
+.incentive-page {
+  display: grid;
+  gap: 14px;
+  max-width: 980px;
+}
+
+.incentive-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.incentive-head h1 {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.05;
+  letter-spacing: -0.055em;
+}
+
+.incentive-note {
+  margin: 0;
+  border-radius: 18px;
+  line-height: 1.5;
+}
+
+.incentive-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.incentive-kpi-card {
+  padding: 16px;
+  border-radius: 20px;
+  min-height: 106px;
+}
+
+.incentive-kpi-card .kpi {
+  font-size: 30px;
+  line-height: 1.05;
+  margin-top: 4px;
+  letter-spacing: -0.04em;
+}
+
+.incentive-kpi-card.tone-deduction .kpi {
+  color: #b42318;
+}
+
+.incentive-kpi-card.tone-net {
+  border-color: #fed7aa;
+  background: linear-gradient(180deg, #ffffff, #fff8f1);
+}
+
+.incentive-section {
+  display: grid;
+}
+
+.incentive-details {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 22px rgba(18, 31, 54, 0.045);
+}
+
+.incentive-details summary {
+  list-style: none;
+  cursor: pointer;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  font-size: 19px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.incentive-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.incentive-details summary::after {
+  content: "เปิด";
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--brand-dark);
+  background: var(--brand-soft);
+  border: 1px solid #fed7aa;
+  border-radius: 999px;
+  padding: 5px 9px;
+}
+
+.incentive-details[open] summary::after {
+  content: "พับ";
+}
+
+.incentive-details summary b {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  margin-left: auto;
+}
+
+.incentive-row-list {
+  border-top: 1px solid var(--line);
+}
+
+.incentive-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  min-height: 40px;
+  border-bottom: 1px solid #edf1f7;
+}
+
+.incentive-row:last-child {
+  border-bottom: 0;
+}
+
+.incentive-row-label {
+  min-width: 0;
+  color: #475467;
+  font-size: 14px;
+  font-weight: 760;
+  line-height: 1.35;
+}
+
+.incentive-row-value {
+  max-width: 46vw;
+  color: #101828;
+  font-size: 15px;
+  font-weight: 900;
+  text-align: right;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.incentive-row-value.is-positive {
+  color: #087443;
+}
+
+.incentive-row-value.is-negative {
+  color: #b42318;
+}
+
+@media (max-width: 860px) {
+  .incentive-page {
+    gap: 10px;
+  }
+
+  .incentive-head h1 {
+    font-size: 30px;
+  }
+
+  .incentive-note {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .incentive-kpi-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+  }
+
+  .incentive-kpi-card {
+    min-height: auto;
+    padding: 12px;
+    border-radius: 18px;
+  }
+
+  .incentive-kpi-card.tone-net {
+    grid-column: 1 / -1;
+  }
+
+  .incentive-kpi-card .label {
+    font-size: 12px;
+  }
+
+  .incentive-kpi-card .kpi {
+    font-size: 26px;
+  }
+
+  .incentive-details {
+    border-radius: 18px;
+  }
+
+  .incentive-details summary {
+    min-height: 46px;
+    padding: 12px 13px;
+    font-size: 18px;
+  }
+
+  .incentive-details summary b {
+    display: none;
+  }
+
+  .incentive-row {
+    padding: 9px 12px;
+    min-height: 38px;
+    gap: 8px;
+  }
+
+  .incentive-row-label {
+    font-size: 13px;
+  }
+
+  .incentive-row-value {
+    max-width: 44vw;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 420px) {
+  .incentive-kpi-card .kpi {
+    font-size: 24px;
+  }
+
+  .incentive-row {
+    grid-template-columns: minmax(0, 1fr) minmax(90px, auto);
+  }
+
+  .incentive-row-value {
+    max-width: 42vw;
+  }
+}
