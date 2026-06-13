@@ -8,6 +8,14 @@ function fmt(value: any) {
   return formatThaiDateTime(value);
 }
 
+function importedAt(batch: any) {
+  return batch.imported_at || batch.uploaded_at || batch.confirmed_at || batch.created_at || batch.updated_at;
+}
+
+function importer(batch: any) {
+  return batch.imported_by || batch.imported_by_employee_code || batch.created_by || batch.uploaded_by || batch.imported_by_role || '-';
+}
+
 export default function Batches() {
   const { data, loading, error } = useApi<any>('/api/admin/import/batches');
   const batches = data?.batches || [];
@@ -64,8 +72,8 @@ export default function Batches() {
                       <td>{b.shift_column_detected ? `${b.shift_column_name || '-'} (${b.shift_records_count || 0})` : '-'}</td>
                       <td>{b.success_rows ?? b.success_count ?? 0}</td>
                       <td>{b.failed_rows ?? b.error_count ?? 0}</td>
-                      <td>{fmt(b.created_at || b.imported_at)}</td>
-                      <td>{b.created_by || b.imported_by || '-'}</td>
+                      <td>{fmt(importedAt(b))}</td>
+                      <td>{importer(b)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -92,8 +100,8 @@ export default function Batches() {
                   <div><span>กะ</span><strong>{b.shift_column_detected ? `${b.shift_column_name || '-'} (${b.shift_records_count || 0})` : '-'}</strong></div>
                   <div><span>สำเร็จ</span><strong>{b.success_rows ?? b.success_count ?? 0}</strong></div>
                   <div><span>ผิดพลาด</span><strong>{b.failed_rows ?? b.error_count ?? 0}</strong></div>
-                  <div><span>นำเข้าเมื่อ</span><strong>{fmt(b.created_at || b.imported_at)}</strong></div>
-                  <div><span>ผู้นำเข้า</span><strong>{b.created_by || b.imported_by || '-'}</strong></div>
+                  <div><span>นำเข้าเมื่อ</span><strong>{fmt(importedAt(b))}</strong></div>
+                  <div><span>ผู้นำเข้า</span><strong>{importer(b)}</strong></div>
                 </div>
               </div>
             ))}

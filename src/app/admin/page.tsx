@@ -65,23 +65,41 @@ export default function Admin() {
       {loading && <div className="notice">กำลังโหลดข้อมูล...</div>}
       {error && <div className="notice danger">{error}</div>}
 
-      <div className="grid grid-3 admin-stats-grid">
+      <div className="grid grid-3 admin-stats-grid dashboard-count-grid">
         <Link className="card kpi-card" href="/admin/employees">
-          <div className="label">พนักงานทั้งหมด</div>
-          <div className="kpi">{s.employees || 0}</div>
-          <p className="muted small">จำนวนพนักงานในระบบ</p>
+          <div className="label">พนักงานใช้งานอยู่</div>
+          <div className="kpi">{s.active_employee_count ?? s.employees ?? 0}</div>
+          <p className="muted small">Headcount ปัจจุบันจาก employee master</p>
+        </Link>
+
+        <Link className="card kpi-card" href="/admin/employees">
+          <div className="label">พนักงานทั้งหมดในระบบ</div>
+          <div className="kpi">{s.total_employee_count ?? 0}</div>
+          <p className="muted small">รวม ACTIVE, RESIGNED, INACTIVE, SUSPENDED ที่ไม่ถูกลบ</p>
+        </Link>
+
+        <Link className="card kpi-card" href="/admin/employees">
+          <div className="label">ลาออก/ไม่ใช้งาน</div>
+          <div className="kpi">{s.inactive_employee_count ?? 0}</div>
+          <p className="muted small">ไม่รวมใน Headcount ปัจจุบัน แต่ยังเก็บประวัติ</p>
         </Link>
 
         <Link className="card kpi-card" href="/admin/employees">
           <div className="label">บัญชีทั้งหมด</div>
-          <div className="kpi">{s.accounts || 0}</div>
-          <p className="muted small">บัญชีที่เปิดใช้งานหรือรอจัดการ</p>
+          <div className="kpi">{s.account_count ?? s.accounts ?? 0}</div>
+          <p className="muted small">นับจาก user_accounts ไม่ใช่จำนวนพนักงาน</p>
         </Link>
 
         <Link className="card kpi-card approval-kpi-card" href="/manager/approvals">
-          <div className="label">รออนุมัติ</div>
-          <div className="kpi">{s.pendingActivation || 0}</div>
+          <div className="label">รออนุมัติเปิดใช้งาน</div>
+          <div className="kpi">{s.pending_activation_count ?? s.pendingActivation ?? 0}</div>
           <p className="muted small">คำขอเปิดใช้งานที่รอตรวจสอบ</p>
+        </Link>
+
+        <Link className="card kpi-card approval-kpi-card" href="/manager/pin-resets">
+          <div className="label">รอรีเซ็ต PIN</div>
+          <div className="kpi">{s.pending_pin_reset_count ?? s.pendingPinReset ?? 0}</div>
+          <p className="muted small">คำขอลืม PIN ที่รอตรวจสอบ</p>
         </Link>
       </div>
 

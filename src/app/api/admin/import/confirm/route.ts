@@ -18,6 +18,7 @@ function normalizeEmploymentStatus(status?: string) {
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req, ['super_admin', 'admin']);
+    const sessionUser = user as any;
     const form = await req.formData();
     const file = form.get('file') as File | null;
 
@@ -52,6 +53,15 @@ export async function POST(req: NextRequest) {
       .get();
 
     const versionNo = existing.size + 1;
+    const importTimestamp = ts();
+    const importerCode = String(sessionUser.employeeCode || '').trim();
+    const importerName = String(sessionUser.employeeName || sessionUser.name || '').trim();
+    const importerRole = String(sessionUser.role || '').trim();
+    const importerEmail = String(sessionUser.email || '').trim();
+    const importerDisplay = importerName
+      ? `${importerName}${importerCode ? ` (${importerCode})` : ''}`
+      : importerCode || importerRole || '';
+
     const batchRef = await db().collection('import_batches').add({
       file_name: file.name,
       file_type: fileType,
@@ -62,8 +72,18 @@ export async function POST(req: NextRequest) {
       template_id: `${fileType}-default`,
       version_no: versionNo,
       is_active: true,
-      uploaded_by: user.employeeCode,
-      uploaded_at: ts(),
+      uploaded_by: importerCode,
+      uploaded_at: importTimestamp,
+      imported_at: importTimestamp,
+      confirmed_at: importTimestamp,
+      created_at: importTimestamp,
+      updated_at: importTimestamp,
+      imported_by: importerDisplay,
+      imported_by_name: importerName,
+      imported_by_employee_code: importerCode,
+      imported_by_role: importerRole,
+      imported_by_email: importerEmail,
+      created_by: importerDisplay,
       total_rows: parsed.rows.length,
       success_rows: 0,
       failed_rows: 0,

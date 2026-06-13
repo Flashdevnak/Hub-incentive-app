@@ -19,14 +19,26 @@ export default function Manager() {
         </div>
       </div>
 
-      <div className="grid grid-3">
+      <div className="grid grid-3 dashboard-count-grid">
         <div className="card">
-          <div className="label">พนักงานทั้งหมด</div>
-          <div className="kpi">{s.employees || 0}</div>
+          <div className="label">พนักงานใช้งานอยู่</div>
+          <div className="kpi">{s.active_employee_count ?? s.employees ?? 0}</div>
+        </div>
+        <div className="card">
+          <div className="label">พนักงานทั้งหมดในระบบ</div>
+          <div className="kpi">{s.total_employee_count ?? 0}</div>
+        </div>
+        <div className="card">
+          <div className="label">ลาออก/ไม่ใช้งาน</div>
+          <div className="kpi">{s.inactive_employee_count ?? 0}</div>
         </div>
         <div className="card">
           <div className="label">รออนุมัติเปิดใช้งาน</div>
-          <div className="kpi">{s.pendingActivation || 0}</div>
+          <div className="kpi">{s.pending_activation_count ?? s.pendingActivation ?? 0}</div>
+        </div>
+        <div className="card">
+          <div className="label">รอรีเซ็ต PIN</div>
+          <div className="kpi">{s.pending_pin_reset_count ?? s.pendingPinReset ?? 0}</div>
         </div>
         <div className="card">
           <div className="label">คำร้องรอตรวจสอบ</div>

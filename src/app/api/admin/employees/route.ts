@@ -136,6 +136,7 @@ export async function GET(req: NextRequest) {
           account_status: account?.status,
           scope_type: account?.scope_type,
           scope_value: account?.scope_value,
+          permission_preset: account?.permission_preset || employee.permission_preset,
           is_locked: account?.is_locked || false
         };
       })
@@ -217,6 +218,7 @@ export async function POST(req: NextRequest) {
       shift_end: String(body.shift_end || '').trim(),
       start_date: String(body.start_date || '').trim(),
       employment_status: employmentStatus,
+      permission_preset: String(body.permission_preset || 'custom_advanced').trim(),
       is_active: requestedIsActive && employmentStatus === 'ACTIVE',
       is_deleted: body.is_deleted === true ? true : currentEmployee.is_deleted === true ? true : false,
       resigned_at:
@@ -236,6 +238,7 @@ export async function POST(req: NextRequest) {
       role,
       scope_type: scopeType,
       scope_value: scopeValue,
+      permission_preset: String(body.permission_preset || 'custom_advanced').trim(),
       status: employmentStatus === 'ACTIVE' ? status : status === 'ACTIVE' ? 'DISABLED' : status,
       is_locked:
         status === 'LOCKED'

@@ -29,6 +29,7 @@ export interface Employee {
   resigned_at?: string;
   inactive_reason?: string;
   hidden_from_current_count?: boolean;
+  permission_preset?: string;
   shift_code?: string;
   shift_name?: string;
   shift_group?: string;
@@ -44,6 +45,7 @@ export interface UserAccount {
   role: Role;
   scope_type: SessionUser['scopeType'];
   scope_value?: string;
+  permission_preset?: string;
   status: AccountStatus;
   is_locked: boolean;
   failed_login_count: number;

@@ -33,6 +33,7 @@ type EmployeeRow = {
   account_status?: AccountStatus;
   scope_type?: ScopeType;
   scope_value?: string;
+  permission_preset?: string;
   is_locked?: boolean;
 };
 
@@ -54,6 +55,7 @@ type FormState = {
   role: Role;
   scope_type: ScopeType;
   scope_value: string;
+  permission_preset: string;
   status: AccountStatus;
   pin: string;
 };
@@ -86,6 +88,7 @@ const emptyForm: FormState = {
   role: 'staff',
   scope_type: 'SELF',
   scope_value: '',
+  permission_preset: 'staff_self',
   status: 'PIN_REQUIRED',
   pin: ''
 };
@@ -134,7 +137,7 @@ const permissionPresets: PermissionPreset[] = [
     explanation: 'เห็นเฉพาะข้อมูลของตัวเอง'
   },
   {
-    id: 'staff_leader_hub',
+    id: 'leader_hub',
     label: 'หัวหน้าทีม / Staff Leader ดูทั้ง HUB',
     shortLabel: 'Leader / HUB',
     role: 'supervisor',
@@ -161,7 +164,7 @@ const permissionPresets: PermissionPreset[] = [
     explanation: 'ใช้เฉพาะกรณีต้องจำกัดให้เห็นเฉพาะกะที่กำหนดจริง ๆ'
   },
   {
-    id: 'hub_manager',
+    id: 'hub_manager_hub',
     label: 'ผู้รับผิดชอบ HUB / Deputy Manager / Hub Manager',
     shortLabel: 'Hub Manager / HUB',
     role: 'hub_manager',
@@ -170,7 +173,7 @@ const permissionPresets: PermissionPreset[] = [
     explanation: 'เหมาะสำหรับ Hub Deputy Manager หรือ Hub Manager ที่รับผิดชอบ HUB'
   },
   {
-    id: 'area_manager',
+    id: 'area_manager_area',
     label: 'Area Manager',
     shortLabel: 'Area Manager / AREA',
     role: 'area_manager',
@@ -197,6 +200,16 @@ const permissionPresets: PermissionPreset[] = [
     explanation: 'เห็นและจัดการทั้งระบบ'
   }
 ];
+
+const customPreset: PermissionPreset = {
+  id: 'custom_advanced',
+  label: 'กำหนดเอง / Custom Advanced',
+  shortLabel: 'Custom',
+  role: 'viewer',
+  scopeType: 'SELF',
+  valueFrom: 'NONE',
+  explanation: 'ตั้งค่า Role, Scope Type, Scope Value เองในขั้นสูง'
+};
 
 function deriveScopeByRole(role: Role): ScopeType {
   if (role === 'admin' || role === 'super_admin') return 'ALL';
@@ -259,12 +272,20 @@ function presetForValues(role?: Role, scopeType?: ScopeType) {
   return permissionPresets.find((preset) => preset.role === role && preset.scopeType === scopeType);
 }
 
+function presetById(id?: string) {
+  return permissionPresets.find((preset) => preset.id === id);
+}
+
+function presetForRow(row: EmployeeRow) {
+  return presetById(row.permission_preset) || presetForValues(row.account_role, row.scope_type);
+}
+
 function suggestPermissionFromPosition(position: string) {
   const value = position.toLowerCase();
   if (!value) return permissionPresets[0];
-  if (value.includes('area manager')) return permissionPresets.find((p) => p.id === 'area_manager');
-  if (value.includes('deputy manager') || value.includes('hub manager')) return permissionPresets.find((p) => p.id === 'hub_manager');
-  if (value.includes('staff leader') || value.includes('leader')) return permissionPresets.find((p) => p.id === 'staff_leader_hub');
+  if (value.includes('area manager')) return permissionPresets.find((p) => p.id === 'area_manager_area');
+  if (value.includes('deputy manager') || value.includes('hub manager')) return permissionPresets.find((p) => p.id === 'hub_manager_hub');
+  if (value.includes('staff leader') || value.includes('leader')) return permissionPresets.find((p) => p.id === 'leader_hub');
   if (value.includes('supervisor')) return permissionPresets.find((p) => p.id === 'supervisor_hub');
   if (value.includes('staff')) return permissionPresets.find((p) => p.id === 'staff_self');
   return undefined;
@@ -290,6 +311,7 @@ function employeePayload(row: EmployeeRow, patch: Partial<FormState>) {
     role,
     scope_type: row.scope_type || deriveScopeByRole(role),
     scope_value: row.scope_value || '',
+    permission_preset: row.permission_preset || presetForValues(role, row.scope_type || deriveScopeByRole(role))?.id || 'custom_advanced',
     status: row.account_status || 'PIN_REQUIRED',
     pin: '',
     ...patch
@@ -336,7 +358,7 @@ export default function Employees() {
   }, []);
 
   const suggestedPreset = useMemo(() => suggestPermissionFromPosition(form.position), [form.position]);
-  const currentPreset = presetForValues(form.role, form.scope_type);
+  const currentPreset = presetById(form.permission_preset);
   const permissionMeaning = scopeMeaning(form.scope_type, form.scope_value);
   const warnings = useMemo(() => {
     const list: string[] = [];
@@ -384,6 +406,12 @@ export default function Employees() {
   }, [employees]);
 
   function applyPreset(id: string) {
+    if (id === customPreset.id) {
+      setSelectedPreset(customPreset.id);
+      setForm((prev) => ({ ...prev, permission_preset: customPreset.id }));
+      return;
+    }
+
     const preset = permissionPresets.find((item) => item.id === id);
     if (!preset) return;
 
@@ -393,7 +421,8 @@ export default function Employees() {
       ...prev,
       role: preset.role,
       scope_type: preset.scopeType,
-      scope_value: scopeValue
+      scope_value: scopeValue,
+      permission_preset: preset.id
     }));
 
     if (preset.valueFrom !== 'NONE' && !scopeValue) {
@@ -421,8 +450,10 @@ export default function Employees() {
       if (key === 'area' && (next.scope_type === 'AREA') && !next.scope_value) next.scope_value = String(value);
       if (key === 'shift_code' && (next.scope_type === 'SHIFT') && !next.scope_value) next.scope_value = String(value);
 
-      const preset = presetForValues(next.role, next.scope_type);
-      if (preset) setSelectedPreset(preset.id);
+      if (key === 'role' || key === 'scope_type' || key === 'scope_value') {
+        next.permission_preset = customPreset.id;
+        setSelectedPreset(customPreset.id);
+      }
 
       return next;
     });
@@ -431,9 +462,9 @@ export default function Employees() {
   function edit(row: EmployeeRow) {
     const role = row.account_role || 'staff';
     const scopeType = row.scope_type || deriveScopeByRole(role);
-    const preset = presetForValues(role, scopeType);
+    const preset = presetForRow(row);
 
-    setSelectedPreset(preset?.id || 'manual');
+    setSelectedPreset(preset?.id || customPreset.id);
     setForm({
       employee_code: row.employee_code || '',
       employee_name: row.employee_name || '',
@@ -452,6 +483,7 @@ export default function Employees() {
       role,
       scope_type: scopeType,
       scope_value: row.scope_value || '',
+      permission_preset: row.permission_preset || preset?.id || customPreset.id,
       status: row.account_status || 'PIN_REQUIRED',
       pin: ''
     });
@@ -746,7 +778,7 @@ export default function Employees() {
             <label>
               Permission Preset
               <select value={selectedPreset} onChange={(e) => applyPreset(e.target.value)}>
-                <option value="manual">กำหนดเอง / Manual</option>
+                <option value={customPreset.id}>กำหนดเอง / Manual</option>
                 {permissionPresets.map((preset) => (
                   <option value={preset.id} key={preset.id}>{preset.label}</option>
                 ))}
@@ -893,7 +925,7 @@ export default function Employees() {
                 </thead>
                 <tbody>
                   {filtered.map((e) => {
-                    const rowPreset = presetForValues(e.account_role, e.scope_type);
+                    const rowPreset = presetForRow(e);
                     const active = isCurrentActive(e);
 
                     return (
@@ -937,7 +969,7 @@ export default function Employees() {
 
         <div className="responsive-mobile-cards mobile-card-list employee-card-list">
           {filtered.map((e) => {
-            const rowPreset = presetForValues(e.account_role, e.scope_type);
+            const rowPreset = presetForRow(e);
             const active = isCurrentActive(e);
 
             return (

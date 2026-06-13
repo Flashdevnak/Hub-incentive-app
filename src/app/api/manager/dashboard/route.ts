@@ -17,21 +17,35 @@ function isCurrentActiveEmployee(data: any) {
   );
 }
 
+function isInactiveEmployee(data: any) {
+  const employmentStatus = String(data.employment_status || 'ACTIVE').trim().toUpperCase();
+  return (
+    data.is_deleted !== true &&
+    (employmentStatus === 'RESIGNED' ||
+      employmentStatus === 'INACTIVE' ||
+      employmentStatus === 'SUSPENDED' ||
+      (employmentStatus === 'ACTIVE' && (data.is_active === false || data.hidden_from_current_count === true)))
+  );
+}
+
 export async function GET(req: NextRequest) {
   try {
     requireAuth(req, [...managerRoles]);
 
-    const [emp, acc, act, issues, incentiveSnap] = await Promise.all([
+    const [emp, acc, act, pinReset, issues, incentiveSnap] = await Promise.all([
       db().collection('employees').limit(1000).get(),
       db().collection('user_accounts').limit(1000).get(),
       db().collection('activation_requests').where('status', '==', 'PENDING').get(),
+      db().collection('pin_reset_requests').where('status', '==', 'PENDING').get().catch(() => ({ size: 0 } as any)),
       db().collection('issue_tickets').where('status', 'in', ['รอตรวจสอบ', 'กำลังดำเนินการ']).limit(200).get().catch(() => ({ size: 0 } as any)),
       db().collection('incentive_records').where('is_active', '==', true).limit(1000).get().catch(() => ({ docs: [] } as any))
     ]);
 
     const shiftMap = new Map<string, any>();
 
-    const activeEmployees = emp.docs.filter((doc) => isCurrentActiveEmployee(doc.data()));
+    const employeeDocs = emp.docs.filter((doc) => doc.data().is_deleted !== true);
+    const activeEmployees = employeeDocs.filter((doc) => isCurrentActiveEmployee(doc.data()));
+    const inactiveEmployees = employeeDocs.filter((doc) => isInactiveEmployee(doc.data()));
 
     for (const doc of activeEmployees) {
       const data = doc.data();
@@ -75,9 +89,16 @@ export async function GET(req: NextRequest) {
 
     return ok({
       summary: {
+        active_employee_count: activeEmployees.length,
+        total_employee_count: employeeDocs.length,
+        inactive_employee_count: inactiveEmployees.length,
+        account_count: acc.size,
+        pending_activation_count: act.size,
+        pending_pin_reset_count: pinReset.size || 0,
         employees: activeEmployees.length,
         accounts: acc.size,
         pendingActivation: act.size,
+        pendingPinReset: pinReset.size || 0,
         pendingIssues: issues.size || 0
       },
       shiftSummary: Array.from(shiftMap.values()).sort((a, b) => String(a.shift_name).localeCompare(String(b.shift_name), 'th'))
