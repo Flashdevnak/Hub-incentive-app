@@ -2225,3 +2225,53 @@ th {
     right: -76px;
   }
 }
+
+/* Fix notification popup center on mobile */
+
+@media (max-width: 768px) {
+  .mobile-topbar-actions .notification-popover,
+  .notification-popover {
+    position: fixed !important;
+    top: 154px !important;
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    max-width: none !important;
+    border-radius: 22px !important;
+    transform: none !important;
+    z-index: 999 !important;
+  }
+
+  .notification-list {
+    max-height: 46vh;
+    overflow-y: auto;
+  }
+
+  .notification-popover-head {
+    padding: 14px 16px;
+  }
+
+  .notification-item {
+    padding: 14px 16px;
+  }
+
+  .notification-item span,
+  .notification-item p {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .notification-view-all {
+    min-height: 48px;
+  }
+}
+
+@media (max-width: 390px) {
+  .mobile-topbar-actions .notification-popover,
+  .notification-popover {
+    top: 150px !important;
+    left: 10px !important;
+    right: 10px !important;
+  }
+}
