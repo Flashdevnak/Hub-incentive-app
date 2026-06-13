@@ -10,9 +10,26 @@ function toMs(value: any) {
   return 0;
 }
 
+function isHiddenForUser(data: any, employeeCode: string) {
+  const hiddenBy = Array.isArray(data.hidden_by_employee_codes)
+    ? data.hidden_by_employee_codes
+    : [];
+
+  if (hiddenBy.includes(employeeCode)) return true;
+
+  if (data.recipient_employee_code === employeeCode && data.is_hidden === true) {
+    return true;
+  }
+
+  return false;
+}
+
 function mapNotification(id: string, data: any, employeeCode: string) {
   const roles = Array.isArray(data.recipient_roles) ? data.recipient_roles : [];
-  const readBy = Array.isArray(data.read_by_employee_codes) ? data.read_by_employee_codes : [];
+  const readBy = Array.isArray(data.read_by_employee_codes)
+    ? data.read_by_employee_codes
+    : [];
+
   const isPersonal = data.recipient_employee_code === employeeCode;
 
   return {
@@ -35,32 +52,39 @@ export async function GET(req: NextRequest) {
     const personalSnap = await db()
       .collection('notifications')
       .where('recipient_employee_code', '==', user.employeeCode)
-      .limit(50)
+      .limit(80)
       .get();
 
     const roleSnap = await db()
       .collection('notifications')
       .where('recipient_roles', 'array-contains', user.role)
-      .limit(50)
+      .limit(80)
       .get();
 
     const map = new Map<string, any>();
 
     personalSnap.docs.forEach((doc) => {
-      map.set(doc.id, mapNotification(doc.id, doc.data(), user.employeeCode));
+      const data = doc.data();
+      if (isHiddenForUser(data, user.employeeCode)) return;
+
+      map.set(doc.id, mapNotification(doc.id, data, user.employeeCode));
     });
 
     roleSnap.docs.forEach((doc) => {
-      map.set(doc.id, mapNotification(doc.id, doc.data(), user.employeeCode));
+      const data = doc.data();
+      if (isHiddenForUser(data, user.employeeCode)) return;
+
+      map.set(doc.id, mapNotification(doc.id, data, user.employeeCode));
     });
 
     const notifications = Array.from(map.values())
       .sort((a, b) => toMs(b.created_at) - toMs(a.created_at))
-      .slice(0, 50);
+      .slice(0, 80);
 
     const unreadCount = notifications.filter((n) => !n.is_read).length;
+    const readCount = notifications.filter((n) => n.is_read).length;
 
-    return ok({ notifications, unreadCount });
+    return ok({ notifications, unreadCount, readCount });
   } catch (e) {
     return handleError(e);
   }
