@@ -1,4 +1,465 @@
 'use client';
+
+import { useEffect, useState } from 'react';
 import AppShell from '@/components/AppShell';
-import { useApi } from '@/components/ClientTools';
-export default function Employees(){ const {data}=useApi<any>('/api/admin/employees'); return <AppShell area="admin"><h1>ข้อมูลพนักงาน</h1><div className="table-wrap"><table><thead><tr><th>รหัส</th><th>ชื่อ</th><th>HUB</th><th>ตำแหน่ง</th><th>วันเริ่มงาน</th><th>สถานะ</th></tr></thead><tbody>{(data?.employees||[]).map((e:any)=><tr key={e.id}><td>{e.employee_code}</td><td>{e.employee_name}</td><td>{e.hub_name}</td><td>{e.position}</td><td>{e.start_date}</td><td>{e.employment_status}</td></tr>)}</tbody></table></div></AppShell>}
+import { Message } from '@/components/ClientTools';
+import type { Role, SessionUser, AccountStatus } from '@/types';
+
+type ScopeType = SessionUser['scopeType'];
+
+type EmployeeRow = {
+  id?: string;
+  employee_code: string;
+  employee_name?: string;
+  hub_id?: string;
+  hub_name?: string;
+  area?: string;
+  position?: string;
+  position_category?: string;
+  start_date?: string;
+  employment_status?: string;
+  account_role?: Role;
+  account_status?: AccountStatus;
+  scope_type?: ScopeType;
+  scope_value?: string;
+  is_locked?: boolean;
+};
+
+type FormState = {
+  employee_code: string;
+  employee_name: string;
+  hub_id: string;
+  hub_name: string;
+  area: string;
+  position: string;
+  start_date: string;
+  employment_status: string;
+  role: Role;
+  scope_type: ScopeType;
+  scope_value: string;
+  status: AccountStatus;
+  pin: string;
+};
+
+const emptyForm: FormState = {
+  employee_code: '',
+  employee_name: '',
+  hub_id: '',
+  hub_name: '',
+  area: '',
+  position: '',
+  start_date: '',
+  employment_status: 'ACTIVE',
+  role: 'staff',
+  scope_type: 'SELF',
+  scope_value: '',
+  status: 'PIN_REQUIRED',
+  pin: ''
+};
+
+const roleOptions: { value: Role; label: string; desc: string }[] = [
+  { value: 'staff', label: 'พนักงาน', desc: 'เห็นข้อมูลตัวเอง' },
+  { value: 'supervisor', label: 'Supervisor', desc: 'หัวหน้าทีม/กะ' },
+  { value: 'hub_manager', label: 'HUB Manager', desc: 'ดูแลตาม HUB' },
+  { value: 'area_manager', label: 'Area Manager', desc: 'ดูแลตาม Area' },
+  { value: 'admin', label: 'Admin', desc: 'จัดการระบบ' },
+  { value: 'viewer', label: 'Viewer', desc: 'ดูข้อมูลแบบจำกัด' }
+];
+
+const scopeOptions: { value: ScopeType; label: string }[] = [
+  { value: 'SELF', label: 'SELF - เฉพาะตัวเอง' },
+  { value: 'TEAM', label: 'TEAM - ทีม/กะ' },
+  { value: 'HUB', label: 'HUB - คลัง/สาขา' },
+  { value: 'AREA', label: 'AREA - พื้นที่' },
+  { value: 'ALL', label: 'ALL - ทั้งระบบ' }
+];
+
+const statusOptions: { value: AccountStatus; label: string }[] = [
+  { value: 'PIN_REQUIRED', label: 'รอตั้ง PIN' },
+  { value: 'ACTIVE', label: 'ใช้งานได้' },
+  { value: 'LOCKED', label: 'ล็อก' },
+  { value: 'DISABLED', label: 'ปิดใช้งาน' }
+];
+
+function deriveScopeByRole(role: Role): ScopeType {
+  if (role === 'admin' || role === 'super_admin') return 'ALL';
+  if (role === 'area_manager') return 'AREA';
+  if (role === 'hub_manager') return 'HUB';
+  if (role === 'supervisor') return 'TEAM';
+  return 'SELF';
+}
+
+function statusClass(status?: string) {
+  if (status === 'ACTIVE') return 'pill pill-ok';
+  if (status === 'LOCKED' || status === 'DISABLED') return 'pill pill-danger';
+  return 'pill';
+}
+
+export default function Employees() {
+  const [employees, setEmployees] = useState<EmployeeRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const [search, setSearch] = useState('');
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState<'notice' | 'ok' | 'danger'>('notice');
+
+  const [form, setForm] = useState<FormState>(emptyForm);
+
+  async function loadEmployees() {
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const res = await fetch('/api/admin/employees');
+      const json = await res.json();
+
+      if (!json.ok) {
+        setMessageType('danger');
+        setMessage(json.message || 'โหลดข้อมูลไม่สำเร็จ');
+        return;
+      }
+
+      setEmployees(json.employees || []);
+    } catch (e) {
+      setMessageType('danger');
+      setMessage(String(e));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadEmployees();
+  }, []);
+
+  function updateForm<K extends keyof FormState>(key: K, value: FormState[K]) {
+    setForm((prev) => {
+      const next = { ...prev, [key]: value };
+
+      if (key === 'role') {
+        next.scope_type = deriveScopeByRole(value as Role);
+        if (value === 'staff' || value === 'viewer') {
+          next.scope_value = '';
+        }
+      }
+
+      return next;
+    });
+  }
+
+  function edit(row: EmployeeRow) {
+    setForm({
+      employee_code: row.employee_code || '',
+      employee_name: row.employee_name || '',
+      hub_id: row.hub_id || '',
+      hub_name: row.hub_name || '',
+      area: row.area || '',
+      position: row.position || '',
+      start_date: row.start_date || '',
+      employment_status: row.employment_status || 'ACTIVE',
+      role: row.account_role || 'staff',
+      scope_type: row.scope_type || deriveScopeByRole(row.account_role || 'staff'),
+      scope_value: row.scope_value || '',
+      status: row.account_status || 'PIN_REQUIRED',
+      pin: ''
+    });
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function save(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (!form.employee_code.trim()) {
+      setMessageType('danger');
+      setMessage('กรุณากรอกรหัสพนักงาน');
+      return;
+    }
+
+    setSaving(true);
+    setMessage('');
+
+    try {
+      const res = await fetch('/api/admin/employees', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      });
+
+      const json = await res.json();
+
+      if (!json.ok) {
+        setMessageType('danger');
+        setMessage(json.message || 'บันทึกไม่สำเร็จ');
+        return;
+      }
+
+      setMessageType('ok');
+      setMessage('บันทึกข้อมูลสำเร็จ');
+      setForm(emptyForm);
+      await loadEmployees();
+    } catch (e) {
+      setMessageType('danger');
+      setMessage(String(e));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const filtered = employees.filter((e) => {
+    const q = search.trim().toLowerCase();
+
+    if (!q) return true;
+
+    return [
+      e.employee_code,
+      e.employee_name,
+      e.hub_id,
+      e.hub_name,
+      e.area,
+      e.position,
+      e.account_role,
+      e.account_status
+    ]
+      .join(' ')
+      .toLowerCase()
+      .includes(q);
+  });
+
+  return (
+    <AppShell area="admin">
+      <div className="page-head">
+        <div>
+          <p className="eyebrow">Employees & Roles</p>
+          <h1>ข้อมูลพนักงาน / สิทธิ์</h1>
+          <p className="muted">
+            ใช้หน้านี้สร้างบัญชีพนักงาน, Manager, Supervisor และกำหนด Scope การมองเห็นข้อมูล
+          </p>
+        </div>
+
+        <button className="btn-secondary" onClick={() => setForm(emptyForm)}>
+          ล้างฟอร์ม
+        </button>
+      </div>
+
+      <Message text={message} type={messageType} />
+
+      <div className="card section-card">
+        <h2>สร้าง / แก้ไขบัญชี</h2>
+        <p className="muted small">
+          ถ้าต้องการสร้าง Manager หรือ Supervisor ให้กรอกรหัสพนักงาน, เลือกสิทธิ์, กำหนด Scope และตั้ง PIN เริ่มต้น
+        </p>
+
+        <form className="form employee-form" onSubmit={save}>
+          <div className="split">
+            <label>
+              รหัสพนักงาน
+              <input
+                value={form.employee_code}
+                onChange={(e) => updateForm('employee_code', e.target.value)}
+                placeholder="เช่น 6600123"
+              />
+            </label>
+
+            <label>
+              ชื่อพนักงาน
+              <input
+                value={form.employee_name}
+                onChange={(e) => updateForm('employee_name', e.target.value)}
+                placeholder="ชื่อ-นามสกุล"
+              />
+            </label>
+          </div>
+
+          <div className="split">
+            <label>
+              Area
+              <input
+                value={form.area}
+                onChange={(e) => updateForm('area', e.target.value)}
+                placeholder="เช่น NE1"
+              />
+            </label>
+
+            <label>
+              HUB ID
+              <input
+                value={form.hub_id}
+                onChange={(e) => updateForm('hub_id', e.target.value)}
+                placeholder="เช่น 26NAK_BHUB"
+              />
+            </label>
+          </div>
+
+          <label>
+            HUB Name
+            <input
+              value={form.hub_name}
+              onChange={(e) => updateForm('hub_name', e.target.value)}
+              placeholder="เช่น 26 NAK_BHUB-นครราชสีมา"
+            />
+          </label>
+
+          <div className="split">
+            <label>
+              ตำแหน่ง
+              <input
+                value={form.position}
+                onChange={(e) => updateForm('position', e.target.value)}
+                placeholder="ตำแหน่งงาน"
+              />
+            </label>
+
+            <label>
+              วันเริ่มงาน
+              <input
+                value={form.start_date}
+                onChange={(e) => updateForm('start_date', e.target.value)}
+                placeholder="YYYY-MM-DD"
+              />
+            </label>
+          </div>
+
+          <div className="split">
+            <label>
+              สิทธิ์ใช้งาน
+              <select value={form.role} onChange={(e) => updateForm('role', e.target.value as Role)}>
+                {roleOptions.map((r) => (
+                  <option value={r.value} key={r.value}>
+                    {r.label} - {r.desc}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              สถานะบัญชี
+              <select
+                value={form.status}
+                onChange={(e) => updateForm('status', e.target.value as AccountStatus)}
+              >
+                {statusOptions.map((s) => (
+                  <option value={s.value} key={s.value}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <div className="split">
+            <label>
+              Scope Type
+              <select
+                value={form.scope_type}
+                onChange={(e) => updateForm('scope_type', e.target.value as ScopeType)}
+              >
+                {scopeOptions.map((s) => (
+                  <option value={s.value} key={s.value}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              Scope Value
+              <input
+                value={form.scope_value}
+                onChange={(e) => updateForm('scope_value', e.target.value)}
+                placeholder="เช่น NE1 หรือ 26NAK_BHUB"
+              />
+            </label>
+          </div>
+
+          <label>
+            PIN เริ่มต้น / เปลี่ยน PIN
+            <input
+              value={form.pin}
+              onChange={(e) => updateForm('pin', e.target.value)}
+              type="password"
+              inputMode="numeric"
+              placeholder="เว้นว่างไว้ ถ้าไม่เปลี่ยน PIN"
+            />
+          </label>
+
+          <div className="notice">
+            ตัวอย่างการใช้งาน:
+            <br />
+            <b>hub_manager</b> ให้ Scope Type = HUB และ Scope Value = รหัส HUB
+            <br />
+            <b>area_manager</b> ให้ Scope Type = AREA และ Scope Value = Area เช่น NE1
+            <br />
+            <b>supervisor</b> ให้ Scope Type = TEAM หรือ HUB ตามที่ต้องการให้ดูแล
+          </div>
+
+          <button disabled={saving}>{saving ? 'กำลังบันทึก...' : 'บันทึกบัญชี / สิทธิ์'}</button>
+        </form>
+      </div>
+
+      <div className="section-title-row">
+        <h2 className="section-title">รายการพนักงาน</h2>
+        <input
+          className="search-input"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="ค้นหารหัส / ชื่อ / HUB / Role"
+        />
+      </div>
+
+      {loading ? (
+        <div className="notice">กำลังโหลดข้อมูล...</div>
+      ) : (
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>รหัส</th>
+                <th>ชื่อ</th>
+                <th>Area</th>
+                <th>HUB</th>
+                <th>ตำแหน่ง</th>
+                <th>Role</th>
+                <th>Scope</th>
+                <th>สถานะบัญชี</th>
+                <th>จัดการ</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {filtered.map((e) => (
+                <tr key={e.employee_code}>
+                  <td>{e.employee_code}</td>
+                  <td>{e.employee_name || '-'}</td>
+                  <td>{e.area || '-'}</td>
+                  <td>{e.hub_name || e.hub_id || '-'}</td>
+                  <td>{e.position || '-'}</td>
+                  <td>{e.account_role || '-'}</td>
+                  <td>
+                    {e.scope_type || '-'}
+                    {e.scope_value ? ` / ${e.scope_value}` : ''}
+                  </td>
+                  <td>
+                    <span className={statusClass(e.account_status)}>{e.account_status || 'NO_ACCOUNT'}</span>
+                  </td>
+                  <td>
+                    <button className="btn-secondary small-button" onClick={() => edit(e)}>
+                      แก้ไข
+                    </button>
+                  </td>
+                </tr>
+              ))}
+
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={9}>ไม่พบข้อมูล</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </AppShell>
+  );
+}

@@ -9,8 +9,8 @@ import type { Role, SessionUser } from '@/types';
 const roleLabels: Record<Role, string> = {
   super_admin: 'Super Admin',
   admin: 'Admin',
-  area_manager: 'Area Manager',
-  hub_manager: 'Hub Manager',
+  area_manager: 'ผู้จัดการ Area',
+  hub_manager: 'ผู้จัดการ HUB',
   supervisor: 'Supervisor',
   staff: 'พนักงาน',
   viewer: 'ผู้ดูข้อมูล'
@@ -53,7 +53,7 @@ const staffNav: NavItem[] = [
 ];
 
 const adminNav: NavItem[] = [
-  { href: '/admin', label: 'ภาพรวมระบบ', icon: 'shield' },
+  { href: '/admin', label: 'ภาพรวมระบบ', icon: 'home' },
   { href: '/admin/import', label: 'อัปโหลด Excel', icon: 'upload' },
   { href: '/admin/batches', label: 'ประวัตินำเข้า', icon: 'archive' },
   { href: '/admin/employees', label: 'ข้อมูลพนักงาน', icon: 'users' },
@@ -62,7 +62,7 @@ const adminNav: NavItem[] = [
 ];
 
 const managerNav: NavItem[] = [
-  { href: '/manager', label: 'ภาพรวมหัวหน้า', icon: 'chart' },
+  { href: '/manager', label: 'ภาพรวมหัวหน้า', icon: 'home' },
   { href: '/manager/approvals', label: 'อนุมัติเปิดใช้งาน', icon: 'check' },
   { href: '/manager/devices', label: 'อนุมัติอุปกรณ์', icon: 'device' },
   { href: '/manager/employees', label: 'รายชื่อพนักงาน', icon: 'users' },
@@ -107,16 +107,16 @@ function sectionsForMode(mode: 'staff' | 'admin' | 'manager'): NavSection[] {
 function mobileNavForMode(mode: 'staff' | 'admin' | 'manager'): NavItem[] {
   if (mode === 'admin') {
     return [
-      { href: '/admin', label: 'ระบบ', icon: 'shield' },
+      { href: '/admin', label: 'หน้าแรก', icon: 'home' },
       { href: '/admin/import', label: 'อัปโหลด', icon: 'upload' },
-      { href: '/admin/batches', label: 'ประวัติ', icon: 'archive' },
+      { href: '/admin/employees', label: 'พนักงาน', icon: 'users' },
       { href: '/account', label: 'บัญชี', icon: 'user' }
     ];
   }
 
   if (mode === 'manager') {
     return [
-      { href: '/manager', label: 'ภาพรวม', icon: 'chart' },
+      { href: '/manager', label: 'หน้าแรก', icon: 'home' },
       { href: '/manager/approvals', label: 'อนุมัติ', icon: 'check' },
       { href: '/manager/devices', label: 'อุปกรณ์', icon: 'device' },
       { href: '/account', label: 'บัญชี', icon: 'user' }
@@ -126,9 +126,15 @@ function mobileNavForMode(mode: 'staff' | 'admin' | 'manager'): NavItem[] {
   return [
     { href: '/dashboard', label: 'หน้าแรก', icon: 'home' },
     { href: '/incentive', label: 'รายละเอียด', icon: 'file' },
-    { href: '/issues', label: 'แจ้งปัญหา', icon: 'message' },
+    { href: '/history', label: 'ย้อนหลัง', icon: 'history' },
     { href: '/account', label: 'บัญชี', icon: 'user' }
   ];
+}
+
+function homeHrefForMode(mode: 'staff' | 'admin' | 'manager') {
+  if (mode === 'admin') return '/admin';
+  if (mode === 'manager') return '/manager';
+  return '/dashboard';
 }
 
 function isActive(pathname: string, href: string) {
@@ -392,13 +398,13 @@ export default function AppShell({
       </aside>
 
       <header className="mobile-topbar">
-        <div className="mobile-brand">
+        <Link href={homeHrefForMode(mode)} className="mobile-brand mobile-brand-link">
           <div className="brand-monogram small">NAK</div>
           <div>
             <strong>NAK Incentive</strong>
             <span>{displayName}</span>
           </div>
-        </div>
+        </Link>
 
         <span className="role-badge">{displayRole}</span>
       </header>
