@@ -1175,3 +1175,125 @@ th {
     font-size: 28px;
   }
 }
+
+/* Account Page Professional UI */
+
+.account-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.85fr) minmax(320px, 1.15fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.account-profile-card,
+.account-pin-card,
+.account-device-card,
+.account-danger-card {
+  display: grid;
+  gap: 16px;
+}
+
+.account-profile-card {
+  min-height: 100%;
+}
+
+.account-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 24px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--brand), var(--brand2));
+  color: #ffffff;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  box-shadow: 0 16px 34px rgba(237, 91, 47, 0.22);
+}
+
+.account-profile-card h2,
+.account-pin-card h2,
+.account-device-card h2,
+.account-danger-card h2 {
+  margin-bottom: 4px;
+  letter-spacing: -0.03em;
+}
+
+.account-detail-list {
+  display: grid;
+  gap: 10px;
+}
+
+.account-detail-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 16px;
+  background: #f8fafc;
+  border: 1px solid var(--line);
+}
+
+.account-detail-row span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.account-detail-row strong {
+  text-align: right;
+  font-size: 14px;
+}
+
+.account-status-ok {
+  color: var(--ok);
+}
+
+.account-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.account-device-card,
+.account-danger-card {
+  grid-column: 1 / -1;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.account-danger-card {
+  border-color: #ffc7c3;
+  background: linear-gradient(180deg, #ffffff, #fff8f7);
+}
+
+.account-logout-top {
+  min-width: 132px;
+}
+
+@media (max-width: 860px) {
+  .account-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .account-device-card,
+  .account-danger-card {
+    grid-column: auto;
+    grid-template-columns: 1fr;
+  }
+
+  .account-device-card .btn,
+  .account-danger-card button,
+  .account-logout-top {
+    width: 100%;
+  }
+
+  .account-detail-row {
+    align-items: flex-start;
+  }
+
+  .account-detail-row strong {
+    max-width: 55%;
+    word-break: break-word;
+  }
+}
