@@ -139,6 +139,7 @@ export default function Employees() {
 
       if (key === 'role') {
         next.scope_type = deriveScopeByRole(value as Role);
+
         if (value === 'staff' || value === 'viewer') {
           next.scope_value = '';
         }
@@ -384,24 +385,27 @@ export default function Employees() {
             />
           </label>
 
-          <div className="notice">
-            ตัวอย่างการใช้งาน:
-            <br />
-            <b>hub_manager</b> ให้ Scope Type = HUB และ Scope Value = รหัส HUB
-            <br />
-            <b>area_manager</b> ให้ Scope Type = AREA และ Scope Value = Area เช่น NE1
-            <br />
-            <b>supervisor</b> ให้ Scope Type = TEAM หรือ HUB ตามที่ต้องการให้ดูแล
+          <div className="notice employee-scope-note">
+            <strong>ตัวอย่างการใช้งาน</strong>
+            <span><b>hub_manager</b> ให้ Scope Type = HUB และ Scope Value = รหัส HUB</span>
+            <span><b>area_manager</b> ให้ Scope Type = AREA และ Scope Value = Area เช่น NE1</span>
+            <span><b>supervisor</b> ให้ Scope Type = TEAM หรือ HUB ตามที่ต้องการให้ดูแล</span>
           </div>
 
           <button disabled={saving}>{saving ? 'กำลังบันทึก...' : 'บันทึกบัญชี / สิทธิ์'}</button>
         </form>
       </div>
 
-      <div className="section-title-row">
-        <h2 className="section-title">รายการพนักงาน</h2>
+      <div className="section-title-row employee-list-head">
+        <div>
+          <h2 className="section-title">รายการพนักงาน</h2>
+          <p className="muted small">
+            แสดงแบบการ์ดเพื่อให้อ่านง่าย ไม่ต้องเลื่อนตารางไปทางขวา
+          </p>
+        </div>
+
         <input
-          className="search-input"
+          className="search-input employee-search-input"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="ค้นหารหัส / ชื่อ / HUB / Role"
@@ -411,53 +415,66 @@ export default function Employees() {
       {loading ? (
         <div className="notice">กำลังโหลดข้อมูล...</div>
       ) : (
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>รหัส</th>
-                <th>ชื่อ</th>
-                <th>Area</th>
-                <th>HUB</th>
-                <th>ตำแหน่ง</th>
-                <th>Role</th>
-                <th>Scope</th>
-                <th>สถานะบัญชี</th>
-                <th>จัดการ</th>
-              </tr>
-            </thead>
+        <div className="employee-card-list">
+          {filtered.map((e) => (
+            <div className="card employee-card" key={e.employee_code}>
+              <div className="employee-card-top">
+                <div className="employee-avatar">
+                  {(e.employee_name || e.employee_code || '?').slice(0, 1)}
+                </div>
 
-            <tbody>
-              {filtered.map((e) => (
-                <tr key={e.employee_code}>
-                  <td>{e.employee_code}</td>
-                  <td>{e.employee_name || '-'}</td>
-                  <td>{e.area || '-'}</td>
-                  <td>{e.hub_name || e.hub_id || '-'}</td>
-                  <td>{e.position || '-'}</td>
-                  <td>{e.account_role || '-'}</td>
-                  <td>
+                <div className="employee-main-info">
+                  <div className="employee-code">{e.employee_code}</div>
+                  <h3>{e.employee_name || '-'}</h3>
+                  <p>{e.position || 'ไม่ระบุตำแหน่ง'}</p>
+                </div>
+
+                <span className={statusClass(e.account_status)}>
+                  {e.account_status || 'NO_ACCOUNT'}
+                </span>
+              </div>
+
+              <div className="employee-info-grid">
+                <div>
+                  <span>Area</span>
+                  <strong>{e.area || '-'}</strong>
+                </div>
+
+                <div>
+                  <span>HUB</span>
+                  <strong>{e.hub_name || e.hub_id || '-'}</strong>
+                </div>
+
+                <div>
+                  <span>Role</span>
+                  <strong>{e.account_role || '-'}</strong>
+                </div>
+
+                <div>
+                  <span>Scope</span>
+                  <strong>
                     {e.scope_type || '-'}
                     {e.scope_value ? ` / ${e.scope_value}` : ''}
-                  </td>
-                  <td>
-                    <span className={statusClass(e.account_status)}>{e.account_status || 'NO_ACCOUNT'}</span>
-                  </td>
-                  <td>
-                    <button className="btn-secondary small-button" onClick={() => edit(e)}>
-                      แก้ไข
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                  </strong>
+                </div>
+              </div>
 
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={9}>ไม่พบข้อมูล</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+              <div className="employee-card-actions">
+                <button className="btn-secondary" onClick={() => edit(e)}>
+                  แก้ไขข้อมูล / สิทธิ์
+                </button>
+              </div>
+            </div>
+          ))}
+
+          {filtered.length === 0 && (
+            <div className="card empty-state-card">
+              <h2>ไม่พบข้อมูล</h2>
+              <p className="muted">
+                ไม่พบพนักงานตามคำค้นหา กรุณาลองค้นหาด้วยรหัส ชื่อ HUB หรือ Role อื่น
+              </p>
+            </div>
+          )}
         </div>
       )}
     </AppShell>
