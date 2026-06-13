@@ -361,7 +361,58 @@ export default function Employees() {
       {loading ? (
         <div className="notice">กำลังโหลดข้อมูล...</div>
       ) : (
-        <div className="mobile-card-list employee-card-list">
+        <>
+        {filtered.length > 0 && (
+          <div className="responsive-desktop-table">
+            <div className="table-wrap desktop-table-card">
+              <table className="desktop-data-table employee-data-table">
+                <thead>
+                  <tr>
+                    <th>รหัส</th>
+                    <th>ชื่อ</th>
+                    <th>ตำแหน่ง</th>
+                    <th>Area</th>
+                    <th>HUB</th>
+                    <th>Role</th>
+                    <th>Scope</th>
+                    <th>สถานะ</th>
+                    <th>จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((e) => (
+                    <tr key={e.employee_code}>
+                      <td><strong>{e.employee_code}</strong></td>
+                      <td>{e.employee_name || '-'}</td>
+                      <td>{e.position || '-'}</td>
+                      <td>{e.area || '-'}</td>
+                      <td className="desktop-detail-cell">{e.hub_name || e.hub_id || '-'}</td>
+                      <td>{e.account_role || '-'}</td>
+                      <td>{e.scope_type || '-'}{e.scope_value ? ` / ${e.scope_value}` : ''}</td>
+                      <td><span className={statusClass(e.account_status)}>{e.account_status || 'NO_ACCOUNT'}</span></td>
+                      <td>
+                        <div className="desktop-table-actions">
+                          <button className="btn-secondary small-button" onClick={() => edit(e)}>แก้ไข</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {filtered.length === 0 && (
+          <div className="responsive-desktop-table">
+            <div className="card empty-state-card">
+              <h2>ไม่พบข้อมูล</h2>
+              <p className="muted">ไม่พบพนักงานตามคำค้นหา กรุณาลองค้นหาด้วยรหัส ชื่อ HUB หรือ Role อื่น</p>
+            </div>
+          </div>
+        )}
+
+        <div className="responsive-mobile-cards mobile-card-list employee-card-list">
           {filtered.map((e) => (
             <div className="card employee-card" key={e.employee_code}>
               <div className="employee-card-top">
@@ -396,6 +447,7 @@ export default function Employees() {
             </div>
           )}
         </div>
+        </>
       )}
     </AppShell>
   );

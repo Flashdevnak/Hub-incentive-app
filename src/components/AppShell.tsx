@@ -196,7 +196,7 @@ function useIsMobileViewport() {
 
   useEffect(() => {
     function sync() {
-      setIsMobile(window.innerWidth <= 860);
+      setIsMobile(window.innerWidth <= 1023);
     }
 
     sync();

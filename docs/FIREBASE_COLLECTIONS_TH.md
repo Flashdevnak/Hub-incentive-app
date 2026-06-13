@@ -6,14 +6,8 @@
 ## user_accounts
 บัญชีล็อกอิน เช่น pin_hash, role, scope_type, status, failed_login_count
 
-## trusted_devices
-อุปกรณ์ที่ได้รับอนุมัติ
-
 ## activation_requests
 คำขอเปิดใช้งานครั้งแรก
-
-## device_requests
-คำขอใช้อุปกรณ์ใหม่
 
 ## import_batches
 ประวัติการนำเข้าไฟล์ Excel

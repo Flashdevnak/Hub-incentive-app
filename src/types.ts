@@ -1,7 +1,6 @@
 export type Role = 'super_admin' | 'admin' | 'area_manager' | 'hub_manager' | 'supervisor' | 'staff' | 'viewer';
 export type AccountStatus = 'PIN_REQUIRED' | 'ACTIVE' | 'LOCKED' | 'DISABLED';
 export type RequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
-export type DeviceStatus = 'ACTIVE' | 'PENDING' | 'REVOKED';
 export type FileType = 'incentive' | 'diligence' | 'ot' | 'attendance' | 'bonus' | 'fine' | 'other';
 
 export interface SessionUser {

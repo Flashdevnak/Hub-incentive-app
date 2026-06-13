@@ -2,7 +2,7 @@
   "name": "nak-incentive-vercel-firebase",
   "version": "1.0.0",
   "private": true,
-  "description": "NAK Incentive Web App - Thai full system with Next.js, Vercel, Firebase Firestore, Excel import, mapping, employee PIN login, trusted devices, manager/admin backoffice.",
+  "description": "NAK Incentive Web App - Thai full system with Next.js, Vercel, Firebase Firestore, Excel import, mapping, employee PIN login, activation approval, manager/admin backoffice.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
