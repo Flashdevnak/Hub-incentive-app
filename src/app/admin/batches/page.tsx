@@ -47,6 +47,7 @@ export default function Batches() {
                     <th>รอบเดือน</th>
                     <th>HUB</th>
                     <th>Version</th>
+                    <th>กะ</th>
                     <th>สำเร็จ</th>
                     <th>ผิดพลาด</th>
                     <th>นำเข้าเมื่อ</th>
@@ -62,6 +63,7 @@ export default function Batches() {
                       <td>{b.period_month || '-'}/{b.period_year || '-'}</td>
                       <td>{b.hub || b.hub_name || '-'}</td>
                       <td>v{b.version_no || b.version || '-'}</td>
+                      <td>{b.shift_column_detected ? `${b.shift_column_name || '-'} (${b.shift_records_count || 0})` : '-'}</td>
                       <td>{b.success_rows ?? b.success_count ?? 0}</td>
                       <td>{b.failed_rows ?? b.error_count ?? 0}</td>
                       <td>{fmt(b.created_at || b.imported_at)}</td>
@@ -89,6 +91,7 @@ export default function Batches() {
                   <div><span>รอบเดือน</span><strong>{b.period_month || '-'}/{b.period_year || '-'}</strong></div>
                   <div><span>HUB</span><strong>{b.hub || b.hub_name || '-'}</strong></div>
                   <div><span>Version</span><strong>v{b.version_no || b.version || '-'}</strong></div>
+                  <div><span>กะ</span><strong>{b.shift_column_detected ? `${b.shift_column_name || '-'} (${b.shift_records_count || 0})` : '-'}</strong></div>
                   <div><span>สำเร็จ</span><strong>{b.success_rows ?? b.success_count ?? 0}</strong></div>
                   <div><span>ผิดพลาด</span><strong>{b.failed_rows ?? b.error_count ?? 0}</strong></div>
                   <div><span>นำเข้าเมื่อ</span><strong>{fmt(b.created_at || b.imported_at)}</strong></div>

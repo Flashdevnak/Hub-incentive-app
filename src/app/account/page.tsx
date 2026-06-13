@@ -26,6 +26,7 @@ function scopeLabel(user?: SessionUser | null) {
   if (user.scopeType === 'AREA') return `Area: ${user.scopeValue || '-'}`;
   if (user.scopeType === 'HUB') return `HUB: ${user.scopeValue || '-'}`;
   if (user.scopeType === 'TEAM') return `Team: ${user.scopeValue || '-'}`;
+  if (user.scopeType === 'SHIFT') return `Shift: ${user.scopeValue || '-'}`;
 
   return 'เฉพาะข้อมูลของตัวเอง';
 }

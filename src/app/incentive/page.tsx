@@ -149,6 +149,15 @@ export default function Incentive() {
               <KpiCard label="ยอดสุทธิ" value={record.net_amount} tone="net" />
             </div>
 
+            <div className="card shift-summary-card">
+              <div>
+                <span className="login-label">Shift</span>
+                <h2>{record.shift_name || record.shift_code || 'ยังไม่มีข้อมูลกะ'}</h2>
+                <p className="muted">แหล่งข้อมูล: {record.shift_source || 'UNKNOWN'}</p>
+              </div>
+              {record.shift_group && <span className="pill">{record.shift_group}</span>}
+            </div>
+
             <CompactSection
               title="ข้อมูลพนักงาน"
               items={by('identity').concat(by('attendance'))}

@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { db, ts } from '@/lib/firebaseAdmin';
 import { fail, ok, requireAuth, handleError } from '@/lib/http';
 import { hashPin, normalizeCode } from '@/lib/crypto';
+import { audit } from '@/lib/audit';
 import type { Role, SessionUser, AccountStatus } from '@/types';
 
 const roles: Role[] = [
@@ -30,7 +31,7 @@ function deriveScopeType(role: Role): SessionUser['scopeType'] {
   if (role === 'super_admin' || role === 'admin') return 'ALL';
   if (role === 'area_manager') return 'AREA';
   if (role === 'hub_manager') return 'HUB';
-  if (role === 'supervisor') return 'TEAM';
+  if (role === 'supervisor') return 'HUB';
   return 'SELF';
 }
 
@@ -61,8 +62,18 @@ function canSeeEmployee(session: SessionUser, employee: any) {
     return (
       String(employee.team || '').trim() === scopeValue ||
       String(employee.team_name || '').trim() === scopeValue ||
+      String(employee.shift_code || '').trim() === scopeValue ||
+      String(employee.shift_group || '').trim() === scopeValue ||
       String(employee.hub_id || '').trim() === scopeValue ||
       String(employee.hub_name || '').trim() === scopeValue
+    );
+  }
+
+  if (session.scopeType === 'SHIFT') {
+    return (
+      String(employee.shift_code || '').trim() === scopeValue ||
+      String(employee.shift_name || '').trim() === scopeValue ||
+      String(employee.shift_group || '').trim() === scopeValue
     );
   }
 
@@ -78,6 +89,10 @@ export async function GET(req: NextRequest) {
       'hub_manager',
       'supervisor'
     ]);
+
+    const shiftCode = String(req.nextUrl.searchParams.get('shiftCode') || '').trim();
+    const shiftName = String(req.nextUrl.searchParams.get('shiftName') || '').trim();
+    const shiftGroup = String(req.nextUrl.searchParams.get('shiftGroup') || '').trim();
 
     const [employeesSnap, accountsSnap] = await Promise.all([
       db().collection('employees').limit(1000).get(),
@@ -106,7 +121,10 @@ export async function GET(req: NextRequest) {
           is_locked: account?.is_locked || false
         };
       })
-      .filter((employee) => canSeeEmployee(session, employee));
+      .filter((employee) => canSeeEmployee(session, employee))
+      .filter((employee) => !shiftCode || String(employee.shift_code || '').trim() === shiftCode)
+      .filter((employee) => !shiftName || String(employee.shift_name || '').trim() === shiftName)
+      .filter((employee) => !shiftGroup || String(employee.shift_group || '').trim() === shiftGroup);
 
     return ok({ employees });
   } catch (e) {
@@ -138,6 +156,8 @@ export async function POST(req: NextRequest) {
     const employeeRef = db().collection('employees').doc(employeeCode);
     const accountRef = db().collection('user_accounts').doc(employeeCode);
 
+    const employeeSnap = await employeeRef.get();
+    const currentEmployee = employeeSnap.exists ? employeeSnap.data() || {} : {};
     const accountSnap = await accountRef.get();
     const currentAccount = accountSnap.exists ? accountSnap.data() || {} : {};
 
@@ -148,6 +168,11 @@ export async function POST(req: NextRequest) {
       hub_name: String(body.hub_name || '').trim(),
       area: String(body.area || '').trim(),
       position: String(body.position || '').trim(),
+      shift_code: String(body.shift_code || '').trim(),
+      shift_name: String(body.shift_name || '').trim(),
+      shift_group: String(body.shift_group || '').trim(),
+      shift_start: String(body.shift_start || '').trim(),
+      shift_end: String(body.shift_end || '').trim(),
       start_date: String(body.start_date || '').trim(),
       employment_status: String(body.employment_status || 'ACTIVE').trim(),
       updated_at: ts()
@@ -191,6 +216,20 @@ export async function POST(req: NextRequest) {
 
     await employeeRef.set(employeeData, { merge: true });
     await accountRef.set(accountData, { merge: true });
+
+    const shiftChanged = ['shift_code', 'shift_name', 'shift_group', 'shift_start', 'shift_end'].some(
+      (key) => String(currentEmployee[key] || '') !== String(employeeData[key as keyof typeof employeeData] || '')
+    );
+
+    if (shiftChanged) {
+      await audit(session.employeeCode, session.role, 'UPDATE_EMPLOYEE_SHIFT', 'employee', employeeCode, {
+        shift_code: employeeData.shift_code,
+        shift_name: employeeData.shift_name,
+        shift_group: employeeData.shift_group,
+        shift_start: employeeData.shift_start,
+        shift_end: employeeData.shift_end
+      }, req);
+    }
 
     return ok({
       message: 'บันทึกข้อมูลพนักงานและบัญชีสำเร็จ',

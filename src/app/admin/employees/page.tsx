@@ -18,6 +18,11 @@ type EmployeeRow = {
   position_category?: string;
   start_date?: string;
   employment_status?: string;
+  shift_code?: string;
+  shift_name?: string;
+  shift_group?: string;
+  shift_start?: string;
+  shift_end?: string;
   account_role?: Role;
   account_status?: AccountStatus;
   scope_type?: ScopeType;
@@ -34,6 +39,11 @@ type FormState = {
   position: string;
   start_date: string;
   employment_status: string;
+  shift_code: string;
+  shift_name: string;
+  shift_group: string;
+  shift_start: string;
+  shift_end: string;
   role: Role;
   scope_type: ScopeType;
   scope_value: string;
@@ -50,6 +60,11 @@ const emptyForm: FormState = {
   position: '',
   start_date: '',
   employment_status: 'ACTIVE',
+  shift_code: '',
+  shift_name: '',
+  shift_group: '',
+  shift_start: '',
+  shift_end: '',
   role: 'staff',
   scope_type: 'SELF',
   scope_value: '',
@@ -69,6 +84,7 @@ const roleOptions: { value: Role; label: string; desc: string }[] = [
 const scopeOptions: { value: ScopeType; label: string }[] = [
   { value: 'SELF', label: 'SELF - เฉพาะตัวเอง' },
   { value: 'TEAM', label: 'TEAM - ทีม/กะ' },
+  { value: 'SHIFT', label: 'SHIFT - กะงาน' },
   { value: 'HUB', label: 'HUB - คลัง/สาขา' },
   { value: 'AREA', label: 'AREA - พื้นที่' },
   { value: 'ALL', label: 'ALL - ทั้งระบบ' }
@@ -100,6 +116,7 @@ export default function Employees() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
+  const [shiftFilter, setShiftFilter] = useState('');
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'notice' | 'ok' | 'danger'>('notice');
   const [form, setForm] = useState<FormState>(emptyForm);
@@ -157,6 +174,11 @@ export default function Employees() {
       position: row.position || '',
       start_date: row.start_date || '',
       employment_status: row.employment_status || 'ACTIVE',
+      shift_code: row.shift_code || '',
+      shift_name: row.shift_name || '',
+      shift_group: row.shift_group || '',
+      shift_start: row.shift_start || '',
+      shift_end: row.shift_end || '',
       role: row.account_role || 'staff',
       scope_type: row.scope_type || deriveScopeByRole(row.account_role || 'staff'),
       scope_value: row.scope_value || '',
@@ -217,13 +239,23 @@ export default function Employees() {
       e.hub_name,
       e.area,
       e.position,
+      e.shift_code,
+      e.shift_name,
+      e.shift_group,
       e.account_role,
       e.account_status
     ]
       .join(' ')
       .toLowerCase()
       .includes(q);
+  }).filter((e) => {
+    if (!shiftFilter) return true;
+    return [e.shift_code, e.shift_name, e.shift_group].map((x) => String(x || '')).includes(shiftFilter);
   });
+
+  const shiftOptions = Array.from(new Set(
+    employees.flatMap((e) => [e.shift_code, e.shift_name, e.shift_group]).filter(Boolean).map(String)
+  )).sort();
 
   return (
     <AppShell area="admin">
@@ -278,6 +310,38 @@ export default function Employees() {
             HUB Name
             <input value={form.hub_name} onChange={(e) => updateForm('hub_name', e.target.value)} placeholder="เช่น 26 NAK_BHUB-นครราชสีมา" />
           </label>
+
+          <div className="notice employee-shift-note">
+            <strong>ข้อมูลกะเป็น optional</strong>
+            <span>ถ้าไฟล์ Incentive มีคอลัมน์กะ ระบบจะใช้กะจากไฟล์เป็นหลัก ถ้าไม่มี ระบบจะใช้กะจากข้อมูลพนักงานแทนถ้ามี</span>
+          </div>
+
+          <div className="split">
+            <label>
+              รหัสกะ / Shift Code
+              <input value={form.shift_code} onChange={(e) => updateForm('shift_code', e.target.value)} placeholder="เช่น DAY, NIGHT, A, 01:00-10:00" />
+            </label>
+
+            <label>
+              ชื่อกะ / Shift Name
+              <input value={form.shift_name} onChange={(e) => updateForm('shift_name', e.target.value)} placeholder="เช่น กะเช้า / กะดึก" />
+            </label>
+          </div>
+
+          <div className="split">
+            <label>
+              กลุ่มกะ / Shift Group
+              <input value={form.shift_group} onChange={(e) => updateForm('shift_group', e.target.value)} placeholder="เช่น DAY, AFTERNOON, NIGHT" />
+            </label>
+
+            <label>
+              เวลากะ
+              <div className="split compact-split">
+                <input value={form.shift_start} onChange={(e) => updateForm('shift_start', e.target.value)} placeholder="เริ่ม เช่น 01:00" />
+                <input value={form.shift_end} onChange={(e) => updateForm('shift_end', e.target.value)} placeholder="สิ้นสุด เช่น 10:00" />
+              </div>
+            </label>
+          </div>
 
           <div className="split">
             <label>
@@ -335,8 +399,10 @@ export default function Employees() {
           <div className="notice employee-scope-note">
             <strong>ตัวอย่างการตั้งค่า</strong>
             <span><b>Hub Supervisor</b> แนะนำ Role = supervisor, Scope Type = HUB, Scope Value = รหัส HUB</span>
+            <span><b>supervisor + TEAM/SHIFT</b> ใช้เมื่อไฟล์นำเข้ามีข้อมูลทีม/กะสม่ำเสมอเท่านั้น</span>
             <span><b>hub_manager</b> ให้ Scope Type = HUB และ Scope Value = รหัส HUB</span>
             <span><b>area_manager</b> ให้ Scope Type = AREA และ Scope Value = Area เช่น NE1</span>
+            <span><b>admin / super_admin</b> ให้ Scope Type = ALL เพื่อดูทั้งระบบ</span>
             <span><b>staff</b> ให้ Scope Type = SELF เพื่อดูเฉพาะข้อมูลตัวเอง</span>
           </div>
 
@@ -350,12 +416,25 @@ export default function Employees() {
           <p className="muted small">แสดงแบบการ์ดเพื่อให้อ่านง่ายบนมือถือ ไม่ต้องเลื่อนตาราง</p>
         </div>
 
-        <input
-          className="search-input employee-search-input"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="ค้นหารหัส / ชื่อ / HUB / Role"
-        />
+        <div className="employee-filter-bar">
+          <input
+            className="search-input employee-search-input"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="ค้นหารหัส / ชื่อ / HUB / Role / กะ"
+          />
+
+          <select
+            className="search-input employee-shift-filter"
+            value={shiftFilter}
+            onChange={(e) => setShiftFilter(e.target.value)}
+          >
+            <option value="">ทุกกะ</option>
+            {shiftOptions.map((shift) => (
+              <option value={shift} key={shift}>{shift}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {loading ? (
@@ -373,6 +452,7 @@ export default function Employees() {
                     <th>ตำแหน่ง</th>
                     <th>Area</th>
                     <th>HUB</th>
+                    <th>กะ</th>
                     <th>Role</th>
                     <th>Scope</th>
                     <th>สถานะ</th>
@@ -387,6 +467,7 @@ export default function Employees() {
                       <td>{e.position || '-'}</td>
                       <td>{e.area || '-'}</td>
                       <td className="desktop-detail-cell">{e.hub_name || e.hub_id || '-'}</td>
+                      <td>{e.shift_name || e.shift_code || e.shift_group || '-'}</td>
                       <td>{e.account_role || '-'}</td>
                       <td>{e.scope_type || '-'}{e.scope_value ? ` / ${e.scope_value}` : ''}</td>
                       <td><span className={statusClass(e.account_status)}>{e.account_status || 'NO_ACCOUNT'}</span></td>
@@ -430,6 +511,7 @@ export default function Employees() {
               <div className="employee-info-grid">
                 <div><span>Area</span><strong>{e.area || '-'}</strong></div>
                 <div><span>HUB</span><strong>{e.hub_name || e.hub_id || '-'}</strong></div>
+                <div><span>กะ</span><strong>{e.shift_name || e.shift_code || e.shift_group || '-'}</strong></div>
                 <div><span>Role</span><strong>{e.account_role || '-'}</strong></div>
                 <div><span>Scope</span><strong>{e.scope_type || '-'}{e.scope_value ? ` / ${e.scope_value}` : ''}</strong></div>
               </div>

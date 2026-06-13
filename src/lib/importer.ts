@@ -2,6 +2,24 @@ import * as XLSX from 'xlsx';
 import { FieldMapping } from '@/types';
 import { normalizeCode, normalizeDate } from './crypto';
 
+const shiftHeaderAliases = new Set([
+  'กะ',
+  'กะงาน',
+  'รอบกะ',
+  'เวรกะ',
+  'รอบงาน',
+  'รอบ',
+  'ทีม',
+  'ทีม/กะ',
+  'shift',
+  'shift code',
+  'shift name',
+  'shift group',
+  'team',
+  'work shift',
+  'schedule'
+]);
+
 export const defaultMappings: FieldMapping[] = [
   { excel_header: '网点ID', system_field: 'hub_id', thai_label: 'รหัส HUB', data_type: 'text', category: 'identity', is_visible_to_staff: true, display_order: 10 },
   { excel_header: '网点名称', system_field: 'hub_name', thai_label: 'ชื่อ HUB', data_type: 'text', category: 'identity', is_visible_to_staff: true, display_order: 20 },
@@ -35,6 +53,16 @@ export const defaultMappings: FieldMapping[] = [
   { excel_header: '当月应发金额总计', system_field: 'net_amount', thai_label: 'ยอดสุทธิจาก Incentive', data_type: 'money', category: 'summary', is_required: true, is_visible_to_staff: true, display_order: 410 }
 ];
 
+defaultMappings.push({
+  excel_header: 'Shift',
+  system_field: 'shift_code',
+  thai_label: 'กะ / Shift',
+  data_type: 'text',
+  category: 'identity',
+  is_visible_to_staff: true,
+  display_order: 90
+});
+
 export function parseWorkbook(buffer: Buffer) {
   const wb = XLSX.read(buffer, { type: 'buffer', cellDates: true });
   const sheetName = wb.SheetNames[0];
@@ -46,9 +74,84 @@ export function parseWorkbook(buffer: Buffer) {
 
 export function autoMap(headers: string[], existing: FieldMapping[] = defaultMappings) {
   return headers.map((h, idx) => {
-    const found = existing.find(m => m.excel_header === h || m.system_field === h || m.thai_label === h);
+    const found = existing.find(m => m.excel_header === h || m.system_field === h || m.thai_label === h) ||
+      (shiftHeaderAliases.has(normalizeShiftHeader(h))
+        ? { excel_header: h, system_field: 'shift_code', thai_label: 'กะ / Shift', data_type: 'text', category: 'identity', is_visible_to_staff: true, display_order: 90 } as FieldMapping
+        : null);
     return found || { excel_header: h, system_field: `extra_${idx + 1}`, thai_label: h, data_type: 'text', category: 'extra', is_visible_to_staff: true, display_order: 1000 + idx } as FieldMapping;
   });
+}
+
+function normalizeShiftHeader(value: string) {
+  return String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+export function detectShiftColumn(headers: string[], mappings?: FieldMapping[]) {
+  const mapped = mappings?.find((m) => (
+    m.system_field === 'shift_code' ||
+    m.system_field === 'shift_name' ||
+    m.system_field === 'shift_group'
+  ));
+
+  if (mapped) {
+    return { detected: true, columnName: mapped.excel_header, systemField: mapped.system_field };
+  }
+
+  const header = headers.find((h) => shiftHeaderAliases.has(normalizeShiftHeader(h)));
+  return header
+    ? { detected: true, columnName: header, systemField: 'shift_code' }
+    : { detected: false, columnName: '', systemField: '' };
+}
+
+export function normalizeShift(rawValue: any) {
+  const raw = String(rawValue || '').trim().replace(/\s+/g, ' ');
+  if (!raw) return { shift_code: '', shift_name: '', shift_group: '', shift_start: '', shift_end: '' };
+
+  const lower = raw.toLowerCase();
+  let shift_code = raw;
+  let shift_name = raw;
+  let shift_group = '';
+
+  if (/เช้า|day|morning/.test(lower)) {
+    shift_code = 'DAY';
+    shift_name = 'กะเช้า';
+    shift_group = 'DAY';
+  } else if (/บ่าย|afternoon/.test(lower)) {
+    shift_code = 'AFTERNOON';
+    shift_name = 'กะบ่าย';
+    shift_group = 'AFTERNOON';
+  } else if (/ดึก|night/.test(lower)) {
+    shift_code = 'NIGHT';
+    shift_name = 'กะดึก';
+    shift_group = 'NIGHT';
+  } else {
+    const timeRange = raw.match(/(\d{1,2}[:.]\d{2})\s*[-–]\s*(\d{1,2}[:.]\d{2})/);
+    const startOnly = raw.match(/(\d{1,2}[:.]\d{2})/);
+
+    if (timeRange) {
+      shift_code = `${timeRange[1].replace('.', ':')}-${timeRange[2].replace('.', ':')}`;
+      shift_name = shift_code;
+      shift_group = shift_code;
+    } else if (startOnly) {
+      shift_code = startOnly[1].replace('.', ':');
+      shift_name = raw;
+      shift_group = shift_code;
+    } else if (/^[a-z0-9_-]+$/i.test(raw)) {
+      shift_code = raw.toUpperCase();
+      shift_name = raw.toUpperCase();
+      shift_group = raw.toUpperCase();
+    }
+  }
+
+  const range = shift_code.match(/^(\d{1,2}:\d{2})-(\d{1,2}:\d{2})$/);
+
+  return {
+    shift_code,
+    shift_name,
+    shift_group,
+    shift_start: range?.[1] || '',
+    shift_end: range?.[2] || ''
+  };
 }
 
 export function toNumber(v: any) {
@@ -78,5 +181,14 @@ export function transformRow(row: Record<string, any>, mappings: FieldMapping[])
       display_order: m.display_order || 999
     });
   }
+  const shift = normalizeShift(standard.shift_code || standard.shift_name || standard.shift_group);
+  if (shift.shift_code) {
+    standard.shift_code = standard.shift_code || shift.shift_code;
+    standard.shift_name = standard.shift_name || shift.shift_name;
+    standard.shift_group = standard.shift_group || shift.shift_group;
+    standard.shift_start = standard.shift_start || shift.shift_start;
+    standard.shift_end = standard.shift_end || shift.shift_end;
+  }
+
   return { standard, details, raw: row };
 }

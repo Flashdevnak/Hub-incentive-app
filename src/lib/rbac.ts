@@ -7,6 +7,8 @@ export function canAccessEmployee(user: SessionUser, employee?: Employee | null,
   if (user.scopeType === 'SELF') return user.employeeCode === employee.employee_code;
   if (user.scopeType === 'HUB') return employee.hub_name === user.scopeValue || employee.hub_id === user.scopeValue;
   if (user.scopeType === 'AREA') return employee.area === user.scopeValue;
+  if (user.scopeType === 'SHIFT') return employee.shift_code === user.scopeValue || employee.shift_name === user.scopeValue || employee.shift_group === user.scopeValue;
+  if (user.scopeType === 'TEAM') return employee.team === user.scopeValue || employee.team_name === user.scopeValue || employee.shift_code === user.scopeValue || employee.shift_group === user.scopeValue;
   return false;
 }
 

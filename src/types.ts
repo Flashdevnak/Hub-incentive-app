@@ -6,7 +6,7 @@ export type FileType = 'incentive' | 'diligence' | 'ot' | 'attendance' | 'bonus'
 export interface SessionUser {
   employeeCode: string;
   role: Role;
-  scopeType: 'ALL' | 'AREA' | 'HUB' | 'TEAM' | 'SELF';
+  scopeType: 'ALL' | 'AREA' | 'HUB' | 'TEAM' | 'SHIFT' | 'SELF';
   scopeValue?: string;
   employeeName?: string;
 }
@@ -19,8 +19,15 @@ export interface Employee {
   area?: string;
   position?: string;
   position_category?: string;
+  team?: string;
+  team_name?: string;
   start_date?: string;
   employment_status?: string;
+  shift_code?: string;
+  shift_name?: string;
+  shift_group?: string;
+  shift_start?: string;
+  shift_end?: string;
   updated_at?: string;
 }
 
