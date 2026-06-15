@@ -65,21 +65,17 @@ const adminNav: NavItem[] = [
   { href: '/admin', label: 'ภาพรวมระบบ', icon: 'home' },
   { href: '/admin/import', label: 'อัปโหลด Excel', icon: 'upload' },
   { href: '/manager/approvals', label: 'ศูนย์อนุมัติ', icon: 'check', badgeKey: 'total_pending_approval_count' },
-  { href: '/manager/pin-resets', label: 'อนุมัติรีเซ็ต PIN', icon: 'key', badgeKey: 'pending_pin_reset_count' },
   { href: '/notifications', label: 'แจ้งเตือน', icon: 'inbox', badgeKey: 'unread_notification_count' },
   { href: '/admin/batches', label: 'ประวัตินำเข้า', icon: 'archive' },
   { href: '/admin/employees', label: 'ข้อมูลพนักงาน', icon: 'users' },
-  { href: '/admin/issues', label: 'คำร้องตรวจสอบ', icon: 'inbox', badgeKey: 'pending_issue_count' },
   { href: '/admin/logs', label: 'Audit Log', icon: 'audit' }
 ];
 
 const managerNav: NavItem[] = [
   { href: '/manager', label: 'ภาพรวมหัวหน้า', icon: 'home' },
   { href: '/manager/approvals', label: 'ศูนย์อนุมัติ', icon: 'check', badgeKey: 'total_pending_approval_count' },
-  { href: '/manager/pin-resets', label: 'อนุมัติรีเซ็ต PIN', icon: 'key', badgeKey: 'pending_pin_reset_count' },
   { href: '/notifications', label: 'แจ้งเตือน', icon: 'inbox', badgeKey: 'unread_notification_count' },
-  { href: '/manager/employees', label: 'รายชื่อพนักงาน', icon: 'users' },
-  { href: '/manager/issues', label: 'คำร้องตรวจสอบ', icon: 'inbox', badgeKey: 'pending_issue_count' }
+  { href: '/manager/employees', label: 'รายชื่อพนักงาน', icon: 'users' }
 ];
 
 const adminRoles: Role[] = ['super_admin', 'admin'];

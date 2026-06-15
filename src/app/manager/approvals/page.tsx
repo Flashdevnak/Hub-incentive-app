@@ -153,6 +153,11 @@ export default function ApprovalCenter() {
   }, [items, query, tab]);
 
   useEffect(() => {
+    const tabParam = new URLSearchParams(window.location.search).get('tab');
+    if (tabParam === 'activation' || tabParam === 'pin' || tabParam === 'issue' || tabParam === 'all') {
+      setTab(tabParam);
+    }
+
     function onKey(event: KeyboardEvent) {
       if (event.key === 'Escape') setModal(null);
     }

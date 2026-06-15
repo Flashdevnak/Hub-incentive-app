@@ -359,6 +359,11 @@ export default function Employees() {
     loadEmployees();
   }, []);
 
+  useEffect(() => {
+    const nextPreset = form.permission_preset || customPreset.id;
+    if (selectedPreset !== nextPreset) setSelectedPreset(nextPreset);
+  }, [form.permission_preset, selectedPreset]);
+
   const suggestedPreset = useMemo(() => suggestPermissionFromPosition(form.position), [form.position]);
   const currentPreset = presetById(form.permission_preset);
   const permissionMeaning = scopeMeaning(form.scope_type, form.scope_value);

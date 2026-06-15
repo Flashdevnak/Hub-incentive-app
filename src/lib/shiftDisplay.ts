@@ -1,21 +1,11 @@
 export function formatShiftSource(source: any) {
   const value = String(source || '').trim().toUpperCase();
-  if (!value) return '-';
-  if (value === 'EXCEL') return 'จากระบบ HCM';
-  if (value === 'EMPLOYEE_MASTER') return 'จากข้อมูลพนักงาน';
-  if (value === 'MANUAL') return 'ตั้งค่าเอง';
-  if (value === 'UNKNOWN') return 'ไม่ระบุ';
-  return value;
+  if (!value || value === 'UNKNOWN') return '-';
+  return 'กะ';
 }
 
 export function formatShiftSourceFull(source: any) {
-  const value = String(source || '').trim().toUpperCase();
-  if (!value) return '-';
-  if (value === 'EXCEL') return 'ข้อมูลกะจากระบบ HCM';
-  if (value === 'EMPLOYEE_MASTER') return 'ใช้ข้อมูลกะจากข้อมูลพนักงานในระบบ';
-  if (value === 'MANUAL') return 'กะถูกตั้งค่าเองโดยผู้ดูแลระบบ';
-  if (value === 'UNKNOWN') return 'ยังไม่มีข้อมูลกะ';
-  return formatShiftSource(value);
+  return formatShiftSource(source);
 }
 
 export function formatShiftGroup(group: any) {
