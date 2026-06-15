@@ -36,6 +36,7 @@ type NavItem = {
   href: string;
   label: string;
   icon: IconName;
+  badgeKey?: keyof PendingCounts;
 };
 
 type NavSection = {
@@ -43,11 +44,18 @@ type NavSection = {
   items: NavItem[];
 };
 
+type PendingCounts = {
+  pending_activation_count: number;
+  pending_pin_reset_count: number;
+  pending_issue_count: number;
+  unread_notification_count: number;
+};
+
 const staffNav: NavItem[] = [
   { href: '/dashboard', label: 'หน้าแรก', icon: 'home' },
   { href: '/incentive', label: 'รายละเอียด', icon: 'file' },
   { href: '/history', label: 'ย้อนหลัง', icon: 'history' },
-  { href: '/notifications', label: 'แจ้งเตือน', icon: 'inbox' },
+  { href: '/notifications', label: 'แจ้งเตือน', icon: 'inbox', badgeKey: 'unread_notification_count' },
   { href: '/issues', label: 'แจ้งปัญหา', icon: 'message' },
   { href: '/account', label: 'บัญชี', icon: 'user' }
 ];
@@ -55,22 +63,22 @@ const staffNav: NavItem[] = [
 const adminNav: NavItem[] = [
   { href: '/admin', label: 'ภาพรวมระบบ', icon: 'home' },
   { href: '/admin/import', label: 'อัปโหลด Excel', icon: 'upload' },
-  { href: '/manager/approvals', label: 'อนุมัติเปิดใช้งาน', icon: 'check' },
-  { href: '/manager/pin-resets', label: 'อนุมัติรีเซ็ต PIN', icon: 'key' },
-  { href: '/notifications', label: 'แจ้งเตือน', icon: 'inbox' },
+  { href: '/manager/approvals', label: 'อนุมัติเปิดใช้งาน', icon: 'check', badgeKey: 'pending_activation_count' },
+  { href: '/manager/pin-resets', label: 'อนุมัติรีเซ็ต PIN', icon: 'key', badgeKey: 'pending_pin_reset_count' },
+  { href: '/notifications', label: 'แจ้งเตือน', icon: 'inbox', badgeKey: 'unread_notification_count' },
   { href: '/admin/batches', label: 'ประวัตินำเข้า', icon: 'archive' },
   { href: '/admin/employees', label: 'ข้อมูลพนักงาน', icon: 'users' },
-  { href: '/admin/issues', label: 'คำร้องตรวจสอบ', icon: 'inbox' },
+  { href: '/admin/issues', label: 'คำร้องตรวจสอบ', icon: 'inbox', badgeKey: 'pending_issue_count' },
   { href: '/admin/logs', label: 'Audit Log', icon: 'audit' }
 ];
 
 const managerNav: NavItem[] = [
   { href: '/manager', label: 'ภาพรวมหัวหน้า', icon: 'home' },
-  { href: '/manager/approvals', label: 'อนุมัติเปิดใช้งาน', icon: 'check' },
-  { href: '/manager/pin-resets', label: 'อนุมัติรีเซ็ต PIN', icon: 'key' },
-  { href: '/notifications', label: 'แจ้งเตือน', icon: 'inbox' },
+  { href: '/manager/approvals', label: 'อนุมัติเปิดใช้งาน', icon: 'check', badgeKey: 'pending_activation_count' },
+  { href: '/manager/pin-resets', label: 'อนุมัติรีเซ็ต PIN', icon: 'key', badgeKey: 'pending_pin_reset_count' },
+  { href: '/notifications', label: 'แจ้งเตือน', icon: 'inbox', badgeKey: 'unread_notification_count' },
   { href: '/manager/employees', label: 'รายชื่อพนักงาน', icon: 'users' },
-  { href: '/manager/issues', label: 'คำร้องตรวจสอบ', icon: 'inbox' }
+  { href: '/manager/issues', label: 'คำร้องตรวจสอบ', icon: 'inbox', badgeKey: 'pending_issue_count' }
 ];
 
 const adminRoles: Role[] = ['super_admin', 'admin'];
@@ -113,7 +121,7 @@ function mobileNavForMode(mode: 'staff' | 'admin' | 'manager'): NavItem[] {
     return [
       { href: '/admin', label: 'หน้าแรก', icon: 'home' },
       { href: '/admin/import', label: 'อัปโหลด', icon: 'upload' },
-      { href: '/manager/approvals', label: 'อนุมัติ', icon: 'check' },
+      { href: '/manager/approvals', label: 'อนุมัติ', icon: 'check', badgeKey: 'pending_activation_count' },
       { href: '/account', label: 'บัญชี', icon: 'user' }
     ];
   }
@@ -121,8 +129,8 @@ function mobileNavForMode(mode: 'staff' | 'admin' | 'manager'): NavItem[] {
   if (mode === 'manager') {
     return [
       { href: '/manager', label: 'หน้าแรก', icon: 'home' },
-      { href: '/manager/approvals', label: 'อนุมัติ', icon: 'check' },
-      { href: '/manager/pin-resets', label: 'PIN', icon: 'key' },
+      { href: '/manager/approvals', label: 'อนุมัติ', icon: 'check', badgeKey: 'pending_activation_count' },
+      { href: '/manager/pin-resets', label: 'PIN', icon: 'key', badgeKey: 'pending_pin_reset_count' },
       { href: '/account', label: 'บัญชี', icon: 'user' }
     ];
   }
@@ -146,6 +154,12 @@ function isActive(pathname: string, href: string) {
   if (href === '/admin') return pathname === '/admin';
   if (href === '/manager') return pathname === '/manager';
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function badgeText(count?: number) {
+  const value = Number(count || 0);
+  if (value <= 0) return '';
+  return value > 99 ? '99+' : String(value);
 }
 
 function AppIcon({ name }: { name: IconName }) {
@@ -224,6 +238,12 @@ export default function AppShell({
 
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
+  const [pendingCounts, setPendingCounts] = useState<PendingCounts>({
+    pending_activation_count: 0,
+    pending_pin_reset_count: 0,
+    pending_issue_count: 0,
+    unread_notification_count: 0
+  });
   const isMobile = useIsMobileViewport();
 
   useEffect(() => {
@@ -255,6 +275,45 @@ export default function AppShell({
       alive = false;
     };
   }, [router]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    let alive = true;
+
+    async function loadPendingCounts() {
+      try {
+        const res = await fetch('/api/me/pending-summary', { cache: 'no-store' });
+        const json = await res.json().catch(() => null);
+
+        if (alive && res.ok && json?.ok) {
+          setPendingCounts({
+            pending_activation_count: Number(json.summary?.pending_activation_count || 0),
+            pending_pin_reset_count: Number(json.summary?.pending_pin_reset_count || 0),
+            pending_issue_count: Number(json.summary?.pending_issue_count || 0),
+            unread_notification_count: Number(json.summary?.unread_notification_count || 0)
+          });
+        }
+      } catch {
+        if (alive) {
+          setPendingCounts({
+            pending_activation_count: 0,
+            pending_pin_reset_count: 0,
+            pending_issue_count: 0,
+            unread_notification_count: 0
+          });
+        }
+      }
+    }
+
+    loadPendingCounts();
+    const timer = window.setInterval(loadPendingCounts, 60000);
+
+    return () => {
+      alive = false;
+      window.clearInterval(timer);
+    };
+  }, [user]);
 
   const mode = modeFromUser(user, area);
   const sections = useMemo(() => sectionsForMode(mode), [mode]);
@@ -295,16 +354,23 @@ export default function AppShell({
                 <div className="nav-title">{section.title}</div>
 
                 {section.items.map((item) => (
-                  <Link
-                    href={item.href}
-                    key={item.href}
-                    className={isActive(pathname, item.href) ? 'active' : ''}
-                  >
-                    <span className="nav-symbol">
-                      <AppIcon name={item.icon} />
-                    </span>
-                    <span>{item.label}</span>
-                  </Link>
+                  (() => {
+                    const count = item.badgeKey ? badgeText(pendingCounts[item.badgeKey]) : '';
+
+                    return (
+                      <Link
+                        href={item.href}
+                        key={item.href}
+                        className={isActive(pathname, item.href) ? 'active' : ''}
+                      >
+                        <span className="nav-symbol">
+                          <AppIcon name={item.icon} />
+                        </span>
+                        <span className="nav-label">{item.label}</span>
+                        {count && <span className="nav-count-badge">{count}</span>}
+                      </Link>
+                    );
+                  })()
                 ))}
               </div>
             ))}
@@ -353,16 +419,23 @@ export default function AppShell({
 
       <nav className="mobile-tabs mobile-tabs-modern">
         {mobileNav.map((item) => (
-          <Link
-            href={item.href}
-            key={item.href}
-            className={isActive(pathname, item.href) ? 'active' : ''}
-          >
-            <span className="mobile-tab-icon">
-              <AppIcon name={item.icon} />
-            </span>
-            <b>{item.label}</b>
-          </Link>
+          (() => {
+            const count = item.badgeKey ? badgeText(pendingCounts[item.badgeKey]) : '';
+
+            return (
+              <Link
+                href={item.href}
+                key={item.href}
+                className={isActive(pathname, item.href) ? 'active' : ''}
+              >
+                <span className="mobile-tab-icon">
+                  <AppIcon name={item.icon} />
+                  {count && <span className="mobile-count-badge">{count}</span>}
+                </span>
+                <b>{item.label}</b>
+              </Link>
+            );
+          })()
         ))}
       </nav>
     </div>

@@ -25,8 +25,7 @@ export async function GET(req: NextRequest) {
       shiftInfo: {
         shift_code: shift?.shift_code || '',
         shift_name: shift?.shift_name || '',
-        shift_group: shift?.shift_group || '',
-        shift_source: shift?.shift_source || (employee?.shift_code ? 'EMPLOYEE_MASTER' : 'UNKNOWN')
+        shift_group: shift?.shift_group || ''
       },
       notice: 'ยอดที่แสดงเป็นข้อมูลจากไฟล์นำเข้าล่าสุด ยังไม่รวมรายได้อื่น เช่น เบี้ยขยันหรือรายการนอกระบบ'
     });
