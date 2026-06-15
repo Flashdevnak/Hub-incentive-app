@@ -51,19 +51,31 @@ function hasMojibake(value: any) {
   return /[\uFFFD\u00C3\u00C2]|\u00C3\u00A0\u00C2[\u00B8\u00B9\u00BA]|\u00C3\u00A1\u00C2\u00B8/.test(text);
 }
 
+function displayYear(value: any) {
+  const year = Number(value || 0);
+  if (!Number.isFinite(year) || year <= 0) return 0;
+  return year < 2400 ? year + 543 : year;
+}
+
 export function periodLabel(period: any, periodOptions: any[] = []) {
   if (!period) return NO_DATA_LABEL;
 
-  const selectedKey = period?.key || period?.period || '';
+  if (hasMojibake(period?.label) || hasMojibake(period?.name) || hasMojibake(period?.period)) {
+    return NO_DATA_LABEL;
+  }
+
+  const selectedKey = typeof period === 'string' || typeof period === 'number'
+    ? String(period)
+    : period?.key || period?.period || '';
   const matchedOption = selectedKey
-    ? periodOptions.find((item) => String(item?.key || '') === String(selectedKey))
+    ? periodOptions.find((item) => String(item?.key || '') === String(selectedKey) && !hasMojibake(item?.label) && !hasMojibake(item?.name))
     : null;
 
   const source = matchedOption || period;
   const parsed = parsePeriodKey(source?.key || selectedKey);
 
   const month = Number(source?.month || parsed?.month || 0);
-  const year = Number(source?.year || parsed?.year || 0);
+  const year = displayYear(source?.year || parsed?.year || 0);
   const monthText = monthName(month);
 
   if (monthText && year) return `${monthText} ${year}`;

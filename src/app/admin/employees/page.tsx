@@ -781,10 +781,12 @@ export default function Employees() {
             </label>
           </div>
 
-          <div className="permission-section">
-            <div>
+          <div className="permission-section role-guide-panel">
+            <div className="role-guide-header">
+              <div>
               <h3>ตั้งค่าสิทธิ์แบบง่าย</h3>
-              <p className="muted small">เลือกแบบสิทธิ์ด้านล่าง ระบบจะเติม Role และ Scope ให้อัตโนมัติ ถ้าไม่แน่ใจให้เลือกตามตำแหน่งงานจริง</p>
+              <p className="role-guide-description">เลือกแบบสิทธิ์ด้านล่าง ระบบจะเติม Role และ Scope ให้อัตโนมัติ ถ้าไม่แน่ใจให้เลือกตามตำแหน่งงานจริง</p>
+              </div>
             </div>
 
             {suggestedPreset && suggestedPreset.id !== currentPreset?.id && (
@@ -804,16 +806,16 @@ export default function Employees() {
               </select>
             </label>
 
-            <div className="permission-preset-grid">
+            <div className="permission-preset-grid role-guide-grid">
               {permissionPresets.map((preset) => (
                 <button
                   type="button"
                   key={preset.id}
-                  className={`permission-preset-card ${selectedPreset === preset.id ? 'is-active' : ''}`}
+                  className={`permission-preset-card role-guide-card ${selectedPreset === preset.id ? 'is-active' : ''}`}
                   onClick={() => applyPreset(preset.id)}
                 >
-                  <strong>{preset.shortLabel}</strong>
-                  <span>{preset.explanation}</span>
+                  <strong className="role-guide-badge">{preset.shortLabel}</strong>
+                  <span className="role-guide-text">{preset.explanation}</span>
                 </button>
               ))}
             </div>
