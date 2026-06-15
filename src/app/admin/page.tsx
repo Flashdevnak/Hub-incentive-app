@@ -137,11 +137,16 @@ export default function Admin() {
         ))}
       </div>
 
-      <div className="card role-guide-card">
-        <h3>การใช้สิทธิ์ Manager / Supervisor</h3>
-        <p className="muted">
+      <section className="role-guide-panel">
+        <div className="role-guide-header">
+          <div>
+            <p className="eyebrow">Permission Guide</p>
+            <h3>การใช้สิทธิ์ Manager / Supervisor</h3>
+          </div>
+        </div>
+        <p className="role-guide-description">
           สิทธิ์ของผู้ใช้ไม่ได้อิงจากชื่อไฟล์ แต่กำหนดจากบัญชีใน Firestore collection
-          <b> user_accounts.role </b>
+          <strong> user_accounts.role </strong>
           โดย Admin สามารถตั้งค่าได้ที่เมนู “ข้อมูลพนักงาน / สิทธิ์”
         </p>
 
@@ -163,7 +168,7 @@ export default function Admin() {
             <span>เห็นเฉพาะข้อมูลของตัวเอง</span>
           </div>
         </div>
-      </div>
+      </section>
 
       <div className="section-title-row shift-period-row">
         <div>

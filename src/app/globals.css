@@ -598,6 +598,94 @@ p {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
+.role-guide-panel {
+  min-width: 0;
+  margin-top: 24px;
+  padding: 22px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: var(--radius-lg);
+  background: #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+.role-guide-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.role-guide-header > div {
+  min-width: 0;
+}
+
+.role-guide-header .eyebrow {
+  margin-bottom: 4px;
+}
+
+.role-guide-panel h3 {
+  margin: 0;
+  color: var(--text-main);
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.35;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.role-guide-description {
+  margin: 0 0 18px;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+
+.role-guide-description strong {
+  color: var(--text-main);
+  font-weight: 900;
+}
+
+.role-guide-panel .role-guide-grid {
+  gap: 14px;
+}
+
+.role-guide-panel .role-guide-grid > div,
+.role-guide-card {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid rgba(255, 204, 0, 0.55);
+  border-radius: 18px;
+  background: linear-gradient(180deg, #fffdf2 0%, #ffffff 100%);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+}
+
+.role-guide-panel .role-guide-grid > div strong,
+.role-guide-badge {
+  display: inline-flex;
+  max-width: 100%;
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #ffcc00;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.role-guide-panel .role-guide-grid > div span,
+.role-guide-text {
+  display: block;
+  margin: 0;
+  color: #1f2937;
+  font-size: 15px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
 .split,
 .account-grid {
   display: grid;
@@ -1996,5 +2084,33 @@ textarea:focus {
     font-size: 10px;
     padding-left: 4px;
     padding-right: 4px;
+  }
+}
+
+@media (max-width: 1023px) and (min-width: 640px) {
+  .role-guide-panel .role-guide-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 639px) {
+  .role-guide-panel {
+    margin-top: 18px;
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .role-guide-panel h3 {
+    font-size: 16px;
+  }
+
+  .role-guide-panel .role-guide-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .role-guide-panel .role-guide-grid > div,
+  .role-guide-card {
+    padding: 14px;
   }
 }
