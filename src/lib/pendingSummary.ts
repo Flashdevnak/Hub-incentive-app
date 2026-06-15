@@ -58,6 +58,7 @@ export async function getPendingSummary(user: SessionUser) {
       pending_activation_count: 0,
       pending_pin_reset_count: 0,
       pending_issue_count: 0,
+      total_pending_approval_count: 0,
       unread_notification_count: unreadNotificationCount
     };
   }
@@ -87,6 +88,7 @@ export async function getPendingSummary(user: SessionUser) {
     pending_activation_count: visibleActivations.length,
     pending_pin_reset_count: visiblePins.length,
     pending_issue_count: visibleIssues.length,
+    total_pending_approval_count: visibleActivations.length + visiblePins.length + visibleIssues.length,
     unread_notification_count: unreadNotificationCount
   };
 }

@@ -48,6 +48,7 @@ type PendingCounts = {
   pending_activation_count: number;
   pending_pin_reset_count: number;
   pending_issue_count: number;
+  total_pending_approval_count: number;
   unread_notification_count: number;
 };
 
@@ -63,7 +64,7 @@ const staffNav: NavItem[] = [
 const adminNav: NavItem[] = [
   { href: '/admin', label: 'ภาพรวมระบบ', icon: 'home' },
   { href: '/admin/import', label: 'อัปโหลด Excel', icon: 'upload' },
-  { href: '/manager/approvals', label: 'อนุมัติเปิดใช้งาน', icon: 'check', badgeKey: 'pending_activation_count' },
+  { href: '/manager/approvals', label: 'ศูนย์อนุมัติ', icon: 'check', badgeKey: 'total_pending_approval_count' },
   { href: '/manager/pin-resets', label: 'อนุมัติรีเซ็ต PIN', icon: 'key', badgeKey: 'pending_pin_reset_count' },
   { href: '/notifications', label: 'แจ้งเตือน', icon: 'inbox', badgeKey: 'unread_notification_count' },
   { href: '/admin/batches', label: 'ประวัตินำเข้า', icon: 'archive' },
@@ -74,7 +75,7 @@ const adminNav: NavItem[] = [
 
 const managerNav: NavItem[] = [
   { href: '/manager', label: 'ภาพรวมหัวหน้า', icon: 'home' },
-  { href: '/manager/approvals', label: 'อนุมัติเปิดใช้งาน', icon: 'check', badgeKey: 'pending_activation_count' },
+  { href: '/manager/approvals', label: 'ศูนย์อนุมัติ', icon: 'check', badgeKey: 'total_pending_approval_count' },
   { href: '/manager/pin-resets', label: 'อนุมัติรีเซ็ต PIN', icon: 'key', badgeKey: 'pending_pin_reset_count' },
   { href: '/notifications', label: 'แจ้งเตือน', icon: 'inbox', badgeKey: 'unread_notification_count' },
   { href: '/manager/employees', label: 'รายชื่อพนักงาน', icon: 'users' },
@@ -121,7 +122,7 @@ function mobileNavForMode(mode: 'staff' | 'admin' | 'manager'): NavItem[] {
     return [
       { href: '/admin', label: 'หน้าแรก', icon: 'home' },
       { href: '/admin/import', label: 'อัปโหลด', icon: 'upload' },
-      { href: '/manager/approvals', label: 'อนุมัติ', icon: 'check', badgeKey: 'pending_activation_count' },
+      { href: '/manager/approvals', label: 'อนุมัติ', icon: 'check', badgeKey: 'total_pending_approval_count' },
       { href: '/account', label: 'บัญชี', icon: 'user' }
     ];
   }
@@ -129,7 +130,7 @@ function mobileNavForMode(mode: 'staff' | 'admin' | 'manager'): NavItem[] {
   if (mode === 'manager') {
     return [
       { href: '/manager', label: 'หน้าแรก', icon: 'home' },
-      { href: '/manager/approvals', label: 'อนุมัติ', icon: 'check', badgeKey: 'pending_activation_count' },
+      { href: '/manager/approvals', label: 'อนุมัติ', icon: 'check', badgeKey: 'total_pending_approval_count' },
       { href: '/manager/pin-resets', label: 'PIN', icon: 'key', badgeKey: 'pending_pin_reset_count' },
       { href: '/account', label: 'บัญชี', icon: 'user' }
     ];
@@ -242,6 +243,7 @@ export default function AppShell({
     pending_activation_count: 0,
     pending_pin_reset_count: 0,
     pending_issue_count: 0,
+    total_pending_approval_count: 0,
     unread_notification_count: 0
   });
   const isMobile = useIsMobileViewport();
@@ -291,6 +293,7 @@ export default function AppShell({
             pending_activation_count: Number(json.summary?.pending_activation_count || 0),
             pending_pin_reset_count: Number(json.summary?.pending_pin_reset_count || 0),
             pending_issue_count: Number(json.summary?.pending_issue_count || 0),
+            total_pending_approval_count: Number(json.summary?.total_pending_approval_count || 0),
             unread_notification_count: Number(json.summary?.unread_notification_count || 0)
           });
         }
@@ -300,6 +303,7 @@ export default function AppShell({
             pending_activation_count: 0,
             pending_pin_reset_count: 0,
             pending_issue_count: 0,
+            total_pending_approval_count: 0,
             unread_notification_count: 0
           });
         }
