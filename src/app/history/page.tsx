@@ -2,7 +2,7 @@
 
 import AppShell from '@/components/AppShell';
 import { useApi } from '@/components/ClientTools';
-import { money, monthName } from '@/lib/uiData';
+import { money, periodLabel } from '@/lib/uiData';
 import { formatShiftGroup } from '@/lib/shiftDisplay';
 
 export default function History() {
@@ -36,7 +36,7 @@ export default function History() {
             <tbody>
               {rows.map((r: any) => (
                 <tr key={r.id}>
-                  <td>{monthName(r.period_month)} {r.period_year}</td>
+                  <td>{periodLabel({ month: r.period_month, year: r.period_year })}</td>
                   <td>{r.shift_name || r.shift_code || formatShiftGroup(r.shift_group)}</td>
                   <td className="amount-text-gross">{money(r.gross_amount)}</td>
                   <td className="amount-text-deduction">{money(r.deduction_amount)}</td>
@@ -54,7 +54,7 @@ export default function History() {
             <div className="mobile-data-card-head">
               <div>
                 <span className="data-kicker">รอบเดือน</span>
-                <h3>{monthName(r.period_month)} {r.period_year}</h3>
+                <h3>{periodLabel({ month: r.period_month, year: r.period_year })}</h3>
               </div>
               <span className="pill">{r.shift_name || r.shift_code || formatShiftGroup(r.shift_group)}</span>
             </div>

@@ -2,7 +2,7 @@
 
 import AppShell from '@/components/AppShell';
 import { useApi } from '@/components/ClientTools';
-import { money, monthName } from '@/lib/uiData';
+import { money, periodLabel } from '@/lib/uiData';
 import { formatShiftGroup } from '@/lib/shiftDisplay';
 
 export default function Dashboard() {
@@ -10,9 +10,7 @@ export default function Dashboard() {
   const emp = data?.employee || {};
   const latest = data?.latest || {};
   const shift = data?.shiftInfo || {};
-  const latestPeriod = latest.period_month
-    ? `${monthName(latest.period_month)} ${latest.period_year || ''}`.trim()
-    : 'ยังไม่มีข้อมูล';
+  const latestPeriod = periodLabel({ month: latest.period_month, year: latest.period_year });
 
   return (
     <AppShell>

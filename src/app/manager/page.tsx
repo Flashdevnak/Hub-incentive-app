@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import AppShell from '@/components/AppShell';
 import { useApi } from '@/components/ClientTools';
-import { money, monthName } from '@/lib/uiData';
+import { money, monthName, periodLabel } from '@/lib/uiData';
 
 export default function Manager() {
   const [period, setPeriod] = useState('');
@@ -13,9 +13,7 @@ export default function Manager() {
   const shiftSummary = data?.shiftSummary || [];
   const periodOptions = data?.periodOptions || [];
   const selectedPeriod = data?.selectedPeriod;
-  const selectedPeriodLabel = selectedPeriod
-    ? `${monthName(selectedPeriod.month)} ${selectedPeriod.year}`
-    : 'ยังไม่มีข้อมูล';
+  const selectedPeriodLabel = periodLabel(selectedPeriod, periodOptions);
 
   return (
     <AppShell area="manager">
@@ -81,7 +79,7 @@ export default function Manager() {
             <select value={period || selectedPeriod?.key || ''} onChange={(event) => setPeriod(event.target.value)}>
               {periodOptions.map((option: any) => (
                 <option key={option.key} value={option.key}>
-                  {monthName(option.month)} {option.year}
+                  {monthName(option.month) || option.label || option.key} {option.year || ''}
                 </option>
               ))}
             </select>

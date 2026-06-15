@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import AppShell from '@/components/AppShell';
 import { useApi } from '@/components/ClientTools';
-import { money, monthName } from '@/lib/uiData';
+import { money, monthName, periodLabel } from '@/lib/uiData';
 
 const quickLinks = [
   { href: '/admin/import', title: 'อัปโหลด Excel', desc: 'นำเข้าไฟล์ Incentive และตรวจ Mapping ก่อนยืนยันข้อมูล' },
@@ -31,7 +31,7 @@ export default function Admin() {
   const shiftSummary = data?.shiftSummary || [];
   const periodOptions = data?.periodOptions || [];
   const selectedPeriod = data?.selectedPeriod;
-  const selectedPeriodLabel = selectedPeriod ? `${monthName(selectedPeriod.month)} ${selectedPeriod.year}` : 'ยังไม่มีข้อมูล';
+  const selectedPeriodLabel = periodLabel(selectedPeriod, periodOptions);
 
   return (
     <AppShell area="admin">
@@ -89,7 +89,7 @@ export default function Admin() {
       <div className="section-title-row shift-period-row">
         <div><h2 className="section-title">สรุปตามกะ</h2><p className="muted small">รอบข้อมูลล่าสุด: {selectedPeriodLabel}</p></div>
         {periodOptions.length > 0 && (
-          <label className="period-select-label"><span>เลือกรอบข้อมูล</span><select value={period || selectedPeriod?.key || ''} onChange={(event) => setPeriod(event.target.value)}>{periodOptions.map((option: any) => (<option key={option.key} value={option.key}>{monthName(option.month)} {option.year}</option>))}</select></label>
+          <label className="period-select-label"><span>เลือกรอบข้อมูล</span><select value={period || selectedPeriod?.key || ''} onChange={(event) => setPeriod(event.target.value)}>{periodOptions.map((option: any) => (<option key={option.key} value={option.key}>{monthName(option.month) || option.label || option.key} {option.year || ''}</option>))}</select></label>
         )}
       </div>
 
