@@ -1,32 +1,32 @@
 /* 1. Tokens */
 :root {
-  --app-bg: #f7f7f4;
-  --app-bg-soft: #fbfaf6;
+  --app-bg: #f4f7fb;
+  --app-bg-soft: #f8fafc;
 
   --surface: #ffffff;
-  --surface-soft: #fafafa;
-  --surface-warm: #fff9df;
-  --surface-yellow: #fff4b8;
+  --surface-soft: #f9fbfd;
+  --surface-warm: #eef6ff;
+  --surface-yellow: #eef6ff;
 
-  --border: #e3e0d6;
-  --border-soft: #eee9dc;
-  --border-strong: #d8d2c2;
+  --border: #d9e2ec;
+  --border-soft: #e8eef5;
+  --border-strong: #b8c7d9;
 
-  --text-main: #1f2933;
-  --text-secondary: #4b5563;
-  --text-muted: #6b7280;
-  --text-soft: #9ca3af;
+  --text-main: #102033;
+  --text-secondary: #40556e;
+  --text-muted: #68788d;
+  --text-soft: #94a3b8;
 
-  --brand: #f6c800;
-  --brand-hover: #ffd84d;
-  --brand-dark: #202020;
-  --brand-soft: #fff6c7;
-  --brand-soft-2: #fffbe8;
-  --brand-border: #ecd074;
+  --brand: #2563eb;
+  --brand-hover: #1d4ed8;
+  --brand-dark: #102033;
+  --brand-soft: #eaf2ff;
+  --brand-soft-2: #f3f8ff;
+  --brand-border: #bcd7ff;
 
-  --ink: #202020;
-  --ink-soft: #2f2f2f;
-  --ink-muted: #4a4a4a;
+  --ink: #102033;
+  --ink-soft: #1f3654;
+  --ink-muted: #40556e;
 
   --success: #15803d;
   --success-soft: #e8f7ee;
@@ -41,24 +41,24 @@
   --danger-border: #fed7aa;
 
   --info: #2563eb;
-  --info-soft: #eef4ff;
-  --info-border: #bfdbfe;
+  --info-soft: #eaf2ff;
+  --info-border: #bcd7ff;
 
-  --sidebar-bg: #2a2926;
-  --sidebar-panel: #34332f;
-  --sidebar-text: #fffaf0;
-  --sidebar-muted: #d8d1bf;
-  --sidebar-hover: rgba(246, 200, 0, 0.12);
-  --sidebar-active-bg: #f6c800;
-  --sidebar-active-text: #202020;
+  --sidebar-bg: #172033;
+  --sidebar-panel: #202b43;
+  --sidebar-text: #f8fafc;
+  --sidebar-muted: #b7c4d6;
+  --sidebar-hover: rgba(96, 165, 250, 0.14);
+  --sidebar-active-bg: #eaf2ff;
+  --sidebar-active-text: #102033;
 
   --radius-sm: 12px;
   --radius-md: 16px;
   --radius-lg: 22px;
   --radius-xl: 28px;
 
-  --shadow-card: 0 12px 28px rgba(38, 38, 38, 0.07);
-  --shadow-soft: 0 22px 52px rgba(38, 38, 38, 0.10);
+  --shadow-card: 0 12px 28px rgba(16, 32, 51, 0.07);
+  --shadow-soft: 0 22px 52px rgba(16, 32, 51, 0.10);
 
   --bg: var(--app-bg);
   --card: var(--surface);
@@ -69,12 +69,12 @@
   --text: var(--text-main);
   --muted: var(--text-muted);
   --muted-2: var(--text-soft);
-  --brand2: var(--brand-hover);
+  --brand2: #0ea5e9;
   --brand-line: var(--brand-border);
   --ok: var(--success);
   --ok-soft: var(--success-soft);
-  --blue: var(--info);
-  --blue-soft: var(--info-soft);
+  --blue: var(--brand);
+  --blue-soft: var(--brand-soft);
   --premium-shadow-soft: var(--shadow-card);
 }
 
@@ -91,8 +91,8 @@ body {
   margin: 0;
   overflow-x: hidden;
   background:
-    radial-gradient(circle at 8% -8%, rgba(246, 200, 0, 0.14), transparent 34%),
-    linear-gradient(180deg, #fbfaf6 0%, var(--app-bg) 100%);
+    radial-gradient(circle at 8% -8%, rgba(37, 99, 235, 0.10), transparent 34%),
+    linear-gradient(180deg, var(--app-bg-soft) 0%, var(--app-bg) 100%);
   color: var(--text-main);
 }
 
@@ -170,7 +170,7 @@ p {
   width: 100%;
   min-height: 100dvh;
   background:
-    radial-gradient(circle at 18% 0%, rgba(246, 200, 0, 0.10), transparent 32%),
+    radial-gradient(circle at 18% 0%, rgba(14, 165, 233, 0.08), transparent 32%),
     var(--app-bg);
 }
 
@@ -219,8 +219,8 @@ p {
 .side,
 .side-modern {
   background:
-    linear-gradient(180deg, var(--sidebar-bg) 0%, #302f2b 64%, var(--sidebar-panel) 100%),
-    radial-gradient(circle at 50% 0%, rgba(246, 200, 0, 0.12), transparent 32%);
+    linear-gradient(180deg, var(--sidebar-bg) 0%, #1b2840 64%, var(--sidebar-panel) 100%),
+    radial-gradient(circle at 50% 0%, rgba(96, 165, 250, 0.14), transparent 32%);
   border-right: 4px solid var(--brand);
   color: var(--sidebar-text);
 }
@@ -231,7 +231,7 @@ p {
   gap: 12px;
   padding: 18px;
   margin: 16px;
-  border: 1px solid rgba(236, 208, 116, 0.36);
+  border: 1px solid rgba(188, 215, 255, 0.28);
   border-radius: var(--radius-lg);
   background: var(--sidebar-panel);
 }
@@ -255,8 +255,9 @@ p {
   display: inline-grid;
   place-items: center;
   border-radius: 16px;
-  background: var(--brand);
-  color: var(--brand-dark);
+  border: 1px solid rgba(188, 215, 255, 0.55);
+  background: var(--brand-soft);
+  color: var(--brand);
   font-size: 13px;
   font-weight: 950;
 }
@@ -280,7 +281,7 @@ p {
   gap: 6px;
   padding: 16px;
   margin: 0 16px 18px;
-  border: 1px solid rgba(236, 208, 116, 0.36);
+  border: 1px solid rgba(188, 215, 255, 0.28);
   border-radius: var(--radius-lg);
   background: var(--sidebar-panel);
 }
@@ -352,13 +353,13 @@ p {
   display: inline-grid;
   place-items: center;
   border-radius: 12px;
-  background: var(--brand);
-  color: var(--brand-dark);
+  background: rgba(96, 165, 250, 0.16);
+  color: #bfdbfe;
 }
 
 .nav-modern a.active .nav-symbol {
-  background: var(--brand-dark);
-  color: var(--brand);
+  background: var(--brand);
+  color: #ffffff;
 }
 
 .nav-label {
@@ -522,7 +523,7 @@ p {
   border-radius: var(--radius-xl);
   background:
     linear-gradient(90deg, var(--brand) 0 6px, transparent 6px),
-    radial-gradient(circle at 100% 0%, rgba(246, 200, 0, 0.12), transparent 28%),
+    radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.10), transparent 28%),
     var(--surface);
   box-shadow: var(--shadow-card);
 }
@@ -791,8 +792,8 @@ button:disabled,
 .notification-popover-actions button:first-child {
   background: var(--brand);
   border-color: var(--brand);
-  color: var(--brand-dark);
-  box-shadow: 0 10px 22px rgba(246, 200, 0, 0.18);
+  color: #ffffff;
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.18);
 }
 
 .btn-primary:hover,
@@ -887,7 +888,7 @@ input:focus,
 select:focus,
 textarea:focus {
   border-color: var(--brand-border);
-  box-shadow: 0 0 0 4px rgba(246, 200, 0, 0.18);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.16);
 }
 
 .search-input {
@@ -1516,7 +1517,7 @@ textarea:focus {
 .permission-preset-card.is-active {
   background: var(--brand-soft);
   border-color: var(--brand-border);
-  box-shadow: 0 0 0 4px rgba(246, 200, 0, 0.16);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14);
 }
 
 .permission-preset-card.is-active strong {
@@ -1550,8 +1551,8 @@ textarea:focus {
   gap: 24px;
   padding: 28px 16px;
   background:
-    radial-gradient(circle at 10% -10%, rgba(246, 200, 0, 0.16), transparent 34%),
-    linear-gradient(180deg, #fbfaf6 0%, var(--app-bg) 100%);
+    radial-gradient(circle at 10% -10%, rgba(37, 99, 235, 0.12), transparent 34%),
+    linear-gradient(180deg, var(--app-bg-soft) 0%, var(--app-bg) 100%);
 }
 
 .auth-card,
