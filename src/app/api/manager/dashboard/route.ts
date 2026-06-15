@@ -1,16 +1,17 @@
 import { NextRequest } from 'next/server';
 import { db } from '@/lib/firebaseAdmin';
 import { ok, requireAuth, handleError } from '@/lib/http';
-import { managerRoles } from '@/lib/rbac';
+import { canAccessEmployee, managerRoles } from '@/lib/rbac';
 import { isActiveEmployeeRecord, isExplicitInactiveEmployeeRecord, isUsableAccountRecord } from '@/lib/employeeStatus';
-
-function shiftKey(data: any) {
-  return String(data.shift_code || data.shift_name || data.shift_group || '').trim();
-}
+import { buildShiftSummaryForPeriod } from '@/lib/incentiveRecords';
 
 export async function GET(req: NextRequest) {
   try {
-    requireAuth(req, [...managerRoles]);
+    const user = requireAuth(req, [...managerRoles]);
+    const periodParam = String(req.nextUrl.searchParams.get('period') || '').trim();
+    const monthParam = Number(req.nextUrl.searchParams.get('month') || 0);
+    const yearParam = Number(req.nextUrl.searchParams.get('year') || 0);
+    const selectedPeriodKey = periodParam || (monthParam && yearParam ? `${yearParam}${String(monthParam).padStart(2, '0')}` : '');
 
     const [emp, acc, act, pinReset, issues, incentiveSnap] = await Promise.all([
       db().collection('employees').limit(1000).get(),
@@ -21,11 +22,9 @@ export async function GET(req: NextRequest) {
       db().collection('incentive_records').where('is_active', '==', true).limit(1000).get().catch(() => ({ docs: [] } as any))
     ]);
 
-    const shiftMap = new Map<string, any>();
     const accountMap = new Map<string, any>();
 
     acc.docs.forEach((doc) => accountMap.set(doc.id, doc.data()));
-    const activeAccountCount = acc.docs.filter((doc) => isUsableAccountRecord(doc.data())).length;
 
     const employeeDocs = emp.docs
       .map((doc) => {
@@ -41,67 +40,39 @@ export async function GET(req: NextRequest) {
           accountStatus: account?.status || employee.accountStatus
         };
       })
+      .filter((employee) => canAccessEmployee(user, employee))
       .filter((employee) => employee.is_deleted !== true);
     const activeEmployees = employeeDocs.filter(isActiveEmployeeRecord);
     const inactiveEmployees = employeeDocs.filter(isExplicitInactiveEmployeeRecord);
     const missingAccountCount = activeEmployees.filter((employee) => !employee.account_exists).length;
+    const visibleEmployeeCodes = new Set(employeeDocs.map((employee) => String(employee.employee_code || '').toUpperCase()));
+    const visibleAccountDocs = acc.docs.filter((doc) => visibleEmployeeCodes.has(String(doc.id || '').toUpperCase()));
+    const activeAccountCount = visibleAccountDocs.filter((doc) => isUsableAccountRecord(doc.data())).length;
 
-    for (const data of activeEmployees) {
-      const key = shiftKey(data);
-      if (!key) continue;
-
-      const row = shiftMap.get(key) || {
-        shift_code: data.shift_code || key,
-        shift_name: data.shift_name || data.shift_code || key,
-        shift_group: data.shift_group || '',
-        employees: 0,
-        gross_amount: 0,
-        deduction_amount: 0,
-        net_amount: 0
-      };
-
-      row.employees++;
-      shiftMap.set(key, row);
-    }
-
-    for (const doc of incentiveSnap.docs || []) {
-      const data = doc.data();
-      const key = shiftKey(data);
-      if (!key) continue;
-
-      const row = shiftMap.get(key) || {
-        shift_code: data.shift_code || key,
-        shift_name: data.shift_name || data.shift_code || key,
-        shift_group: data.shift_group || '',
-        employees: 0,
-        gross_amount: 0,
-        deduction_amount: 0,
-        net_amount: 0
-      };
-
-      row.gross_amount += Number(data.gross_amount || 0);
-      row.deduction_amount += Number(data.deduction_amount || 0);
-      row.net_amount += Number(data.net_amount || 0);
-      shiftMap.set(key, row);
-    }
+    const incentiveRecords = (incentiveSnap.docs || [])
+      .map((doc: any) => ({ id: doc.id, ...doc.data() }))
+      .filter((record: any) => visibleEmployeeCodes.has(String(record.employee_code || '').toUpperCase()));
+    const periodSummary = buildShiftSummaryForPeriod(incentiveRecords, selectedPeriodKey);
 
     return ok({
       summary: {
         active_employee_count: activeEmployees.length,
         total_employee_count: employeeDocs.length,
         inactive_employee_count: inactiveEmployees.length,
-        account_count: acc.size,
+        account_count: visibleAccountDocs.length,
         active_account_count: activeAccountCount,
         missing_account_count: missingAccountCount,
         pending_activation_count: act.size,
         pending_pin_reset_count: pinReset.size || 0,
         employees: activeEmployees.length,
-        accounts: acc.size,
+        accounts: visibleAccountDocs.length,
         pendingActivation: act.size,
         pendingPinReset: pinReset.size || 0,
         pendingIssues: issues.size || 0
       },
-      shiftSummary: Array.from(shiftMap.values()).sort((a, b) => String(a.shift_name).localeCompare(String(b.shift_name), 'th'))
+      selectedPeriod: periodSummary.selectedPeriod,
+      periodOptions: periodSummary.periodOptions,
+      shiftSummary: periodSummary.shiftSummary
     });
   } catch (e) {
     return handleError(e);

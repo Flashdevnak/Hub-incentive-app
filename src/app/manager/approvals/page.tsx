@@ -11,7 +11,6 @@ type ActivationRequest = {
   employee_name?: string;
   hub_name?: string;
   start_date_input?: string;
-  device_info?: string;
   status?: string;
   requested_at?: string;
 };
@@ -92,7 +91,6 @@ export default function Approvals() {
                     <th>วันเริ่มงาน</th>
                     <th>สถานะ</th>
                     <th>วันที่ส่ง</th>
-                    <th>อุปกรณ์/Browser</th>
                     <th>จัดการ</th>
                   </tr>
                 </thead>
@@ -105,7 +103,6 @@ export default function Approvals() {
                       <td>{r.start_date_input || '-'}</td>
                       <td><span className="pill">{r.status || 'PENDING'}</span></td>
                       <td>{formatThaiDateTime(r.requested_at)}</td>
-                      <td className="desktop-detail-cell">{r.device_info || '-'}</td>
                       <td>
                         <div className="desktop-table-actions">
                           <button className="small-button" onClick={() => act(r.id, true)} disabled={busyId === r.id}>อนุมัติ</button>
@@ -137,7 +134,6 @@ export default function Approvals() {
                   <div><span>สถานะ</span><strong>{r.status || 'PENDING'}</strong></div>
                   <div><span>วันที่ส่งคำขอ</span><strong>{formatThaiDateTime(r.requested_at)}</strong></div>
                 </div>
-                <div className="data-note"><span>อุปกรณ์ / Browser</span><p>{r.device_info || '-'}</p></div>
                 <div className="data-card-actions two">
                   <button onClick={() => act(r.id, true)} disabled={busyId === r.id}>{busyId === r.id ? 'กำลังทำรายการ...' : 'อนุมัติ'}</button>
                   <button className="btn-danger" onClick={() => act(r.id, false)} disabled={busyId === r.id}>ปฏิเสธ</button>

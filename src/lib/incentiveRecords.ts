@@ -1,4 +1,4 @@
-function toMs(value: any) {
+export function toMs(value: any) {
   if (!value) return 0;
   if (typeof value === 'number') return value;
   if (typeof value === 'string') return new Date(value).getTime() || 0;
@@ -45,10 +45,47 @@ export function pickLatestIncentiveRecord(records: any[]) {
   })[0] || null;
 }
 
+export function isValidIncentiveRecord(record: any) {
+  const status = String(record?.import_status || record?.status || '').trim().toUpperCase();
+
+  if (!record || record.is_deleted === true) return false;
+  if (status === 'FAILED' || status === 'ERROR' || status === 'DELETED') return false;
+  return true;
+}
+
+export function getPeriodKey(record: any) {
+  const year = Number(record.period_year || record.year || 0);
+  const month = Number(record.period_month || record.month || 0);
+
+  if (!year || !month) return '';
+  return `${year}${String(month).padStart(2, '0')}`;
+}
+
+export function periodFromKey(periodKey: string) {
+  const key = String(periodKey || '').trim();
+  const year = Number(key.slice(0, 4));
+  const month = Number(key.slice(4, 6));
+
+  if (!year || !month) return null;
+  return { key, year, month };
+}
+
+export function importedPeriods(records: any[]) {
+  const periods = new Map<string, { key: string; year: number; month: number }>();
+
+  for (const record of records.filter(isValidIncentiveRecord)) {
+    const key = getPeriodKey(record);
+    const period = periodFromKey(key);
+    if (period) periods.set(key, period);
+  }
+
+  return Array.from(periods.values()).sort((a, b) => b.key.localeCompare(a.key));
+}
+
 export function dedupeIncentiveRecordsByMonth(records: any[]) {
   const groups = new Map<string, any[]>();
 
-  for (const record of records) {
+  for (const record of records.filter(isValidIncentiveRecord)) {
     const key = getHistoryDedupeKey(record);
     groups.set(key, [...(groups.get(key) || []), record]);
   }
@@ -61,4 +98,48 @@ export function dedupeIncentiveRecordsByMonth(records: any[]) {
       if (periodDiff) return periodDiff;
       return toMs(b.imported_at || b.confirmed_at || b.created_at) - toMs(a.imported_at || a.confirmed_at || a.created_at);
     });
+}
+
+function shiftKey(data: any) {
+  return String(data.shift_code || data.shift_name || data.shift_group || '').trim();
+}
+
+export function buildShiftSummaryForPeriod(records: any[], selectedPeriodKey?: string) {
+  const periods = importedPeriods(records);
+  const periodKey = selectedPeriodKey && periods.some((period) => period.key === selectedPeriodKey)
+    ? selectedPeriodKey
+    : periods[0]?.key || '';
+
+  const latestRecords = dedupeIncentiveRecordsByMonth(records)
+    .filter((record) => getPeriodKey(record) === periodKey);
+  const shiftMap = new Map<string, any>();
+
+  for (const record of latestRecords) {
+    const key = shiftKey(record);
+    if (!key) continue;
+
+    const row = shiftMap.get(key) || {
+      shift_code: record.shift_code || key,
+      shift_name: record.shift_name || record.shift_code || key,
+      shift_group: record.shift_group || '',
+      employees: 0,
+      gross_amount: 0,
+      deduction_amount: 0,
+      net_amount: 0
+    };
+
+    row.employees++;
+    row.gross_amount += Number(record.gross_amount || 0);
+    row.deduction_amount += Number(record.deduction_amount || 0);
+    row.net_amount += Number(record.net_amount || 0);
+    shiftMap.set(key, row);
+  }
+
+  return {
+    selectedPeriod: periodFromKey(periodKey),
+    periodOptions: periods,
+    shiftSummary: Array.from(shiftMap.values()).sort((a, b) =>
+      String(a.shift_name).localeCompare(String(b.shift_name), 'th')
+    )
+  };
 }

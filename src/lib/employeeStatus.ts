@@ -49,6 +49,7 @@ export function isActiveEmployeeRecord(employee: any) {
   if (
     !employee ||
     employee.is_deleted === true ||
+    employee.hidden_from_current_count === true ||
     employee.is_active === false
   ) {
     return false;

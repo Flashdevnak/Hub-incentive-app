@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import AppShell from '@/components/AppShell';
 import { useApi } from '@/components/ClientTools';
-import { money } from '@/lib/uiData';
+import { money, monthName } from '@/lib/uiData';
 
 const quickLinks = [
   {
@@ -44,9 +45,16 @@ const quickLinks = [
 ];
 
 export default function Admin() {
-  const { data, loading, error } = useApi<any>('/api/manager/dashboard');
+  const [period, setPeriod] = useState('');
+  const dashboardUrl = period ? `/api/manager/dashboard?period=${period}` : '/api/manager/dashboard';
+  const { data, loading, error } = useApi<any>(dashboardUrl);
   const s = data?.summary || {};
   const shiftSummary = data?.shiftSummary || [];
+  const periodOptions = data?.periodOptions || [];
+  const selectedPeriod = data?.selectedPeriod;
+  const selectedPeriodLabel = selectedPeriod
+    ? `${monthName(selectedPeriod.month)} ${selectedPeriod.year}`
+    : 'à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µà¸‚à¹‰à¸­à¸¡à¸¹à¸¥';
 
   return (
     <AppShell area="admin">
@@ -157,7 +165,24 @@ export default function Admin() {
         </div>
       </div>
 
-      <h2 className="section-title">สรุปตามกะ</h2>
+      <div className="section-title-row shift-period-row">
+        <div>
+          <h2 className="section-title">สรุปตามกะ</h2>
+          <p className="muted small">รอบข้อมูลล่าสุด: {selectedPeriodLabel}</p>
+        </div>
+        {periodOptions.length > 0 && (
+          <label className="period-select-label">
+            <span>เลือกรอบข้อมูล</span>
+            <select value={period || selectedPeriod?.key || ''} onChange={(event) => setPeriod(event.target.value)}>
+              {periodOptions.map((option: any) => (
+                <option key={option.key} value={option.key}>
+                  {monthName(option.month)} {option.year}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+      </div>
 
       {shiftSummary.length === 0 ? (
         <div className="card empty-state-card">
