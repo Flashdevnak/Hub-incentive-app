@@ -11,6 +11,7 @@ import { recordScopeMatches } from '@/lib/hubScope';
 export async function GET(req: NextRequest) {
   try {
     const user = requireAuth(req, [...managerRoles]);
+    const hubParam = String(req.nextUrl.searchParams.get('hub') || '').trim().toUpperCase();
     const periodParam = String(req.nextUrl.searchParams.get('period') || '').trim();
     const monthParam = Number(req.nextUrl.searchParams.get('month') || 0);
     const yearParam = Number(req.nextUrl.searchParams.get('year') || 0);
@@ -63,7 +64,9 @@ export async function GET(req: NextRequest) {
       }
       return visibleEmployeeCodes.has(String(record.employee_code || '').toUpperCase());
     });
-    const periodSummary = buildShiftSummaryForPeriod(scopedRecords, selectedPeriodKey);
+    const hubOptions = [...new Set(scopedRecords.map((r: any) => String(r.import_hub || r.hub_name || r.hub_id || '').trim().toUpperCase()).filter(Boolean))].sort();
+    const hubRecords = scopedRecords.filter((r: any) => !hubParam || String(r.import_hub || r.hub_name || r.hub_id || '').trim().toUpperCase() === hubParam);
+    const periodSummary = buildShiftSummaryForPeriod(hubRecords, selectedPeriodKey);
 
     return ok({
       summary: {
@@ -86,6 +89,8 @@ export async function GET(req: NextRequest) {
       selectedPeriod: periodSummary.selectedPeriod,
       periodOptions: periodSummary.periodOptions,
       shiftSummary: periodSummary.shiftSummary,
+      hubs: hubOptions,
+      selectedHub: hubParam,
       incentiveRecordsLimitReached: incentiveSnap.size === 1000,
       unpublishedRecordsHidden: published.unpublishedHidden
     });
