@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "seed:admin": "node scripts/seed-admin.mjs",
-    "test:multi-hub": "node --experimental-strip-types --test tests/multi-hub-history.test.mjs"
+    "test:multi-hub": "node --experimental-strip-types --test tests/multi-hub-history.test.mjs tests/multi-sheet-workbook.test.mjs"
   },
   "dependencies": {
     "@types/node": "^20.11.30",
