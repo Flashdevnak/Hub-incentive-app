@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { db } from '@/lib/firebaseAdmin';
 import { ok, requireAuth, handleError } from '@/lib/http';
 import { dedupeIncentiveRecordsByMonth } from '@/lib/incentiveRecords';
+import { publishedIncentiveRecords } from '@/lib/publishedIncentives';
 
 export async function GET(req: NextRequest) {
   try {
@@ -16,7 +17,8 @@ export async function GET(req: NextRequest) {
 
     const employee = (empSnap.data() || {}) as any;
     const latestRecords = latestSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as any));
-    const latest = dedupeIncentiveRecordsByMonth(latestRecords)[0] || null;
+    const published = await publishedIncentiveRecords(latestRecords);
+    const latest = dedupeIncentiveRecordsByMonth(published.records)[0] || null;
     const shift = (latest || employee) as any;
 
     return ok({
