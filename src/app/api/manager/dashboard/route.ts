@@ -5,7 +5,8 @@ import { canAccessEmployee, managerRoles } from '@/lib/rbac';
 import { isActiveEmployeeRecord, isExplicitInactiveEmployeeRecord, isUsableAccountRecord } from '@/lib/employeeStatus';
 import { buildShiftSummaryForPeriod } from '@/lib/incentiveRecords';
 import { getPendingSummary } from '@/lib/pendingSummary';
-import { publishedIncentiveRecords, recordScopeMatches } from '@/lib/publishedIncentives';
+import { publishedIncentiveRecords } from '@/lib/publishedIncentives';
+import { recordScopeMatches } from '@/lib/hubScope';
 
 export async function GET(req: NextRequest) {
   try {
