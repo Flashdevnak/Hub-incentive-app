@@ -11,7 +11,7 @@ export function getHistoryDedupeKey(record: any) {
   const employeeCode = String(record.employee_code || '').trim().toUpperCase();
   const year = String(record.period_year || record.year || '').trim();
   const month = String(record.period_month || record.month || '').trim().padStart(2, '0');
-  const hub = String(record.hub_id || record.hub_name || '').trim().toUpperCase();
+  const hub = String(record.import_hub || record.hub_id || record.hub_name || '').trim().toUpperCase();
 
   return [employeeCode, year, month, hub].join('|');
 }
@@ -49,7 +49,7 @@ export function isValidIncentiveRecord(record: any) {
   const status = String(record?.import_status || record?.status || '').trim().toUpperCase();
 
   if (!record || record.is_deleted === true) return false;
-  if (status === 'FAILED' || status === 'ERROR' || status === 'DELETED') return false;
+  if (status === 'FAILED' || status === 'ERROR' || status === 'DELETED' || status === 'PROCESSING') return false;
   return true;
 }
 
