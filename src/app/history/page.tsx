@@ -1,13 +1,16 @@
 'use client';
 
+import { useState } from 'react';
 import AppShell from '@/components/AppShell';
 import { useApi } from '@/components/ClientTools';
 import { money, periodLabel } from '@/lib/uiData';
 import { formatShiftGroup } from '@/lib/shiftDisplay';
 
 export default function History() {
+  const [hub, setHub] = useState('');
   const { data, error } = useApi<any>('/api/me/history');
-  const rows = data?.records || [];
+  const hubs: string[] = data?.hubs || [];
+  const rows = (data?.records || []).filter((r: any) => !hub || String(r.import_hub || r.hub_name || r.hub_id || '').trim().toUpperCase() === hub);
 
   return (
     <AppShell>
@@ -20,6 +23,7 @@ export default function History() {
       </div>
 
       {error && <div className="notice danger">{error}</div>}
+      <div className="card"><label>เลือกดูประวัติตาม HUB / Area <select value={hub} onChange={(event) => setHub(event.target.value)}><option value="">ทุก HUB</option>{hubs.map((name) => <option key={name} value={name}>{name}</option>)}</select></label></div>
 
       <div className="responsive-desktop-table">
         <div className="table-wrap desktop-table-card">
@@ -27,6 +31,7 @@ export default function History() {
             <thead>
               <tr>
                 <th>รอบเดือน</th>
+                <th>HUB ณ วันที่นำเข้า</th>
                 <th>กะ</th>
                 <th>ยอด Incentive</th>
                 <th>ยอดหัก</th>
@@ -37,6 +42,7 @@ export default function History() {
               {rows.map((r: any) => (
                 <tr key={r.id}>
                   <td>{periodLabel({ month: r.period_month, year: r.period_year })}</td>
+                  <td>{r.import_hub || r.hub_name || r.hub_id || '-'}</td>
                   <td>{r.shift_name || r.shift_code || formatShiftGroup(r.shift_group)}</td>
                   <td className="amount-text-gross">{money(r.gross_amount)}</td>
                   <td className="amount-text-deduction">{money(r.deduction_amount)}</td>
@@ -59,6 +65,7 @@ export default function History() {
               <span className="pill">{r.shift_name || r.shift_code || formatShiftGroup(r.shift_group)}</span>
             </div>
             <div className="mobile-info-grid data-grid">
+              <div><span>HUB ณ วันที่นำเข้า</span><strong>{r.import_hub || r.hub_name || r.hub_id || '-'}</strong></div>
               <div className="history-amount-gross"><span>ยอด Incentive</span><strong>{money(r.gross_amount)}</strong></div>
               <div className="history-amount-deduction"><span>ยอดหัก</span><strong>{money(r.deduction_amount)}</strong></div>
               <div className="history-amount-net"><span>ยอดสุทธิ</span><strong>{money(r.net_amount)}</strong></div>

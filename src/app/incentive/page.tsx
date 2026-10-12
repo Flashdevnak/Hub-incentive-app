@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import AppShell from '@/components/AppShell';
 import { useApi } from '@/components/ClientTools';
 import { money } from '@/lib/uiData';
@@ -108,9 +109,11 @@ function KpiCard({
 }
 
 export default function Incentive() {
-  const { data, loading, error } = useApi<any>('/api/me/incentive');
+  const [hub, setHub] = useState('');
+  const { data, loading, error } = useApi<any>(hub ? `/api/me/incentive?hub=${encodeURIComponent(hub)}` : '/api/me/incentive');
 
   const record = data?.record;
+  const hubs: string[] = data?.hubs || [];
   const details: DetailItem[] = record?.detail_json || [];
 
   const by = (category: string) =>
@@ -130,6 +133,7 @@ export default function Incentive() {
           ยอดที่แสดงเป็นข้อมูลจากไฟล์นำเข้าล่าสุด ยังไม่รวมรายได้อื่น เช่น เบี้ยขยันหรือรายการนอกระบบ
         </div>
 
+        {hubs.length > 1 && <div className="card"><label>HUB / Area <select value={hub} onChange={(event) => setHub(event.target.value)}><option value="">ข้อมูลล่าสุดทุก HUB</option>{hubs.map((name) => <option key={name} value={name}>{name}</option>)}</select></label></div>}
         {loading && <div className="notice">กำลังโหลดข้อมูล Incentive...</div>}
         {error && <div className="notice danger">{error}</div>}
 
@@ -144,6 +148,7 @@ export default function Incentive() {
 
         {record && (
           <>
+            <div className="notice">ข้อมูลรอบเดือน {record.period_month}/{record.period_year} · HUB: <strong>{record.import_hub || record.hub_name || record.hub_id || '-'}</strong></div>
             <div className="incentive-kpi-grid">
               <KpiCard label="ยอดรวมก่อนหัก" value={record.gross_amount} tone="gross" />
               <KpiCard label="ยอดหักรวม" value={record.deduction_amount} tone="deduction" />

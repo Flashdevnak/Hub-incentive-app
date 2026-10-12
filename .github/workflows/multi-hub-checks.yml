@@ -1,0 +1,31 @@
+name: Multi-HUB Import Safety Checks
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [work/multi-hub-history-import-safety-v1]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Test multi-HUB isolation and TypeScript
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install pinned dependencies
+        run: npm ci
+      - name: Multi-HUB regression tests
+        run: npm run test:multi-hub
+      - name: TypeScript typecheck
+        run: npx tsc --noEmit
+
+      - name: Next.js production compilation (no deployment)
+        run: npm run build

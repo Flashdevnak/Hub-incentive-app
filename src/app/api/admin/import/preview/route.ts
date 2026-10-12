@@ -15,8 +15,11 @@ export async function POST(req: NextRequest) {
     return ok({
       fileName: file.name,
       sheetName: parsed.sheetName,
+      sheets: parsed.sheets.map((sheet) => ({ name: sheet.name, rowCount: sheet.rowCount, columnCount: sheet.headers.length })),
+      totalRows: parsed.totalRows,
       headers: parsed.headers,
       previewRows: parsed.rows.slice(0, 10),
+      sampleRowsBySheet: parsed.sheets.map((sheet) => ({ name: sheet.name, rows: parsed.rows.filter((row) => row.__source_sheet === sheet.name).slice(0, 2) })),
       mappings,
       shiftDetection,
       shift_column_detected: shiftDetection.detected,

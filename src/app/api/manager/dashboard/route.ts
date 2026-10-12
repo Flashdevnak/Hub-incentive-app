@@ -5,10 +5,13 @@ import { canAccessEmployee, managerRoles } from '@/lib/rbac';
 import { isActiveEmployeeRecord, isExplicitInactiveEmployeeRecord, isUsableAccountRecord } from '@/lib/employeeStatus';
 import { buildShiftSummaryForPeriod } from '@/lib/incentiveRecords';
 import { getPendingSummary } from '@/lib/pendingSummary';
+import { publishedIncentiveRecords } from '@/lib/publishedIncentives';
+import { recordScopeMatches } from '@/lib/hubScope';
 
 export async function GET(req: NextRequest) {
   try {
     const user = requireAuth(req, [...managerRoles]);
+    const hubParam = String(req.nextUrl.searchParams.get('hub') || '').trim().toUpperCase();
     const periodParam = String(req.nextUrl.searchParams.get('period') || '').trim();
     const monthParam = Number(req.nextUrl.searchParams.get('month') || 0);
     const yearParam = Number(req.nextUrl.searchParams.get('year') || 0);
@@ -17,7 +20,7 @@ export async function GET(req: NextRequest) {
     const [emp, acc, incentiveSnap, pendingSummary] = await Promise.all([
       db().collection('employees').limit(1000).get(),
       db().collection('user_accounts').limit(1000).get(),
-      db().collection('incentive_records').where('is_active', '==', true).limit(1000).get().catch(() => ({ docs: [] } as any)),
+      db().collection('incentive_records').where('is_active', '==', true).limit(1000).get(),
       getPendingSummary(user)
     ]);
 
@@ -51,7 +54,19 @@ export async function GET(req: NextRequest) {
     const incentiveRecords = (incentiveSnap.docs || [])
       .map((doc: any) => ({ id: doc.id, ...doc.data() }))
       .filter((record: any) => visibleEmployeeCodes.has(String(record.employee_code || '').toUpperCase()));
-    const periodSummary = buildShiftSummaryForPeriod(incentiveRecords, selectedPeriodKey);
+    const published = await publishedIncentiveRecords(incentiveRecords);
+    const scopedRecords = published.records.filter((record: any) => {
+      if (user.role === 'super_admin' || user.role === 'admin') return true;
+      if (user.scopeType === 'HUB' || user.scopeType === 'AREA') {
+        // Historical reports must be scoped to the HUB at the time, not
+        // the employee's current roster membership after a transfer.
+        return recordScopeMatches(record, user.scopeType, user.scopeValue);
+      }
+      return visibleEmployeeCodes.has(String(record.employee_code || '').toUpperCase());
+    });
+    const hubOptions = [...new Set(scopedRecords.map((r: any) => String(r.import_hub || r.hub_name || r.hub_id || '').trim().toUpperCase()).filter(Boolean))].sort();
+    const hubRecords = scopedRecords.filter((r: any) => !hubParam || String(r.import_hub || r.hub_name || r.hub_id || '').trim().toUpperCase() === hubParam);
+    const periodSummary = buildShiftSummaryForPeriod(hubRecords, selectedPeriodKey);
 
     return ok({
       summary: {
@@ -73,7 +88,11 @@ export async function GET(req: NextRequest) {
       },
       selectedPeriod: periodSummary.selectedPeriod,
       periodOptions: periodSummary.periodOptions,
-      shiftSummary: periodSummary.shiftSummary
+      shiftSummary: periodSummary.shiftSummary,
+      hubs: hubOptions,
+      selectedHub: hubParam,
+      incentiveRecordsLimitReached: incentiveSnap.size === 1000,
+      unpublishedRecordsHidden: published.unpublishedHidden
     });
   } catch (e) {
     return handleError(e);

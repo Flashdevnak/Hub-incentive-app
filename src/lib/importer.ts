@@ -1,4 +1,3 @@
-import * as XLSX from 'xlsx';
 import { FieldMapping } from '@/types';
 import { normalizeCode, normalizeDate } from './crypto';
 
@@ -63,14 +62,7 @@ defaultMappings.push({
   display_order: 90
 });
 
-export function parseWorkbook(buffer: Buffer) {
-  const wb = XLSX.read(buffer, { type: 'buffer', cellDates: true });
-  const sheetName = wb.SheetNames[0];
-  const ws = wb.Sheets[sheetName];
-  const rows = XLSX.utils.sheet_to_json<Record<string, any>>(ws, { defval: '', raw: false });
-  const headers = rows.length ? Object.keys(rows[0]) : [];
-  return { sheetName, headers, rows };
-}
+export { parseWorkbook } from './workbookParser';
 
 export function autoMap(headers: string[], existing: FieldMapping[] = defaultMappings) {
   return headers.map((h, idx) => {
@@ -175,6 +167,7 @@ export function transformRow(row: Record<string, any>, mappings: FieldMapping[])
   const standard: Record<string, any> = {};
   const details: any[] = [];
   for (const m of mappings) {
+    if (!Object.prototype.hasOwnProperty.call(row, m.excel_header)) continue;
     const rawValue = row[m.excel_header];
     let value: any = rawValue;
     if (m.data_type === 'money' || m.data_type === 'number') value = toNumber(rawValue);

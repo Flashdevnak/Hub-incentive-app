@@ -7,10 +7,15 @@ import { money, monthName, periodLabel } from '@/lib/uiData';
 
 export default function Manager() {
   const [period, setPeriod] = useState('');
-  const dashboardUrl = period ? `/api/manager/dashboard?period=${period}` : '/api/manager/dashboard';
+  const [hub, setHub] = useState('');
+  const params = new URLSearchParams();
+  if (period) params.set('period', period);
+  if (hub) params.set('hub', hub);
+  const dashboardUrl = params.toString() ? `/api/manager/dashboard?${params.toString()}` : '/api/manager/dashboard';
   const { data } = useApi<any>(dashboardUrl);
   const s = data?.summary || {};
   const shiftSummary = data?.shiftSummary || [];
+  const hubOptions: string[] = data?.hubs || [];
   const periodOptions = data?.periodOptions || [];
   const selectedPeriod = data?.selectedPeriod;
   const selectedPeriodLabel = periodLabel(selectedPeriod, periodOptions);
@@ -71,8 +76,9 @@ export default function Manager() {
       <div className="section-title-row shift-period-row">
         <div>
           <h2 className="section-title">สรุปตามกะ</h2>
-          <p className="muted small">รอบข้อมูลล่าสุด: {selectedPeriodLabel}</p>
+          <p className="muted small">รอบข้อมูลล่าสุด: {selectedPeriodLabel} · {hub || 'ทุก HUB ที่มีสิทธิ์ดู'}</p>
         </div>
+        <label className="period-select-label"><span>HUB ของข้อมูล Incentive</span><select value={hub} onChange={(event) => setHub(event.target.value)}><option value="">ทุก HUB ที่มีสิทธิ์ดู</option>{hubOptions.map((name) => <option key={name} value={name}>{name}</option>)}</select></label>
         {periodOptions.length > 0 && (
           <label className="period-select-label">
             <span>เลือกรอบข้อมูล</span>
@@ -87,6 +93,7 @@ export default function Manager() {
         )}
       </div>
 
+      {data?.incentiveRecordsLimitReached && <div className="notice danger">ข้อมูล Incentive เกินขอบเขต 1,000 รายการที่ระบบอ่านในครั้งนี้ ยอดสรุปอาจไม่ครบ ต้องปรับปรุงการแบ่งหน้าอ่านข้อมูลก่อนใช้อ้างอิงยอดรวม</div>}
       {shiftSummary.length === 0 ? (
         <div className="card empty-state-card">
           <h2>ยังไม่มีข้อมูลกะ</h2>
