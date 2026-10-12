@@ -26,3 +26,6 @@ jobs:
         run: npm run test:multi-hub
       - name: TypeScript typecheck
         run: npx tsc --noEmit
+
+      - name: Next.js production compilation (no deployment)
+        run: npm run build
