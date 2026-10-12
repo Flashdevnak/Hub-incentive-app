@@ -1,6 +1,5 @@
 import { db } from '@/lib/firebaseAdmin';
-
-const publishedStatuses = new Set(['IMPORTED', 'IMPORTED_WITH_ERRORS']);
+import { resolvePublishedRecords } from '@/lib/batchPublication';
 
 /**
  * Batch status is authoritative. A partially written/abandoned PROCESSING batch
@@ -17,27 +16,5 @@ export async function publishedIncentiveRecords(records: any[]) {
     return [id, doc.exists ? doc.data() : null] as const;
   }));
   const batchById = new Map(batchEntries);
-  let unpublishedHidden = 0;
-  let missingBatchHidden = 0;
-
-  const published = records.flatMap((record) => {
-    const id = String(record.import_batch_id || '').trim();
-    if (!id) return [record]; // Historic records created before batch tracking.
-    const batch = batchById.get(id);
-    if (!batch) {
-      missingBatchHidden++;
-      return [];
-    }
-    const status = String(batch.status || '').trim().toUpperCase();
-    if (!publishedStatuses.has(status)) {
-      unpublishedHidden++;
-      return [];
-    }
-    return [{
-      ...record,
-      import_hub: String(record.import_hub || batch.hub || '').trim().toUpperCase(),
-      import_batch_status: status
-    }];
-  });
-  return { records: published, unpublishedHidden, missingBatchHidden };
+  return resolvePublishedRecords(records, batchById);
 }
