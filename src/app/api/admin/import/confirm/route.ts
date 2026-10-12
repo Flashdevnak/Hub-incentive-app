@@ -47,8 +47,11 @@ export async function POST(req: NextRequest) {
       ? ['employee_code', 'employee_name', 'start_date', 'net_amount']
       : ['employee_code', 'employee_name', 'start_date'];
     for (const field of required) {
-      if (!mappings.some((m) => m.system_field === field)) {
-        return fail(`Mapping ขาดฟิลด์สำคัญ: ${field}`);
+      const mapping = mappings.find((m) => m.system_field === field);
+      if (!mapping) return fail(`Mapping ขาดฟิลด์สำคัญ: ${field}`);
+      const missingSheets = parsed.sheets.filter((sheet) => !sheet.headers.includes(mapping.excel_header));
+      if (missingSheets.length) {
+        return fail(`ชีต ${missingSheets.map((sheet) => sheet.name).join(', ')} ไม่มีคอลัมน์ ${mapping.excel_header} (ฟิลด์ ${field})`);
       }
     }
 
@@ -107,6 +110,7 @@ export async function POST(req: NextRequest) {
       imported_by_email: importerEmail,
       created_by: importerDisplay,
       total_rows: parsed.rows.length,
+      source_sheets: parsed.sheets.map((sheet) => ({ name: sheet.name, rowCount: sheet.rowCount })),
       success_rows: 0,
       failed_rows: 0,
       status: 'PROCESSING',
@@ -132,6 +136,18 @@ export async function POST(req: NextRequest) {
       promise.catch(() => { firestoreWriteFailures++; });
     };
     const employeeShiftCache = new Map<string, any>();
+    // Read the roster in bounded Firestore getAll batches instead of a
+    // sequential network roundtrip for every one of 143+ employees.
+    const employeeCodes = [...new Set(parsed.rows.map((row) =>
+      transformRow(row, mappings).standard.employee_code
+    ).filter(Boolean))] as string[];
+    for (let start = 0; start < employeeCodes.length; start += 100) {
+      const codes = employeeCodes.slice(start, start + 100);
+      const snapshots = await db().getAll(...codes.map((code) => db().collection('employees').doc(code)));
+      snapshots.forEach((snap, i) => {
+        employeeShiftCache.set(codes[i], snap.exists ? snap.data() || {} : {});
+      });
+    }
     const employeeUpserts = new Map<string, Record<string, any>>();
     const employeeCodesSeen = new Set<string>();
 
@@ -152,13 +168,7 @@ export async function POST(req: NextRequest) {
           continue;
         }
         employeeCodesSeen.add(employeeCode);
-        let employeeMaster = employeeShiftCache.get(employeeCode);
-
-        if (!employeeShiftCache.has(employeeCode)) {
-          const employeeSnap = await db().collection('employees').doc(employeeCode).get();
-          employeeMaster = employeeSnap.exists ? employeeSnap.data() || {} : {};
-          employeeShiftCache.set(employeeCode, employeeMaster);
-        }
+        const employeeMaster = employeeShiftCache.get(employeeCode) || {};
 
         let shift = normalizeShift(standard.shift_code || standard.shift_name || standard.shift_group);
         let shiftSource: 'EXCEL' | 'EMPLOYEE_MASTER' | 'UNKNOWN' = shift.shift_code ? 'EXCEL' : 'UNKNOWN';
@@ -185,6 +195,8 @@ export async function POST(req: NextRequest) {
           import_batch_id: batchRef.id,
           row_number: i + 1,
           employee_code: employeeCode,
+          source_sheet: String(raw.__source_sheet || ''),
+          source_sheet_row: Number(raw.__sheet_row_number || i + 2),
           raw_json: raw,
           created_at: ts()
         });
@@ -351,6 +363,7 @@ export async function POST(req: NextRequest) {
 
     await audit(user.employeeCode, user.role, 'IMPORT_EXCEL', 'import_batch', batchRef.id, {
       fileName: file.name,
+      sourceSheets: parsed.sheets.map((sheet) => ({ name: sheet.name, rowCount: sheet.rowCount })),
       fileType,
       periodMonth,
       periodYear,
@@ -372,6 +385,7 @@ export async function POST(req: NextRequest) {
       success,
       failed,
       versionNo,
+      sourceSheets: parsed.sheets.map((sheet) => ({ name: sheet.name, rowCount: sheet.rowCount })),
       employeeSyncErrors,
       shiftColumnDetected: shiftDetection.detected,
       shiftColumnName: shiftDetection.columnName || '',
