@@ -121,6 +121,14 @@ export default function ImportPage() {
 
       {preview && (
         <>
+          <div className="card">
+            <h2 className="section-title">สรุปทุกชีตที่จะนำเข้า</h2>
+            <p><strong>รวม {preview.totalRows || 0} แถว จาก {preview.sheets?.length || 0} ชีต</strong></p>
+            {(preview.sheets || []).map((sheet: any) => (
+              <p key={sheet.name}>{sheet.name}: {sheet.rowCount} แถว / {sheet.columnCount} คอลัมน์</p>
+            ))}
+            <p className="muted">ถ้าจำนวนแถวไม่ตรงกับไฟล์ต้นฉบับ ห้ามกดยืนยันนำเข้า</p>
+          </div>
           <div className={`notice ${preview.shift_column_detected ? 'ok' : ''}`}>
             {preview.shiftMessage}
           </div>
@@ -169,8 +177,13 @@ export default function ImportPage() {
             ))}
           </div>
 
-          <h2 className="section-title">ตัวอย่างข้อมูล</h2>
-          <pre className="pre">{JSON.stringify(preview.previewRows, null, 2)}</pre>
+          <h2 className="section-title">ตัวอย่างข้อมูลทุกชีต</h2>
+          {(preview.sampleRowsBySheet || []).map((sheet: any) => (
+            <div className="card" key={sheet.name}>
+              <h3>{sheet.name}</h3>
+              <pre className="pre">{JSON.stringify(sheet.rows, null, 2)}</pre>
+            </div>
+          ))}
         </>
       )}
     </AppShell>
