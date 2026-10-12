@@ -31,10 +31,12 @@ function importerDisplay(batch: any) {
 function normalizeBatch(id: string, data: any) {
   const importedAt = data.imported_at || data.uploaded_at || data.confirmed_at || data.created_at || data.updated_at || '';
   const importer = importerDisplay(data);
+  const stalled = String(data.status || '').toUpperCase() === 'PROCESSING' && toMs(importedAt) > 0 && Date.now() - toMs(importedAt) > 20 * 60 * 1000;
 
   return {
     id,
     ...data,
+    display_status: stalled ? 'STALLED' : data.status,
     imported_at: importedAt,
     created_at: data.created_at || importedAt,
     uploaded_at: data.uploaded_at || importedAt,
@@ -51,6 +53,7 @@ export async function GET(req: NextRequest) {
   try {
     requireAuth(req, ['super_admin', 'admin']);
 
+    const hub = String(req.nextUrl.searchParams.get('hub') || '').trim().toUpperCase();
     const shiftCode = String(req.nextUrl.searchParams.get('shiftCode') || '').trim();
     const shiftName = String(req.nextUrl.searchParams.get('shiftName') || '').trim();
     const shiftGroup = String(req.nextUrl.searchParams.get('shiftGroup') || '').trim();
@@ -58,6 +61,7 @@ export async function GET(req: NextRequest) {
     const snap = await db().collection('import_batches').limit(200).get();
     const batches = snap.docs
       .map((doc) => normalizeBatch(doc.id, doc.data()))
+      .filter((batch) => !hub || String(batch.hub || '').trim().toUpperCase() === hub)
       .filter((batch) => !shiftCode || String(batch.shift_code || '').trim() === shiftCode)
       .filter((batch) => !shiftName || String(batch.shift_name || '').trim() === shiftName)
       .filter((batch) => !shiftGroup || String(batch.shift_group || '').trim() === shiftGroup)
