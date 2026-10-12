@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
     const periodYear = Number(form.get('periodYear') || 0);
     const hub = String(form.get('hub') || '').trim().toUpperCase();
     const mappings = JSON.parse(String(form.get('mappings') || '[]')) as FieldMapping[];
+    const updateCurrentHub = String(form.get('updateCurrentHub') || '') === 'true';
 
     if (!periodMonth || !periodYear || periodMonth < 1 || periodMonth > 12 || !Number.isInteger(periodYear)) return fail('กรุณาเลือกเดือน/ปีที่ถูกต้อง');
     if (!hub || hub.length > 80) return fail('กรุณาระบุ HUB / Area ไม่เกิน 80 ตัวอักษร');
@@ -42,7 +43,9 @@ export async function POST(req: NextRequest) {
     const shiftDetection = detectShiftColumn(parsed.headers, mappings);
     if (!parsed.rows.length) return fail('ไฟล์ Excel ไม่มีแถวข้อมูลที่นำเข้าได้');
 
-    const required = ['employee_code', 'employee_name', 'start_date'];
+    const required = fileType === 'incentive'
+      ? ['employee_code', 'employee_name', 'start_date', 'net_amount']
+      : ['employee_code', 'employee_name', 'start_date'];
     for (const field of required) {
       if (!mappings.some((m) => m.system_field === field)) {
         return fail(`Mapping ขาดฟิลด์สำคัญ: ${field}`);
@@ -129,6 +132,8 @@ export async function POST(req: NextRequest) {
       promise.catch(() => { firestoreWriteFailures++; });
     };
     const employeeShiftCache = new Map<string, any>();
+    const employeeUpserts = new Map<string, Record<string, any>>();
+    const employeeCodesSeen = new Set<string>();
 
     for (let i = 0; i < parsed.rows.length; i++) {
       try {
@@ -140,6 +145,13 @@ export async function POST(req: NextRequest) {
           continue;
         }
 
+        if (employeeCodesSeen.has(employeeCode)) {
+          // One row per employee per HUB/period. Never silently overwrite
+          // a second row with the same document ID.
+          failed++;
+          continue;
+        }
+        employeeCodesSeen.add(employeeCode);
         let employeeMaster = employeeShiftCache.get(employeeCode);
 
         if (!employeeShiftCache.has(employeeCode)) {
@@ -183,7 +195,12 @@ export async function POST(req: NextRequest) {
           employeeMaster.shift_group
         );
 
-        queueWrite(db().collection('employees').doc(employeeCode), {
+        // Updating the roster from a historical incentive file must be an
+        // explicit administrator choice. New employees can still be created.
+        const masterPeriod = String(employeeMaster.current_hub_import_period_key || '');
+        const canUpdateMaster = Object.keys(employeeMaster).length === 0 ||
+          (updateCurrentHub && (!masterPeriod || periodKey >= masterPeriod));
+        if (canUpdateMaster) employeeUpserts.set(employeeCode, {
           employee_code: employeeCode,
           employee_name: standard.employee_name || '',
           hub_id: standard.hub_id || '',
@@ -206,8 +223,9 @@ export async function POST(req: NextRequest) {
             shift_start: shift.shift_start,
             shift_end: shift.shift_end
           } : {}),
+          current_hub_import_period_key: periodKey,
           updated_at: ts()
-        }, { merge: true });
+        });
 
         if (fileType === 'incentive') {
           queueWrite(db().collection('incentive_records').doc(`${periodYear}_${String(periodMonth).padStart(2, '0')}_${employeeCode}_${batchRef.id}`), {
@@ -218,7 +236,7 @@ export async function POST(req: NextRequest) {
             imported_at: importTimestamp,
             confirmed_at: importTimestamp,
             source_file_name: file.name,
-            import_status: failed ? 'IMPORTED_WITH_ERRORS' : 'IMPORTED',
+            import_status: 'IMPORTED',
             period_month: periodMonth,
             period_year: periodYear,
             month: periodMonth,
@@ -302,21 +320,34 @@ export async function POST(req: NextRequest) {
       }
       transaction.set(batchRef, {
         is_active: activate,
-        published_at: ts()
+        status: 'IMPORTED',
+        success_rows: success,
+        failed_rows: 0,
+        shift_records_count: shiftRecordsCount,
+        shift_fallback_employee_count: employeeMasterShiftCount,
+        shift_unknown_count: unknownShiftCount,
+        inactive_employee_rows_count: inactiveEmployeeRowsCount,
+        published_at: ts(),
+        updated_at: ts()
       }, { merge: true });
     });
     published = true;
 
-    await batchRef.set({
-      success_rows: success,
-      failed_rows: failed,
-      status: 'IMPORTED',
-      shift_records_count: shiftRecordsCount,
-      shift_fallback_employee_count: employeeMasterShiftCount,
-      shift_unknown_count: unknownShiftCount,
-      inactive_employee_rows_count: inactiveEmployeeRowsCount,
-      updated_at: ts()
-    }, { merge: true });
+    // Roster sync happens only after publish, so failed imports cannot
+    // silently replace the current HUB of an existing employee.
+    let employeeSyncErrors = 0;
+    if (employeeUpserts.size) {
+      const rosterWriter = db().bulkWriter();
+      rosterWriter.onWriteError(() => false);
+      for (const [code, employee] of employeeUpserts) {
+        rosterWriter.set(db().collection('employees').doc(code), employee, { merge: true })
+          .catch(() => { employeeSyncErrors++; });
+      }
+      await rosterWriter.close();
+    }
+    if (employeeSyncErrors) {
+      await batchRef.set({ employee_sync_status: 'PARTIAL', employee_sync_error_count: employeeSyncErrors, updated_at: ts() }, { merge: true });
+    }
 
     await audit(user.employeeCode, user.role, 'IMPORT_EXCEL', 'import_batch', batchRef.id, {
       fileName: file.name,
@@ -330,7 +361,9 @@ export async function POST(req: NextRequest) {
       shiftRecordsCount,
       employeeMasterShiftCount,
       unknownShiftCount,
-      inactiveEmployeeRowsCount
+      inactiveEmployeeRowsCount,
+      updateCurrentHub,
+      employeeSyncErrors
     }, req);
 
     return ok({
@@ -339,6 +372,7 @@ export async function POST(req: NextRequest) {
       success,
       failed,
       versionNo,
+      employeeSyncErrors,
       shiftColumnDetected: shiftDetection.detected,
       shiftColumnName: shiftDetection.columnName || '',
       shiftRecordsCount,
