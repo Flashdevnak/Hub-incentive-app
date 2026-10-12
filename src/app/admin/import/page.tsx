@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import AppShell from '@/components/AppShell';
-import { Message } from '@/components/ClientTools';
+import { Message, useApi } from '@/components/ClientTools';
 
 export default function ImportPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -10,7 +10,11 @@ export default function ImportPage() {
   const [msg, setMsg] = useState('');
   const [periodMonth, setMonth] = useState(String(new Date().getMonth() + 1));
   const [periodYear, setYear] = useState(String(new Date().getFullYear() + 543));
-  const [hub, setHub] = useState('NAK');
+  const [hub, setHub] = useState('');
+  const [updateCurrentHub, setUpdateCurrentHub] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const { data: previousBatches } = useApi<any>('/api/admin/import/batches');
+  const hubSuggestions = [...new Set((previousBatches?.batches || []).map((b: any) => String(b.hub || '').trim().toUpperCase()).filter(Boolean))] as string[];
   const [fileType, setFileType] = useState('incentive');
 
   async function doPreview() {
@@ -27,14 +31,18 @@ export default function ImportPage() {
   }
 
   async function confirm() {
-    if (!file || !preview) return;
+    if (!file || !preview || submitting) return;
+    if (!hub.trim()) { setMsg('กรุณาระบุ HUB / Area ก่อนนำเข้า'); return; }
+    setSubmitting(true);
+    try {
 
     const fd = new FormData();
     fd.append('file', file);
     fd.append('fileType', fileType);
     fd.append('periodMonth', periodMonth);
     fd.append('periodYear', periodYear);
-    fd.append('hub', hub);
+    fd.append('hub', hub.trim().toUpperCase());
+    fd.append('updateCurrentHub', String(updateCurrentHub));
     fd.append('mappings', JSON.stringify(preview.mappings));
 
     const res = await fetch('/api/admin/import/confirm', { method: 'POST', body: fd });
@@ -43,7 +51,12 @@ export default function ImportPage() {
       ? ` | กะ: ${json.shiftColumnDetected ? `พบ ${json.shiftColumnName || '-'}` : 'ไม่พบคอลัมน์กะ'} / ${json.shiftRecordsCount || 0} รายการ`
       : '';
 
-    setMsg(`${json.message || (json.ok ? 'นำเข้าสำเร็จ' : 'นำเข้าไม่สำเร็จ')}${shiftText}`);
+    setMsg(`${json.message || (json.ok ? 'นำเข้าสำเร็จ' : 'นำเข้าไม่สำเร็จ')}${shiftText}${json.ok ? ` | Version v${json.versionNo} · HUB ${hub.trim().toUpperCase()}` : ''}${json.employeeSyncErrors ? ` | ข้อมูลพนักงานอัปเดตไม่ครบ ${json.employeeSyncErrors} รายการ` : ''}`);
+    } catch (error) {
+      setMsg(`เชื่อมต่อการนำเข้าไม่สำเร็จ: ${String(error)} กรุณาตรวจประวัติ Batch ก่อนกดยืนยันซ้ำ`);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -79,7 +92,8 @@ export default function ImportPage() {
 
           <label>
             HUB / Area
-            <input value={hub} onChange={(e) => setHub(e.target.value)} />
+            <input value={hub} onChange={(e) => setHub(e.target.value.toUpperCase())} list="known-hubs" placeholder="เช่น NE1 หรือ NAK" required />
+            <datalist id="known-hubs">{hubSuggestions.map((name) => <option key={name} value={name} />)}</datalist>
           </label>
 
           <label>
@@ -93,12 +107,14 @@ export default function ImportPage() {
           </label>
         </div>
 
-        <input type="file" accept=".xlsx,.xls" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+        <label><input type="checkbox" checked={updateCurrentHub} onChange={(e) => setUpdateCurrentHub(e.target.checked)} /> อัปเดตสังกัดปัจจุบันของพนักงานจากไฟล์นี้ (ใช้เมื่อยืนยันการย้าย HUB จริงเท่านั้น)</label>
+        <p className="muted">ถ้าไม่เลือก ระบบจะเก็บ Incentive ตาม HUB และรอบเดือนของไฟล์โดยไม่เขียนทับสังกัดปัจจุบันของพนักงานเดิม พนักงานใหม่ยังเพิ่มเข้า Master ได้</p>
+        <input type="file" accept=".xlsx,.xls" onChange={(e) => { setFile(e.target.files?.[0] || null); setPreview(null); }} />
 
         <div className="actions">
-          <button onClick={doPreview} type="button">อ่านไฟล์ / Preview</button>
+          <button onClick={doPreview} type="button" disabled={!file || submitting}>อ่านไฟล์ / Preview</button>
           {preview && (
-            <button onClick={confirm} type="button" className="btn-blue">ยืนยันนำเข้า</button>
+            <button onClick={confirm} disabled={!hub.trim() || submitting} type="button" className="btn-blue">{submitting ? 'กำลังนำเข้า... ห้ามกดซ้ำ' : 'ยืนยันนำเข้า'}</button>
           )}
         </div>
       </div>
