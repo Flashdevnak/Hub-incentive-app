@@ -15,6 +15,8 @@ export async function POST(req: NextRequest) {
     return ok({
       fileName: file.name,
       sheetName: parsed.sheetName,
+      sheets: parsed.sheets.map((sheet) => ({ name: sheet.name, rowCount: sheet.rowCount, columnCount: sheet.headers.length })),
+      totalRows: parsed.totalRows,
       headers: parsed.headers,
       previewRows: parsed.rows.slice(0, 10),
       mappings,
